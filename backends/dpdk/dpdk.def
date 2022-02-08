@@ -79,6 +79,7 @@ class DpdkLearner {
 
 // Toplevel Assembly representation
 class DpdkAsmProgram {
+    inline cstring pipeline_name;
     inline IndexedVector<DpdkHeaderType> headerType;
     inline IndexedVector<DpdkStructType> structType;
     inline IndexedVector<DpdkExternDeclaration> externDeclarations;

@@ -38,7 +38,7 @@ class DpdkBackend {
     P4::TypeMap* typeMap;
     P4::ConvertEnums::EnumMapping *enumMap;
 
-    const IR::DpdkAsmProgram *dpdk_program = nullptr;
+    std::vector<const IR::DpdkAsmProgram*> dpdk_program;;
     const IR::ToplevelBlock* toplevel = nullptr;
 
   public:
@@ -47,7 +47,8 @@ class DpdkBackend {
                      P4::TypeMap *typeMap,
                      P4::ConvertEnums::EnumMapping *enumMap)
         : options(options), refMap(refMap), typeMap(typeMap), enumMap(enumMap) {}
-    void codegen(std::ostream &) const;
+    void codegen(const IR::DpdkAsmProgram *, std::ostream &) const;
+    std::vector<const IR::DpdkAsmProgram*> getDpdkProgram();
 };
 
 } // namespace DPDK

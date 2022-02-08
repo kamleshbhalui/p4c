@@ -40,20 +40,21 @@ class ConvertToDpdkProgram : public Transform {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
-    const IR::DpdkAsmProgram *dpdk_program;
-
+    std::vector<const IR::DpdkAsmProgram *> dpdk_program;
+    const IR::PackageBlock* main;
   public:
     ConvertToDpdkProgram(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-                         DpdkProgramStructure *structure)
-        : typemap(typemap), refmap(refmap), structure(structure) { }
+                         DpdkProgramStructure *structure, const IR::PackageBlock* main)
+        : typemap(typemap), refmap(refmap), structure(structure), main(main) { }
 
-    const IR::DpdkAsmProgram *create(IR::P4Program *prog);
+    std::vector<const IR::DpdkAsmProgram *> create(IR::P4Program *prog);
     IR::IndexedVector<IR::DpdkAsmStatement> create_pna_preamble();
-    IR::IndexedVector<IR::DpdkAsmStatement> create_psa_preamble();
+    IR::IndexedVector<IR::DpdkAsmStatement> create_psa_preamble(cstring pipeName);
     IR::IndexedVector<IR::DpdkAsmStatement> create_pna_postamble();
-    IR::IndexedVector<IR::DpdkAsmStatement> create_psa_postamble();
+    IR::IndexedVector<IR::DpdkAsmStatement> create_psa_postamble(cstring pipeName);
+    ordered_set<cstring> getPipelineNames();
     const IR::Node *preorder(IR::P4Program *p) override;
-    const IR::DpdkAsmProgram *getDpdkProgram() { return dpdk_program; }
+    std::vector<const IR::DpdkAsmProgram *> getDpdkProgram() { return dpdk_program; }
     IR::IndexedVector<IR::DpdkStructType> UpdateHeaderMetadata(
                       IR::P4Program *prog, IR::Type_Struct *metadata);
 };
@@ -99,13 +100,15 @@ class ConvertToDpdkControl : public Inspector {
     IR::IndexedVector<IR::DpdkAction> actions;
     std::set<cstring> unique_actions;
     bool deparser;
+    cstring pipeline_name;
 
   public:
     ConvertToDpdkControl(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure,
-        bool deparser = false)
-        : typemap(typemap), refmap(refmap), structure(structure), deparser(deparser) {}
+        bool deparser = false, cstring pipeline_name = "")
+        : typemap(typemap), refmap(refmap), structure(structure), deparser(deparser),
+          pipeline_name(pipeline_name) {}
 
     IR::IndexedVector<IR::DpdkTable> &getTables() { return tables; }
     IR::IndexedVector<IR::DpdkSelector> &getSelectors() { return selectors; }
