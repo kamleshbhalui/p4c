@@ -115,6 +115,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     PassManager post_code_gen = {
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,
+        new RemoveUnusedMetadataFields,
     };
 
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
