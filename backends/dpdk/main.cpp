@@ -139,12 +139,17 @@ int main(int argc, char *const argv[]) {
         return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {
-        std::ostream *out = openFile(options.outputFile, false);
-        if (out != nullptr) {
-            backend->codegen(*out);
-            out->flush();
-        }
+        cstring outputFile = options.outputFile.substr(0, options.outputFile.size() - 5 /* size of ".spec" extension */);
+        auto dpdk_program = backend->getDpdkProgram();
+        for_each (dpdk_program.begin(), dpdk_program.end(),
+            [outputFile, backend] (const IR::DpdkAsmProgram* dpdk_asm_program) {
+                 std::ostream *out = openFile(outputFile + (dpdk_asm_program->pipeline_name == "" ? "" : ".")
+                                              + dpdk_asm_program->pipeline_name + ".spec", false);
+                 if (out != nullptr) {
+                     backend->codegen(dpdk_asm_program, *out);
+                     out->flush();
+                 }
+            });
     }
-
     return ::errorCount() > 0;
 }

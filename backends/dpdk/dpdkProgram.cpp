@@ -67,6 +67,23 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
     return structType;
 }
 
+ordered_set<cstring> ConvertToDpdkProgram::getPipelineNames() {
+	ordered_set<cstring> pipenames;
+        auto cparams = main->getConstructorParameters();
+        int index = -1;
+        for (auto param : main->constantValue) {
+             index++;
+             if (!param.second) continue;
+             auto pipe = param.second;
+             if (!pipe->is<IR::PackageBlock>())
+                 continue;
+             auto idxParam = cparams->getParameter(index);
+             auto pipeName = idxParam->name;
+             pipenames.insert(pipeName);
+        }
+	return pipenames;
+}
+
 IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_pna_preamble() {
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
     instr.push_back(new IR::DpdkRxStatement(
@@ -74,13 +91,24 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_pna_preambl
     return instr;
 }
 
-IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_preamble() {
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_preamble(cstring pipeName) {
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
-    instr.push_back(new IR::DpdkRxStatement(
-        new IR::Member(new IR::PathExpression("m"), "psa_ingress_input_metadata_ingress_port")));
-    instr.push_back(new IR::DpdkMovStatement(
-        new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
-        new IR::Constant(0)));
+    auto pipenames = getPipelineNames();
+    BUG_CHECK(pipenames.count(pipeName), "invalid pipeName : %s", pipeName);
+    if (pipeName == "ingress") {
+        instr.push_back(new IR::DpdkRxStatement(
+            new IR::Member(new IR::PathExpression("m"), "psa_ingress_input_metadata_ingress_port")));
+        instr.push_back(new IR::DpdkMovStatement(
+            new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
+            new IR::Constant(0)));
+    }
+    else if (pipeName == "egress") {
+        instr.push_back(new IR::DpdkRxStatement(
+            new IR::Member(new IR::PathExpression("m"), "psa_egress_input_metadata_egress_port")));
+        instr.push_back(new IR::DpdkMovStatement(
+            new IR::Member(new IR::PathExpression("m"), "psa_egress_output_metadata_drop"),
+            new IR::Constant(0)));
+    }
     return instr;
 }
 
@@ -91,18 +119,29 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_pna_postamb
     return instr;
 }
 
-IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamble() {
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamble(cstring pipeName) {
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
-    instr.push_back(new IR::DpdkTxStatement(
-        new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_egress_port")));
-    instr.push_back(new IR::DpdkLabelStatement("label_drop"));
-    instr.push_back(new IR::DpdkDropStatement());
+    auto pipenames = getPipelineNames();
+    BUG_CHECK(pipenames.count(pipeName), "invalid pipeName : %s", pipeName);
+
+    if (pipeName == "ingress") {
+        instr.push_back(new IR::DpdkTxStatement(
+            new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_egress_port")));
+        instr.push_back(new IR::DpdkLabelStatement("label_drop"));
+        instr.push_back(new IR::DpdkDropStatement());
+    }
+    else if (pipeName == "egress") {
+        instr.push_back(new IR::DpdkTxStatement(
+            new IR::Member(new IR::PathExpression("m"), "psa_egress_deparser_input_metadata_egress_port")));
+        instr.push_back(new IR::DpdkLabelStatement("label_drop"));
+        instr.push_back(new IR::DpdkDropStatement());
+    }
     return instr;
 }
 
-
-const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
+std::vector<const IR::DpdkAsmProgram*> ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::Type_Struct *metadataStruct = nullptr;
+    std::vector<const IR::DpdkAsmProgram *> dpdk_program;
 
     for (auto obj : prog->objects) {
         if (auto s = obj->to<IR::Type_Struct>()) {
@@ -112,8 +151,10 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             }
         }
     }
-
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
+    IR::IndexedVector<IR::DpdkAsmStatement> statements_ingress;
+    IR::IndexedVector<IR::DpdkAsmStatement> statements_egress;
+    bool is_ingress_empty = false, is_egress_empty = false;
 
     auto ingress_parser_converter =
         new ConvertToDpdkParser(refmap, typemap, structure, metadataStruct);
@@ -145,40 +186,55 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         else
             BUG("Unknown control block %s", kv.second->name);
     }
-    auto ingress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure, true);
-    auto egress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure);
+    ConvertToDpdkControl* ingress_deparser_converter = nullptr;
+    ConvertToDpdkControl* egress_deparser_converter = nullptr;
     for (auto kv : structure->deparsers) {
-        if (kv.first == "IngressDeparser")
+        if (kv.first == "IngressDeparser") {
+            ingress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, structure, true, "ingress");
             kv.second->apply(*ingress_deparser_converter);
-        else if (kv.first == "EgressDeparser")
+	}
+        else if (kv.first == "EgressDeparser") {
+            egress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, structure, true, "egress");
             kv.second->apply(*egress_deparser_converter);
-        else if (kv.first == "MainDeparserT")
+	}
+        else if (kv.first == "MainDeparserT") {
+            ingress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, structure, true);
             kv.second->apply(*ingress_deparser_converter);
+	}
         else
             BUG("Unknown deparser block %s", kv.second->name);
     }
 
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
-    if (structure->isPNA())
+    IR::IndexedVector<IR::DpdkAsmStatement> instr_egress;
+    IR::IndexedVector<IR::DpdkAsmStatement> instr_ingress;
+    if (structure->isPNA()) {
         instr.append(create_pna_preamble());
-    else if (structure->isPSA())
-        instr.append(create_psa_preamble());
-
-    instr.append(ingress_parser_converter->getInstructions());
-    instr.append(ingress_converter->getInstructions());
-    instr.append(ingress_deparser_converter->getInstructions());
-    instr.append(egress_parser_converter->getInstructions());
-    instr.append(egress_converter->getInstructions());
-    instr.append(egress_deparser_converter->getInstructions());
-
-    if (structure->isPNA())
+        instr.append(ingress_parser_converter->getInstructions());
+        instr.append(ingress_converter->getInstructions());
+        instr.append(ingress_deparser_converter->getInstructions());
         instr.append(create_pna_postamble());
-    else if (structure->isPSA())
-        instr.append(create_psa_postamble());
+        statements.push_back(new IR::DpdkListStatement(instr));
+    }
+    else if (structure->isPSA()) {
+	instr_ingress.append(create_psa_preamble("ingress"));
+        is_ingress_empty =
+                ingress_converter->getInstructions().size() == 0
+                && ingress_deparser_converter->getInstructions().size() == 0;
 
-    statements.push_back(new IR::DpdkListStatement(instr));
+        instr_ingress.append(ingress_parser_converter->getInstructions());
+        instr_ingress.append(ingress_converter->getInstructions());
+        instr_ingress.append(ingress_deparser_converter->getInstructions());
+        instr_ingress.append(create_psa_postamble("ingress"));
+        is_egress_empty =
+		egress_converter->getInstructions().size() == 0
+		&& egress_deparser_converter->getInstructions().size() == 0;
+        instr_egress.append(create_psa_preamble("egress"));
+        instr_egress.append(egress_parser_converter->getInstructions());
+        instr_egress.append(egress_converter->getInstructions());
+        instr_egress.append(egress_deparser_converter->getInstructions());
+        instr_egress.append(create_psa_postamble("egress"));
+    }
 
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure->header_types) {
@@ -187,7 +243,6 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
                                          h->fields);
         headerType.push_back(ht);
     }
-
     IR::IndexedVector<IR::DpdkStructType> structType;
     IR::IndexedVector<IR::DpdkStructType> updatedHeaderMetadataStructs =
             UpdateHeaderMetadata(prog, metadataStruct);
@@ -232,27 +287,47 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     }
     structType.append(updatedHeaderMetadataStructs);
 
+
+
     IR::IndexedVector<IR::DpdkExternDeclaration> dpdkExternDecls;
     for (auto ed : structure->externDecls) {
         auto st = new IR::DpdkExternDeclaration(ed->name, ed->annotations, ed->type, ed->arguments);
         dpdkExternDecls.push_back(st);
     }
 
-    auto tables = ingress_converter->getTables();
-    tables.append(egress_converter->getTables());
+    if (structure->isPNA()) {
+        auto tables = ingress_converter->getTables();
+        auto actions = ingress_converter->getActions();
+        auto selectors = ingress_converter->getSelectors();
+        auto learners = ingress_converter->getLearners();
+        dpdk_program.push_back(new IR::DpdkAsmProgram("",
+                    headerType, structType, dpdkExternDecls, actions, tables, selectors,
+                    learners, statements, structure->get_globals()));
+    }
+    else if (structure->isPSA()) {
+        statements_ingress.push_back(new IR::DpdkListStatement(instr_ingress));
+        statements_egress.push_back(new IR::DpdkListStatement(instr_egress));
 
-    auto actions = ingress_converter->getActions();
-    actions.append(egress_converter->getActions());
+        auto tables_ingress = ingress_converter->getTables();
+        auto tables_egress = egress_converter->getTables();
 
-    auto selectors = ingress_converter->getSelectors();
-    selectors.append(egress_converter->getSelectors());
+        auto actions_ingress = ingress_converter->getActions();
+        auto actions_egress = egress_converter->getActions();
 
-    auto learners = ingress_converter->getLearners();
-    learners.append(egress_converter->getLearners());
+        auto selectors_ingress = ingress_converter->getSelectors();
+        auto selectors_egress = egress_converter->getSelectors();
 
-    return new IR::DpdkAsmProgram(
-        headerType, structType, dpdkExternDecls, actions, tables, selectors, learners,
-        statements, structure->get_globals());
+        auto learners_ingress = ingress_converter->getLearners();
+        auto learners_egress = egress_converter->getLearners();
+
+        if (!is_ingress_empty)
+            dpdk_program.push_back(new IR::DpdkAsmProgram("ingress", headerType, structType, dpdkExternDecls, actions_ingress, tables_ingress,
+                    selectors_ingress, learners_ingress, statements_ingress, structure->get_globals()));
+        if (!is_egress_empty)
+            dpdk_program.push_back(new IR::DpdkAsmProgram("egress", headerType, structType, dpdkExternDecls, actions_egress, tables_egress,
+                    selectors_egress, learners_egress, statements_egress, structure->get_globals()));
+    }
+    return dpdk_program;
 }
 
 const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
@@ -647,9 +722,15 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     helper->setCalledBy(this);
     c->body->apply(*helper);
     if (deparser && structure->isPSA()) {
-        add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
-            new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
-            new IR::Constant(0))); }
+        if (pipeline_name == "ingress")
+            add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
+                new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
+                new IR::Constant(0)));
+	else if (pipeline_name =="egress")
+            add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
+                new IR::Member(new IR::PathExpression("m"), "psa_egress_output_metadata_drop"),
+                new IR::Constant(0)));
+    }
 
     for (auto i : helper->get_instr()) {
         add_inst(i);

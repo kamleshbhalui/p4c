@@ -43,7 +43,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     auto program = tlb->getProgram();
 
     std::set<const IR::P4Table*> invokedInKey;
-    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
+    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, main);
     auto genContextJson = new DpdkContextGenerator(refMap, typeMap, &structure, options);
 
     PassManager simplify = {
@@ -109,18 +109,24 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     program = program->apply(simplify);
 
     dpdk_program = convertToDpdk->getDpdkProgram();
-    if (!dpdk_program)
+    if (dpdk_program.empty())
         return;
     PassManager post_code_gen = {
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,
     };
-
-    dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
+    for_each (dpdk_program.begin(), dpdk_program.end(), [&post_code_gen](const IR::DpdkAsmProgram* &dpdk_asm_program) {
+		    dpdk_asm_program =  dpdk_asm_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
+                    }
+             );
 }
 
-void DpdkBackend::codegen(std::ostream &out) const {
-    dpdk_program->toSpec(out) << std::endl;
+void DpdkBackend::codegen(const IR::DpdkAsmProgram* dpdk_asm_program, std::ostream &out) const {
+    dpdk_asm_program->toSpec(out) << std::endl;
+}
+
+std::vector<const IR::DpdkAsmProgram*> DpdkBackend::getDpdkProgram() {
+    return dpdk_program;
 }
 
 }  // namespace DPDK
