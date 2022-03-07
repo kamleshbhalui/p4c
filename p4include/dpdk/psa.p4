@@ -593,18 +593,21 @@ enum PSA_MeterColor_t { RED, GREEN, YELLOW }
 // BEGIN:Meter_extern
 // Indexed meter with n_meters independent meter states.
 
+// DPDK does not support PACKETS metering if testcases still use
+// packets metering type compiler converts it to bytes metering
+// Hence execute method below always require pkt_len parameter.
 extern Meter<S> {
   Meter(bit<32> n_meters, PSA_MeterType_t type);
 
   // Use this method call to perform a color aware meter update (see
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
-  PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color, @optional in bit<32> pkt_len);
+  PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color, in bit<32> pkt_len);
 
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
   // MeterColor_t.GREEN), which has the same behavior.
-  PSA_MeterColor_t execute(in S index, @optional in bit<32> pkt_len);
+  PSA_MeterColor_t execute(in S index, in bit<32> pkt_len);
 
   /*
   @ControlPlaneAPI
