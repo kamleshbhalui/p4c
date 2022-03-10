@@ -288,7 +288,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     break;
                 }
             }
-        } else if (externBlock->type->name == "Meter") {
+        } else if (externBlock->type->name == "Meter"
+                   || externBlock->type->name == "DPDKMeter") {
             for (auto& extType : *p4info->mutable_meters()) {
                 auto* pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {
@@ -296,7 +297,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     break;
                 }
             }
-        } else if (externBlock->type->name == "Counter") {
+        } else if (externBlock->type->name == "Counter"
+                   || externBlock->type->name == "DPDKCounter") {
             for (auto& extType : *p4info->mutable_counters()) {
                 auto* pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {

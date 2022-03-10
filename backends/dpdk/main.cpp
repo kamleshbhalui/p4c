@@ -46,7 +46,7 @@ int main(int argc, char *const argv[]) {
     auto &options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = DPDK_VERSION_STRING;
-
+    options.preprocessor_options += " -D__TARGET_DPDK__";
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false)
             options.setInputFile();

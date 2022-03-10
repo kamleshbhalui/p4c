@@ -20,17 +20,6 @@ limitations under the License.
  *   P4-16 declaration of the Portable Switch Architecture
  */
 
-/**********************************************************************
- * Beginning of the part of this target-customized psa.p4 include file
- * that declares data plane widths for one particular target device.
- **********************************************************************/
-
-/* Target device for which this section is customized:
- *
- * DPDK back end as implemented by p4c-dpdk in the repository
- * https://github.com/p4lang/p4c
- */
-
 // BEGIN:Type_defns
 /* These are defined using `typedef`, not `type`, so they are truly
  * just different names for the type bit<W> for the particular width W
@@ -46,7 +35,7 @@ limitations under the License.
  *
  * Note that the width of typedef <name>Uint_t will always be the same
  * as the width of type <name>_t. */
-typedef bit<32>  PortIdUint_t;
+typedef bit<32> PortIdUint_t;
 typedef bit<32> MulticastGroupUint_t;
 typedef bit<16> CloneSessionIdUint_t;
 typedef bit<8>  ClassOfServiceUint_t;
@@ -351,7 +340,7 @@ match_kind {
 /// This action does not change whether a clone or resubmit operation
 /// will occur.
 
-@noWarn("unused")
+@noWarnUnused
 action send_to_port(inout psa_ingress_output_metadata_t meta,
                     in PortId_t egress_port)
 {
@@ -368,7 +357,7 @@ action send_to_port(inout psa_ingress_output_metadata_t meta,
 /// This action does not change whether a clone or resubmit operation
 /// will occur.
 
-@noWarn("unused")
+@noWarnUnused
 action multicast(inout psa_ingress_output_metadata_t meta,
                  in MulticastGroup_t multicast_group)
 {
@@ -384,7 +373,7 @@ action multicast(inout psa_ingress_output_metadata_t meta,
 /// This action does not change whether a clone will occur.  It will
 /// prevent a packet from being resubmitted.
 
-@noWarn("unused")
+@noWarnUnused
 action ingress_drop(inout psa_ingress_output_metadata_t meta)
 {
     meta.drop = true;
@@ -397,7 +386,7 @@ action ingress_drop(inout psa_ingress_output_metadata_t meta)
 
 /// This action does not change whether a clone will occur.
 
-@noWarn("unused")
+@noWarnUnused
 action egress_drop(inout psa_egress_output_metadata_t meta)
 {
     meta.drop = true;
@@ -530,10 +519,10 @@ enum PSA_CounterType_t {
 // BEGIN:Counter_extern
 /// Indirect counter with n_counters independent counter values, where
 /// every counter value has a data plane size specified by type W.
-@noWarn("unused")
+
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PSA_CounterType_t type);
-  void count(in S index, @optional in bit<32> increment);
+  void count(in S index);
 
   /*
   /// The control plane API uses 64-bit wide counter values.  It is
@@ -560,7 +549,6 @@ extern Counter<W, S> {
 // END:Counter_extern
 
 // BEGIN:DirectCounter_extern
-@noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
   void count();
@@ -593,21 +581,18 @@ enum PSA_MeterColor_t { RED, GREEN, YELLOW }
 // BEGIN:Meter_extern
 // Indexed meter with n_meters independent meter states.
 
-// DPDK does not support PACKETS metering if testcases still use
-// packets metering type compiler converts it to bytes metering
-// Hence execute method below always require pkt_len parameter.
 extern Meter<S> {
   Meter(bit<32> n_meters, PSA_MeterType_t type);
 
   // Use this method call to perform a color aware meter update (see
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
-  PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color, in bit<32> pkt_len);
+  PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color);
 
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
   // MeterColor_t.GREEN), which has the same behavior.
-  PSA_MeterColor_t execute(in S index, in bit<32> pkt_len);
+  PSA_MeterColor_t execute(in S index);
 
   /*
   @ControlPlaneAPI
@@ -800,5 +785,16 @@ package PSA_Switch<IH, IM, EH, EM, NM, CI2EM, CE2EM, RESUBM, RECIRCM> (
     BufferingQueueingEngine bqe);
 
 // END:Programmable_blocks
+
+// for target specific extensions
+#if defined(__TARGET_DPDK__)
+#include "dpdk/psa.p4"
+#elif defined(__TARGET_BMV2__)
+#include "bmv2/psa.p4"
+#else
+// to get rid of unknown identifier when compile with p4test
+#include "dpdk/psa.p4"
+#include "bmv2/psa.p4"
+#endif  // __TARGET_DPDK__
 
 #endif   // __PSA_P4__
