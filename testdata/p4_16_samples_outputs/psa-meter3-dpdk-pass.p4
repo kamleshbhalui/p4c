@@ -1,4 +1,5 @@
 #include <core.p4>
+#include <psa.p4>
 #include <dpdk/psa.p4>
 
 struct EMPTY {
@@ -29,7 +30,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    Meter<bit<12>>(1024, PSA_MeterType_t.PACKETS) meter0;
+    DPDKMeter<bit<12>>(1024, PSA_MeterType_t.PACKETS) meter0;
     table tbl {
         key = {
             hdr.ethernet.srcAddr: exact;

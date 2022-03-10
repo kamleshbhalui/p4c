@@ -1,4 +1,5 @@
 #include <core.p4>
+#include <psa.p4>
 #include <dpdk/psa.p4>
 
 struct EMPTY {
@@ -32,7 +33,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     @name("MyIC.tmp") PSA_MeterColor_t tmp;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("MyIC.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
+    @name("MyIC.meter0") DPDKMeter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
     @name("MyIC.tbl") table tbl_0 {
         key = {
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;

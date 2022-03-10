@@ -1,6 +1,9 @@
-psa.p4(534): [--Wwarn=unused] warning: 'W' is unused
+psa.p4(523): [--Wwarn=unused] warning: 'W' is unused
 extern Counter<W, S> {
                ^
-psa.p4(563): [--Wwarn=unused] warning: 'W' is unused
+psa.p4(552): [--Wwarn=unused] warning: 'W' is unused
 extern DirectCounter<W> {
                      ^
+psa.p4(34): [--Wwarn=unused] warning: 'W' is unused
+extern DPDKCounter<W, S> {
+                   ^
