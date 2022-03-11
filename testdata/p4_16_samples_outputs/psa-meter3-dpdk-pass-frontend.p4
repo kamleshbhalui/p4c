@@ -1,6 +1,6 @@
 #include <core.p4>
 #include <psa.p4>
-#include <dpdk/psa.p4>
+#include <dpdk/psa_ext.p4>
 
 struct EMPTY {
 }

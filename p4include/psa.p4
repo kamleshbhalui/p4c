@@ -786,15 +786,4 @@ package PSA_Switch<IH, IM, EH, EM, NM, CI2EM, CE2EM, RESUBM, RECIRCM> (
 
 // END:Programmable_blocks
 
-// for target specific extensions
-#if defined(__TARGET_DPDK__)
-#include "dpdk/psa.p4"
-#elif defined(__TARGET_BMV2__)
-#include "bmv2/psa.p4"
-#else
-// to get rid of unknown identifier when compile with p4test
-#include "dpdk/psa.p4"
-#include "bmv2/psa.p4"
-#endif  // __TARGET_DPDK__
-
 #endif   // __PSA_P4__
