@@ -1,5 +1,6 @@
 #include <core.p4>
-#include <dpdk/psa.p4>
+#include <psa.p4>
+#include <dpdk/psa_ext.p4>
 
 struct EMPTY {
 }
@@ -29,22 +30,22 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @name("MyIC.counter0") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS_AND_BYTES) counter0_0;
-    @name("MyIC.counter1") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1_0;
-    @name("MyIC.counter2") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.BYTES) counter2_0;
-    @hidden action psaexampledpdkcounter36() {
+    @name("MyIC.counter0") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS_AND_BYTES) counter0_0;
+    @name("MyIC.counter1") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1_0;
+    @name("MyIC.counter2") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.BYTES) counter2_0;
+    @hidden action psaexampledpdkcounter37() {
         counter0_0.count(12w1023, 32w20);
         counter1_0.count(12w512);
         counter2_0.count(12w1023, 32w64);
     }
-    @hidden table tbl_psaexampledpdkcounter36 {
+    @hidden table tbl_psaexampledpdkcounter37 {
         actions = {
-            psaexampledpdkcounter36();
+            psaexampledpdkcounter37();
         }
-        const default_action = psaexampledpdkcounter36();
+        const default_action = psaexampledpdkcounter37();
     }
     apply {
-        tbl_psaexampledpdkcounter36.apply();
+        tbl_psaexampledpdkcounter37.apply();
     }
 }
 

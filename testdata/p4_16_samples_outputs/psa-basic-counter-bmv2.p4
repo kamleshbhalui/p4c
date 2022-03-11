@@ -1,5 +1,6 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <psa.p4>
+#include <dpdk/psa_ext.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {

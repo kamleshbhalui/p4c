@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+=======
+psa.p4(523): [--Wwarn=unused] warning: 'W' is unused
+extern Counter<W, S> {
+               ^
+psa.p4(552): [--Wwarn=unused] warning: 'W' is unused
+extern DirectCounter<W> {
+                     ^
+>>>>>>> Updated all tests
 psa-example-digest-bmv2.p4(183): [--Wwarn=unused] warning: 'serEnumT' is unused
     action do_tst (PortId_t egress_port, EthTypes serEnumT) {
                                                   ^^^^^^^^

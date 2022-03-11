@@ -1,5 +1,6 @@
 #include <core.p4>
-#include <dpdk/psa.p4>
+#include <psa.p4>
+#include <dpdk/psa_ext.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -51,7 +52,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata_t use
 }
 
 control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    Meter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0;
+    DPDKMeter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0;
     PSA_MeterColor_t color_out;
     PSA_MeterColor_t color_in = PSA_MeterColor_t.RED;
     action execute(bit<12> index) {

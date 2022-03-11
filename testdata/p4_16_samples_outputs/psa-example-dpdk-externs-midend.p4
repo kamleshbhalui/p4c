@@ -1,5 +1,6 @@
 #include <core.p4>
-#include <dpdk/psa.p4>
+#include <psa.p4>
+#include <dpdk/psa_ext.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -55,11 +56,11 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.color_in") PSA_MeterColor_t color_in_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("ingress.counter0") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS_AND_BYTES) counter0_0;
-    @name("ingress.counter1") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1_0;
-    @name("ingress.counter2") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.BYTES) counter2_0;
+    @name("ingress.counter0") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS_AND_BYTES) counter0_0;
+    @name("ingress.counter1") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1_0;
+    @name("ingress.counter2") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.BYTES) counter2_0;
     @name("ingress.reg") Register<bit<32>, bit<12>>(32w1024) reg_0;
-    @name("ingress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
+    @name("ingress.meter0") DPDKMeter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
     @name("ingress.execute") action execute_1(@name("index") bit<12> index_1) {
         color_out_0 = meter0_0.execute(index_1, color_in_0, hdr.ipv4.totalLen);
         user_meta.port_out = (color_out_0 == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
@@ -75,32 +76,32 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         }
         default_action = NoAction_1();
     }
-    @hidden action psaexampledpdkexterns78() {
+    @hidden action psaexampledpdkexterns79() {
         counter0_0.count(12w1023, 32w20);
         counter1_0.count(12w512);
         counter2_0.count(12w1023, 32w64);
         user_meta.port_out = reg_0.read(12w1);
     }
-    @hidden action psaexampledpdkexterns60() {
+    @hidden action psaexampledpdkexterns61() {
         color_in_0 = PSA_MeterColor_t.RED;
     }
-    @hidden table tbl_psaexampledpdkexterns60 {
+    @hidden table tbl_psaexampledpdkexterns61 {
         actions = {
-            psaexampledpdkexterns60();
+            psaexampledpdkexterns61();
         }
-        const default_action = psaexampledpdkexterns60();
+        const default_action = psaexampledpdkexterns61();
     }
-    @hidden table tbl_psaexampledpdkexterns78 {
+    @hidden table tbl_psaexampledpdkexterns79 {
         actions = {
-            psaexampledpdkexterns78();
+            psaexampledpdkexterns79();
         }
-        const default_action = psaexampledpdkexterns78();
+        const default_action = psaexampledpdkexterns79();
     }
     apply {
-        tbl_psaexampledpdkexterns60.apply();
+        tbl_psaexampledpdkexterns61.apply();
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
-            tbl_psaexampledpdkexterns78.apply();
+            tbl_psaexampledpdkexterns79.apply();
         }
     }
 }
@@ -117,18 +118,18 @@ control egress(inout headers hdr, inout metadata_t user_meta, in psa_egress_inpu
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampledpdkexterns101() {
+    @hidden action psaexampledpdkexterns102() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampledpdkexterns101 {
+    @hidden table tbl_psaexampledpdkexterns102 {
         actions = {
-            psaexampledpdkexterns101();
+            psaexampledpdkexterns102();
         }
-        const default_action = psaexampledpdkexterns101();
+        const default_action = psaexampledpdkexterns102();
     }
     apply {
-        tbl_psaexampledpdkexterns101.apply();
+        tbl_psaexampledpdkexterns102.apply();
     }
 }
 

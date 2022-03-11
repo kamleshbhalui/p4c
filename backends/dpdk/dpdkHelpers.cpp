@@ -679,20 +679,25 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                     add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
                 }
             }
+        } else if (a->originalExternType->getName().name == "Meter") {
+            ::error(ErrorType::ERR_UNEXPECTED, "DPDK backend does not support Meter extern, "
+                                                   "use DPDKMeter extern");
+            return false;
         } else if (a->originalExternType->getName().name == "DPDKMeter") {
             if (a->method->getName().name == "execute") {
                 // DPDK target requires the result of meter execute method is assigned to a
                 // variable of PSA_MeterColor_t type.
-                ::error(ErrorType::ERR_UNSUPPORTED, "LHS of meter execute statement is missing " \
+                ::error(ErrorType::ERR_UNSUPPORTED, "LHS of meter execute statement is missing "
                         "Use this format instead : color_out = %1%.execute(index, color_in)",
                          a->object->getName());
             } else {
                 BUG("Meter function not implemented.");
             }
-        } else if (a->originalExternType->getName().name == "Count") {
-            ::error(ErrorType::ERR_UNEXPECTED, "DPDK backend does not support Count extern, "
+        } else if (a->originalExternType->getName().name == "Counter") {
+            ::error(ErrorType::ERR_UNEXPECTED, "DPDK backend does not support Counter extern, "
                                                    "use DPDKCounter extern");
-	} else if (a->originalExternType->getName().name == "DPDKCounter") {
+            return false;
+        } else if (a->originalExternType->getName().name == "DPDKCounter") {
             auto di = a->object->to<IR::Declaration_Instance>();
             auto declArgs = di->arguments;
             unsigned value = 0;
@@ -730,7 +735,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                      }
                 }
             } else {
-                BUG("DPDKCounter function not implemented");
+                BUG("counter method not implemented");
             }
         } else if (a->originalExternType->getName().name == "Register") {
             if (a->method->getName().name == "write") {

@@ -1,9 +1,4 @@
 p4c_add_xfail_reason("dpdk"
-  "Expected packet length argument for count method of indirect counter"
-  testdata/p4_16_samples/psa-example-counters-bmv2.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "error: Action parameter color has a type which is not bit<>, int<>, bool, type or serializable enum"
   testdata/p4_16_samples/psa-meter1.p4
   )
@@ -34,7 +29,7 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Expected atleast 2 arguments"
+  "DPDK backend does not support Meter extern, use DPDKMeter extern"
   testdata/p4_16_samples/psa-meter3.p4
   testdata/p4_16_samples/psa-meter7-bmv2.p4
 )
@@ -47,6 +42,16 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "get_hash's arg is not a ListExpression"
   testdata/p4_16_samples/psa-hash.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "DPDK backend does not support Counter extern, use DPDKCounter extern"
+  testdata/p4_16_samples/psa-example-counters-bmv2.p4
+  testdata/p4_16_samples/psa-counter1.p4
+  testdata/p4_16_samples/psa-counter2.p4
+  testdata/p4_16_samples/psa-counter3.p4
+  testdata/p4_16_samples/psa-custom-type-counter-index.p4
+  testdata/p4_16_samples/psa-basic-counter-bmv2.p4
   )
 
 p4c_add_xfail_reason("dpdk"
