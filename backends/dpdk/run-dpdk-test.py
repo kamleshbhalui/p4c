@@ -160,6 +160,46 @@ def check_generated_files(options, tmpdir, expecteddir):
                 return SUCCESS
             if result != SUCCESS and not ignoreStderr(options):
                 return result
+        if produced.endswith(".spec"):
+            clifile = os.path.splitext(expected)[0] + ".cli"
+            print(str(clifile))
+            with open(clifile,'w',encoding = 'utf-8') as f:
+                f.write("; SPDX-License-Identifier: BSD-3-Clause\n")
+                f.write("; Copyright(c) 2020 Intel Corporation\n")
+                f.write("\n")
+                f.write("mempool MEMPOOL0 buffer 9304 pool 32K cache 256 cpu 0\n")
+                f.write("\n")
+                f.write("link LINK0 dev 0000:00:04.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK1 dev 0000:00:05.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK2 dev 0000:00:06.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK3 dev 0000:00:07.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 create 0\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 port in 0 link LINK0 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 1 link LINK1 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 2 link LINK2 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 3 link LINK3 rxq 0 bsz 32\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 port out 0 link LINK0 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 1 link LINK1 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 2 link LINK2 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 3 link LINK3 txq 0 bsz 32\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 build ")
+                f.write(str(expected))
+                f.write("\n")
+                f.write("pipeline PIPELINE0 commit\n")
+                f.write("thread 1 pipeline PIPELINE0 enable\n")
+                f.close()
+
+            print("/root/dpdk/build/examples/dpdk-pipeline -n 4 -c 0x3 -- -s " + str(clifile))
+            result1 = subprocess.Popen("exec /root/dpdk/build/examples/dpdk-pipeline -n 4 -c 0x3 -- -s " + str(clifile), cwd=".", stdin=subprocess.PIPE, shell=True)
+
+            print("executed")
+            subprocess.Popen("pkill pipeline", shell=True)
+            #if result1.returncode != 0:
+            #    return FAILURE 
     return SUCCESS
 
 def file_name(tmpfolder, base, suffix, ext):
