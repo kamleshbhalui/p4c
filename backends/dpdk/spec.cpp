@@ -2,6 +2,7 @@
 #include "ir/dbprint.h"
 #include "printUtils.h"
 
+#define UNUSED(x) (void)x
 using namespace DBPrint;
 
 static constexpr unsigned DEFAULT_LEARNER_TABLE_SIZE = 0x10000;
@@ -11,28 +12,46 @@ void add_space(std::ostream &out, int size) {
     out << std::setfill(' ') << std::setw(size) << " ";
 }
 
-std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
     for (auto l : globals) {
-        l->toSpec(out) << std::endl;
+        l->toSpec(out, origNameMap) << std::endl;
     }
     out << std::endl;
-    for (auto h : headerType)
-        h->toSpec(out) << std::endl;
-    for (auto s : structType)
-        s->toSpec(out) << std::endl;
-    for (auto s : externDeclarations)
-        s->toSpec(out) << std::endl;
+    for (auto h : headerType) {
+        if (origNameMap.count(h->name.toString()))
+            out<<";oldname:"<<origNameMap.at(h->name.toString())<<"\n";
+        h->toSpec(out, origNameMap) << std::endl;
+    }
+    for (auto s : structType) {
+        if (origNameMap.count(s->name.toString()))
+            out<<";oldname:"<<origNameMap.at(s->name.toString())<<"\n";
+        s->toSpec(out, origNameMap) << std::endl;
+    }
+    for (auto s : externDeclarations) {
+        if (origNameMap.count(s->name.toString()))
+            out<<";oldname:"<<origNameMap.at(s->name.toString())<<"\n";
+        s->toSpec(out, origNameMap) << std::endl;
+    }
     for (auto a : actions) {
-        a->toSpec(out) << std::endl << std::endl;
+        if (origNameMap.count(a->name.toString()))
+            out<<";oldname:"<<origNameMap.at(a->name.toString())<<"\n";
+        a->toSpec(out, origNameMap) << std::endl << std::endl;
     }
     for (auto t : tables) {
-        t->toSpec(out) << std::endl << std::endl;
+        if (origNameMap.count(t->name))
+            out<<";oldname:"<<origNameMap.at(t->name)<<"\n";
+        t->toSpec(out, origNameMap) << std::endl << std::endl;
     }
     for (auto s : selectors) {
-        s->toSpec(out) << std::endl;
+        if (origNameMap.count(s->name))
+            out<<";oldname:"<<origNameMap.at(s->name)<<"\n";
+        s->toSpec(out, origNameMap) << std::endl;
     }
     for (auto s : learners) {
-        s->toSpec(out) << std::endl;
+        if (origNameMap.count(s->name))
+            out<<";oldname:"<<origNameMap.at(s->name)<<"\n";
+        s->toSpec(out, origNameMap) << std::endl;
     }
     for (auto s : statements) {
         s->toSpec(out) << std::endl;
@@ -40,17 +59,22 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkAsmStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkAsmStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     BUG("asm statement %1% not implemented", this);
     return out;
 }
 
-std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     // TBD
     return out;
 }
 
-std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
     if (DPDK::toStr(this->getType()) == "Register") {
         auto args = this->arguments;
         if (args->size() == 0) {
@@ -60,7 +84,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             auto size = args->at(0)->expression;
             auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
             auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
-            regDecl->toSpec(out) << std::endl;
+            regDecl->toSpec(out, origNameMap) << std::endl;
         }
     } else if (DPDK::toStr(this->getType()) == "Counter") {
         auto args = this->arguments;
@@ -77,14 +101,14 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
                    the counter name is suffixed with _packets and _bytes */
                 auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_packets",
                                    n_counters, new IR::Constant(0));
-                regDecl->toSpec(out) << std::endl << std::endl;
+                regDecl->toSpec(out, origNameMap) << std::endl << std::endl;
                 regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_bytes", n_counters,
                                                             new IR::Constant(0));
-                regDecl->toSpec(out) << std::endl;
+                regDecl->toSpec(out, origNameMap) << std::endl;
             } else {
                 auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), n_counters,
                                                                  new IR::Constant(0));
-                regDecl->toSpec(out) << std::endl;
+                regDecl->toSpec(out, origNameMap) << std::endl;
             }
         }
     } else if (DPDK::toStr(this->getType()) == "Meter") {
@@ -95,15 +119,18 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
         } else {
             auto n_meters = args->at(0)->expression;
             auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
-            metDecl->toSpec(out) << std::endl;
+            metDecl->toSpec(out, origNameMap) << std::endl;
         }
     }
     return out;
 }
 
-std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
     out << "struct " << name << " {" << std::endl;
     for (auto it = fields.begin(); it != fields.end(); ++it) {
+        if (origNameMap.count((*it)->name.toString()))
+            out<<"\t;oldname:"<<origNameMap.at((*it)->name.toString())<<"\n";
         if (auto t = (*it)->type->to<IR::Type_Bits>())
             out << "\tbit<" << t->width_bits() << ">";
         else if (auto t = (*it)->type->to<IR::Type_Name>())
@@ -122,9 +149,12 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkStructType::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
     if (getAnnotations()->getSingle("__packet_data__")) {
         for (auto it = fields.begin(); it != fields.end(); ++it) {
+            if (origNameMap.count((*it)->name.toString()))
+                out<<";oldname:"<<origNameMap.at((*it)->name.toString())<<"\n";
             if (auto t = (*it)->type->to<IR::Type_Name>()) {
                 out << "header " << (*it)->name << " instanceof "
                     << t->path->name;
@@ -147,6 +177,8 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
     } else {
         out << "struct " << name << " {" << std::endl;
         for (auto it = fields.begin(); it != fields.end(); ++it) {
+            if (origNameMap.count((*it)->name.toString()))
+                out<<"\t;oldname:"<<origNameMap.at((*it)->name.toString())<<"\n";
             if (auto t = (*it)->type->to<IR::Type_Bits>())
                 out << "\tbit<" << t->width_bits() << ">";
             else if (auto t = (*it)->type->to<IR::Type_Name>()) {
@@ -176,7 +208,9 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "apply {" << std::endl;
     for (auto s : statements) {
         out << "\t";
@@ -188,60 +222,82 @@ std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkApplyStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkApplyStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "table " << table;
     return out;
 }
 
-std::ostream &IR::DpdkMirrorStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkMirrorStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "mirror " << DPDK::toStr(slotId) << " " << DPDK::toStr(sessionId);
     return out;
 }
 
-std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "learn " << action << " " << DPDK::toStr(argument);
     return out;
 }
 
-std::ostream &IR::DpdkEmitStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkEmitStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "emit " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream &IR::DpdkExtractStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkExtractStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "extract " << DPDK::toStr(header);
     if (length)
         out << " " << DPDK::toStr(length);
     return out;
 }
 
-std::ostream &IR::DpdkLookaheadStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkLookaheadStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "lookahead " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream &IR::DpdkJmpStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkJmpStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << instruction << " " << label;
     return out;
 }
 
-std::ostream& IR::DpdkJmpHeaderStatement::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkJmpHeaderStatement::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << instruction << " " << label << " " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkJmpActionStatement::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkJmpActionStatement::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << instruction << " " << label << " " << action;
     return out;
 }
 
-std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << instruction << " " << label << " " << DPDK::toStr(src1)
         << " " << DPDK::toStr(src2);
     return out;
 }
 
-std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     BUG_CHECK(dst->equiv(*src1), "The first source field %1% in a binary operation"
             "must be the same as the destination field %2% to be supported by DPDK",
             src1, dst);
@@ -250,42 +306,58 @@ std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkUnaryStatement::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkUnaryStatement::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << instruction << " " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
     return out;
 }
 
-std::ostream &IR::DpdkRxStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkRxStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "rx " << DPDK::toStr(port);
     return out;
 }
 
-std::ostream &IR::DpdkTxStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkTxStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "tx " << DPDK::toStr(port);
     return out;
 }
 
-std::ostream &IR::DpdkExternObjStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkExternObjStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "extern_obj ";
     return out;
 }
 
-std::ostream &IR::DpdkExternFuncStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkExternFuncStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "extern_func ";
     return out;
 }
 
-std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "return ";
     return out;
 }
 
-std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << label << " :";
     return out;
 }
 
-std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkTable::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "table " << name << " {" << std::endl;
     if (match_keys) {
         out << "\tkey {" << std::endl;
@@ -339,9 +411,11 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkSelector::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "selector " << name << " {" << std::endl;
-    out << "\tgroup_id " << group_id << std::endl;
+    out << "\tgroup_id " << DPDK::toStr(group_id) << std::endl;
     if (selectors) {
         out << "\tselector {" << std::endl;
         for (auto key : selectors->keyElements) {
@@ -349,14 +423,16 @@ std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
         }
         out << "\t}" << std::endl;
     }
-    out << "\tmember_id " << member_id << std::endl;
+    out << "\tmember_id " << DPDK::toStr(member_id) << std::endl;
     out << "\tn_groups_max " << n_groups_max << std::endl;
     out << "\tn_members_per_group_max " << n_members_per_group_max << std::endl;
     out << "}" << std::endl;
     return out;
 }
 
-std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkLearner::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "learner " << name << " {" << std::endl;
     if (match_keys) {
         out << "\tkey {" << std::endl;
@@ -399,7 +475,9 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkAction::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "action " << name.toString() << " args ";
 
     if (para.parameters.size() == 0)
@@ -423,25 +501,33 @@ std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkChecksumAddStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkChecksumAddStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "ckadd "
         << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
     return out;
 }
 
-std::ostream &IR::DpdkChecksumSubStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkChecksumSubStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "cksub "
         << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
     return out;
 }
 
-std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "mov "
         << "h.cksum_state." << intermediate_value << " " << "0x0";
     return out;
 }
 
-std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "hash_get " << DPDK::toStr(dst) << " " << hash << " (";
     if (auto l = fields->to<IR::ListExpression>()) {
         for (auto c : l->components) {
@@ -454,28 +540,40 @@ std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkGetChecksumStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkGetChecksumStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "mov " << DPDK::toStr(dst) << " "
         << "h.cksum_state." << intermediate_value;
     return out;
 }
 
-std::ostream &IR::DpdkCastStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkCastStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "mov " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
     return out;
 }
 
-std::ostream &IR::DpdkVerifyStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkVerifyStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "verify " << DPDK::toStr(condition) << " " << DPDK::toStr(error);
     return out;
 }
 
-std::ostream &IR::DpdkMeterDeclStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkMeterDeclStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    if (origNameMap.count(meter))
+        out<<";oldname:"<<origNameMap.at(meter)<<"\n";
+
     out << "metarray " << meter << " size " << DPDK::toStr(size);
     return out;
 }
 
-std::ostream &IR::DpdkMeterExecuteStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkMeterExecuteStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "meter " << meter << " " << DPDK::toStr(index) << " " << DPDK::toStr(length);
     out << " " << DPDK::toStr(color_in) << " " << DPDK::toStr(color_out);
     return out;
@@ -484,7 +582,11 @@ std::ostream &IR::DpdkMeterExecuteStatement::toSpec(std::ostream &out) const {
 /* DPDK target uses Registers for implementing using Counters, atomic register add instruction
    is used for incrementing the counter. Packet counters are incremented by packet length
    specified as parameter and byte counters are incremente by 1 */
-std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    if (origNameMap.count(counter))
+        out<<";oldname:"<<origNameMap.at(counter)<<"\n";
+
     out << "regadd " << counter << " " << DPDK::toStr(index) << " ";
     if (incr)
         out << DPDK::toStr(incr);
@@ -493,7 +595,11 @@ std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkRegisterDeclStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkRegisterDeclStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    if (origNameMap.count(reg))
+        out<<";oldname:"<<origNameMap.at(reg)<<"\n";
+
     out << "regarray " << reg << " size " << DPDK::toStr(size) << " initval ";
     if (init_val)
         out << DPDK::toStr(init_val);
@@ -502,29 +608,39 @@ std::ostream &IR::DpdkRegisterDeclStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkRegisterReadStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkRegisterReadStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "regrd " << DPDK::toStr(dst) << " " << reg << " "
         << DPDK::toStr(index);
     return out;
 }
 
-std::ostream &IR::DpdkRegisterWriteStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkRegisterWriteStatement::toSpec(std::ostream &out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "regwr " << reg << " " << DPDK::toStr(index) << " "
         << DPDK::toStr(src);
     return out;
 }
 
-std::ostream& IR::DpdkValidateStatement::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkValidateStatement::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "validate " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkInvalidateStatement::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkInvalidateStatement::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "invalidate " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkDropStatement::toSpec(std::ostream& out) const {
+std::ostream& IR::DpdkDropStatement::toSpec(std::ostream& out,
+    const ordered_map<cstring, cstring>& origNameMap) const {
+    UNUSED(origNameMap);
     out << "drop";
     return out;
 }

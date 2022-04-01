@@ -37,6 +37,8 @@ class DpdkBackend {
     P4::ReferenceMap *refMap;
     P4::TypeMap* typeMap;
     P4::ConvertEnums::EnumMapping *enumMap;
+    // emit original name as comment
+    ordered_map<cstring/* new name */, cstring/*original name*/> origNameMap;
 
     const IR::DpdkAsmProgram *dpdk_program = nullptr;
     const IR::ToplevelBlock* toplevel = nullptr;

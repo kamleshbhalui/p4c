@@ -127,14 +127,15 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkAsmOptimization,
         new CollectUsedMetadataField(used_fields),
         new RemoveUnusedMetadataFields(used_fields),
-        new ValidateTableKeys()
+        new ValidateTableKeys(),
+        new ShortenTokenLength(origNameMap),
     };
 
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
 }
 
 void DpdkBackend::codegen(std::ostream &out) const {
-    dpdk_program->toSpec(out) << std::endl;
+    dpdk_program->toSpec(out, origNameMap) << std::endl;
 }
 
 }  // namespace DPDK
