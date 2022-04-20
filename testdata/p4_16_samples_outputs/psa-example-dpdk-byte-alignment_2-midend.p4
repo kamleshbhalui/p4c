@@ -3,7 +3,8 @@ error {
     BadIPv4HeaderChecksum
 }
 #include <core.p4>
-#include <dpdk/psa.p4>
+#include <psa.p4>
+#include <dpdk/psa_ext.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -61,11 +62,11 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.color_in") PSA_MeterColor_t color_in_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("ingress.counter0") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS_AND_BYTES) counter0_0;
-    @name("ingress.counter1") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1_0;
-    @name("ingress.counter2") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.BYTES) counter2_0;
+    @name("ingress.counter0") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS_AND_BYTES) counter0_0;
+    @name("ingress.counter1") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1_0;
+    @name("ingress.counter2") DPDKCounter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.BYTES) counter2_0;
     @name("ingress.reg") Register<bit<32>, bit<12>>(32w1024) reg_0;
-    @name("ingress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
+    @name("ingress.meter0") DPDKMeter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
     @name("ingress.execute") action execute_1(@name("index") bit<12> index_1) {
         hdr.ipv4.ihl = 4w5;
         color_out_0 = meter0_0.execute(index_1, color_in_0, hdr.ipv4.totalLen);
