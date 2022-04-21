@@ -926,6 +926,20 @@ class CollectErrors : public Inspector {
     }
 };
 
+// Eliminate temporary copies of header, which generally populated after inlining,
+// if it's not temporary copy then transform direct header copy to element wise copy
+class ElimHeaderCopy : public Transform {
+    P4::TypeMap *typeMap;
+    ordered_map<cstring, const IR::Member*> replacementMap;
+
+ public:
+    explicit ElimHeaderCopy(P4::TypeMap *typeMap) : typeMap{typeMap} {}
+    bool isHeader(const IR::Expression* e);
+    const IR::Node* preorder(IR::AssignmentStatement* as) override;
+    const IR::Node* preorder(IR::MethodCallExpression *me) override;
+    const IR::Node* postorder(IR::Member* m) override;
+};
+
 class DpdkArchFirst : public PassManager {
  public:
     DpdkArchFirst() { setName("DpdkArchFirst"); }

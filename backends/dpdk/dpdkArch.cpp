@@ -2253,4 +2253,63 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     return;
 }
 
+bool ElimHeaderCopy::isHeader(const IR::Expression* e) {
+    auto type = typeMap->getType(e);
+    if (type)
+        return type->is<IR::Type_Header>() && !e->is<IR::MethodCallExpression>();
+    return false;
+}
+
+const IR::Node* ElimHeaderCopy::preorder(IR::AssignmentStatement* as) {
+    if (isHeader(as->left) && isHeader(as->right)) {
+        if (auto path = as->left->to<IR::PathExpression>()) {
+            replacementMap.insert(std::make_pair(path->path->name.name,
+                                   as->right->to<IR::Member>()));
+            return new IR::EmptyStatement();
+        } else if (auto path = as->right->to<IR::PathExpression>()) {
+            replacementMap.insert(std::make_pair(path->path->name.name,
+                                  as->left->to<IR::Member>()));
+            return  new IR::EmptyStatement();
+        } else {
+            // both are non temporary header instance do element wise copy
+            IR::IndexedVector<IR::StatOrDecl> components;
+            for (auto field : typeMap->getType(as->left)->to<IR::Type_Header>()->fields) {
+                components.push_back(new IR::AssignmentStatement(as->srcInfo,
+                                     new IR::Member(as->left, field->name),
+                                     new IR::Member(as->right, field->name)));
+            }
+            return new IR::BlockStatement(as->srcInfo, components);
+        }
+    }
+    return as;
+}
+
+const IR::Node* ElimHeaderCopy::preorder(IR::MethodCallExpression *me) {
+    auto m = me->method->to<IR::Member>();
+    if (!m)
+        return me;
+    if (!isHeader(m->expr))
+        return me;
+    auto expr = m->expr->to<IR::PathExpression>();
+    if (expr && replacementMap.count(expr->path->name.name)) {
+        auto me1 = new IR::MethodCallExpression(me->srcInfo,
+                     new IR::Member(replacementMap.at(expr->path->name.name), m->member),
+                     me->typeArguments, me->arguments);
+        typeMap->setType(me1->method, typeMap->getType(me->method));
+        return me1;
+    }
+    return me;
+}
+
+const IR::Node* ElimHeaderCopy::postorder(IR::Member* m) {
+    if (!isHeader(m->expr)) {
+        return m;
+    }
+    auto expr = m->expr->to<IR::PathExpression>();
+    if (expr && replacementMap.count(expr->path->name.name)) {
+        return new IR::Member(replacementMap.at(expr->path->name.name), m->member);
+    }
+    return m;
+}
+
 }  // namespace DPDK
