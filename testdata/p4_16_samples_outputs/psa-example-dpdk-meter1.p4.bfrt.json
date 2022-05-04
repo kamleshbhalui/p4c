@@ -55,6 +55,86 @@
       "data" : [],
       "supported_operations" : [],
       "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "ip.ingress.meter0",
+      "id" : 344514043,
+      "table_type" : "DPDKMeter",
+      "size" : 1024,
+      "depends_on" : [],
+      "key" : [
+        {
+          "id" : 65555,
+          "name" : "$METER_INDEX",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : true,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "uint32"
+          }
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65549,
+            "name" : "$METER_SPEC_CIR_PPS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65550,
+            "name" : "$METER_SPEC_PIR_PPS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65551,
+            "name" : "$METER_SPEC_CBS_PKTS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65552,
+            "name" : "$METER_SPEC_PBS_PKTS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        }
+      ],
+      "supported_operations" : [],
+      "attributes" : ["MeterByteCountAdjust"]
     }
   ],
   "learn_filters" : []

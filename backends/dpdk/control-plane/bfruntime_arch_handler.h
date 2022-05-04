@@ -288,8 +288,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     break;
                 }
             }
-        } else if (externBlock->type->name == "Meter"
-                   || externBlock->type->name == "DPDKMeter") {
+        } else if (externBlock->type->name == "Meter") {
             for (auto& extType : *p4info->mutable_meters()) {
                 auto* pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {
@@ -297,9 +296,24 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     break;
                 }
             }
-        } else if (externBlock->type->name == "Counter"
-                   || externBlock->type->name == "DPDKCounter") {
+        } else if (externBlock->type->name == "Counter") {
             for (auto& extType : *p4info->mutable_counters()) {
+                auto* pre = extType.mutable_preamble();
+                if (pre->name() == decl->controlPlaneName()) {
+                    pre->set_name(prefix(pipeName, pre->name()));
+                    break;
+                }
+            }
+        } else if (externBlock->type->name == "DPDKMeter") {
+            for (auto& extType : *p4info->mutable_dpdk_meters()) {
+                auto* pre = extType.mutable_preamble();
+                if (pre->name() == decl->controlPlaneName()) {
+                    pre->set_name(prefix(pipeName, pre->name()));
+                    break;
+                }
+            }
+        } else if (externBlock->type->name == "DPDKCounter") {
+            for (auto& extType : *p4info->mutable_dpdk_counters()) {
                 auto* pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {
                     pre->set_name(prefix(pipeName, pre->name()));
@@ -358,14 +372,14 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     }
 };
 
-class BFRuntimeArchHandlerPSA final :  public BFRuntimeArchHandler<Arch::PSA> {
+class BFRuntimeArchHandlerPSA final :  public BFRuntimeArchHandler<Arch::DPDK_PSA> {
  public:
     BFRuntimeArchHandlerPSA(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
         : BFRuntimeArchHandler(refMap, typeMap, evaluatedProgram) {}
 };
 
-class BFRuntimeArchHandlerPNA final :  public BFRuntimeArchHandler<Arch::PNA> {
+class BFRuntimeArchHandlerPNA final :  public BFRuntimeArchHandler<Arch::DPDK_PNA> {
  public:
     BFRuntimeArchHandlerPNA(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)

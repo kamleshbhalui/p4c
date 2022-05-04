@@ -93,7 +93,13 @@ int main(int argc, char *const argv[]) {
         program = new IR::P4Program(jsonFileLoader);
         fb.close();
     }
-
+    auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
+    if (options.arch == "psa")
+        p4RuntimeSerializer->registerArch("psa",
+                new P4::ControlPlaneAPI::Standard::DPDKPSAArchHandlerBuilder());
+    if (options.arch == "pna")
+        p4RuntimeSerializer->registerArch("pna",
+                new P4::ControlPlaneAPI::Standard::DPDKPNAArchHandlerBuilder());
     P4::serializeP4RuntimeIfRequired(program, options);
     if (::errorCount() > 0)
         return 1;

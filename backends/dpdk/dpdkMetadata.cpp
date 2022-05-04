@@ -31,6 +31,9 @@ const IR::Node* AddNewMetadataFields::preorder(IR::DpdkStructType *st) {
     return st;
 }
 
+void DirectionToRegRead::collectUsedLables(IR::DpdkListStatement *l) {
+
+}
 // make sure new decls and fields name are unique
 void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
     P4::MinimalNameGenerator mng;

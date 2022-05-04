@@ -167,6 +167,26 @@ BFRuntimeGenerator::Counter::fromDirect(const p4configv1::DirectCounter& counter
     return Counter{pre.name(), id, 0, unit, transformAnnotations(pre)};
 }
 
+// DPDKCounter
+boost::optional<BFRuntimeGenerator::DPDKCounter>
+BFRuntimeGenerator::DPDKCounter::from(const p4configv1::DPDKCounter& counterInstance) {
+    const auto& pre = counterInstance.preamble();
+    auto id = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::COUNTER);
+    // TODO(antonin): this works because the enum values are the same for
+    // Counter::Unit and for CounterSpec::Unit, but this may not be very
+    // future-proof.
+    auto unit = static_cast<Unit>(counterInstance.spec().unit());
+    return DPDKCounter{pre.name(), id, counterInstance.size(), unit, transformAnnotations(pre)};
+}
+
+boost::optional<BFRuntimeGenerator::DPDKCounter>
+BFRuntimeGenerator::DPDKCounter::fromDirect(const p4configv1::DirectCounter& counterInstance) {
+    const auto& pre = counterInstance.preamble();
+    auto id = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::DIRECT_COUNTER);
+    auto unit = static_cast<Unit>(counterInstance.spec().unit());
+    return DPDKCounter{pre.name(), id, 0, unit, transformAnnotations(pre)};
+}
+
 // Meter
 boost::optional<BFRuntimeGenerator::Meter>
 BFRuntimeGenerator::Meter::from(const p4configv1::Meter& meterInstance) {
@@ -182,6 +202,23 @@ BFRuntimeGenerator::Meter::fromDirect(const p4configv1::DirectMeter& meterInstan
     auto id = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::DIRECT_METER);
     auto unit = static_cast<Unit>(meterInstance.spec().unit());
     return Meter{pre.name(), id, 0, unit, transformAnnotations(pre)};
+}
+
+// DPDKMeter
+boost::optional<BFRuntimeGenerator::DPDKMeter>
+BFRuntimeGenerator::DPDKMeter::from(const p4configv1::DPDKMeter& meterInstance) {
+    const auto& pre = meterInstance.preamble();
+    auto id = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::METER);
+    auto unit = static_cast<Unit>(meterInstance.spec().unit());
+    return DPDKMeter{pre.name(), id, meterInstance.size(), unit, transformAnnotations(pre)};
+}
+
+boost::optional<BFRuntimeGenerator::DPDKMeter>
+BFRuntimeGenerator::DPDKMeter::fromDirect(const p4configv1::DirectMeter& meterInstance) {
+    const auto& pre = meterInstance.preamble();
+    auto id = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::DIRECT_METER);
+    auto unit = static_cast<Unit>(meterInstance.spec().unit());
+    return DPDKMeter{pre.name(), id, 0, unit, transformAnnotations(pre)};
 }
 
 // ActionProfile
@@ -351,6 +388,30 @@ BFRuntimeGenerator::addCounterCommon(Util::JsonArray* tablesJson,
 }
 
 void
+BFRuntimeGenerator::addCounterCommon(Util::JsonArray* tablesJson,
+        const DPDKCounter& counter) const {
+    auto* tableJson = initTableJson(
+        counter.name, counter.id, "DPDKCounter", counter.size, counter.annotations);
+
+    auto* keyJson = new Util::JsonArray();
+    addKeyField(keyJson, TD_DATA_COUNTER_INDEX, "$COUNTER_INDEX",
+                true /* mandatory */, "Exact", makeType("uint32"));
+    tableJson->emplace("key", keyJson);
+
+    auto* dataJson = new Util::JsonArray();
+    addCounterDataFields(dataJson, counter);
+    tableJson->emplace("data", dataJson);
+
+    auto* operationsJson = new Util::JsonArray();
+    operationsJson->append("Sync");
+    tableJson->emplace("supported_operations", operationsJson);
+
+    tableJson->emplace("attributes", new Util::JsonArray());
+
+    tablesJson->append(tableJson);
+}
+
+void
 BFRuntimeGenerator::addCounterDataFields(Util::JsonArray* dataJson,
         const BFRuntimeGenerator::Counter& counter) {
     static const uint64_t defaultCounterValue = 0u;
@@ -371,9 +432,52 @@ BFRuntimeGenerator::addCounterDataFields(Util::JsonArray* dataJson,
 }
 
 void
+BFRuntimeGenerator::addCounterDataFields(Util::JsonArray* dataJson,
+        const BFRuntimeGenerator::DPDKCounter& counter) {
+    static const uint64_t defaultCounterValue = 0u;
+    if (counter.unit == DPDKCounter::Unit::BYTES
+        || counter.unit == DPDKCounter::Unit::BOTH) {
+        auto* f = makeCommonDataField(
+            TD_DATA_COUNTER_SPEC_BYTES, "$COUNTER_SPEC_BYTES",
+            makeType("uint64", defaultCounterValue), false /* repeated */);
+        addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+    }
+    if (counter.unit == DPDKCounter::Unit::PACKETS
+        || counter.unit == DPDKCounter::Unit::BOTH) {
+        auto* f = makeCommonDataField(
+            TD_DATA_COUNTER_SPEC_PKTS, "$COUNTER_SPEC_PKTS",
+            makeType("uint64", defaultCounterValue), false /* repeated */);
+        addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+    }
+}
+
+void
 BFRuntimeGenerator::addMeterCommon(Util::JsonArray* tablesJson,
         const BFRuntimeGenerator::Meter& meter) const {
     auto* tableJson = initTableJson(meter.name, meter.id, "Meter", meter.size);
+
+    auto* keyJson = new Util::JsonArray();
+    addKeyField(keyJson, TD_DATA_METER_INDEX, "$METER_INDEX",
+                true /* mandatory */, "Exact", makeType("uint32"));
+    tableJson->emplace("key", keyJson);
+
+    auto* dataJson = new Util::JsonArray();
+    addMeterDataFields(dataJson, meter);
+    tableJson->emplace("data", dataJson);
+
+    tableJson->emplace("supported_operations", new Util::JsonArray());
+
+    auto* attributesJson = new Util::JsonArray();
+    attributesJson->append("MeterByteCountAdjust");
+    tableJson->emplace("attributes", attributesJson);
+
+    tablesJson->append(tableJson);
+}
+
+void
+BFRuntimeGenerator::addMeterCommon(Util::JsonArray* tablesJson,
+        const BFRuntimeGenerator::DPDKMeter& meter) const {
+    auto* tableJson = initTableJson(meter.name, meter.id, "DPDKMeter", meter.size);
 
     auto* keyJson = new Util::JsonArray();
     addKeyField(keyJson, TD_DATA_METER_INDEX, "$METER_INDEX",
@@ -515,6 +619,67 @@ BFRuntimeGenerator::addMeterDataFields(Util::JsonArray* dataJson,
         BUG("Unknown meter unit");
     }
 }
+
+void
+BFRuntimeGenerator::addMeterDataFields(Util::JsonArray* dataJson,
+        const BFRuntimeGenerator::DPDKMeter& meter) {
+    // default value for rates and bursts (all GREEN)
+    static const uint64_t maxUint64 = std::numeric_limits<uint64_t>::max();
+    if (meter.unit == DPDKMeter::Unit::BYTES) {
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_CIR_KBPS, "$METER_SPEC_CIR_KBPS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_PIR_KBPS, "$METER_SPEC_PIR_KBPS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_CBS_KBITS, "$METER_SPEC_CBS_KBITS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_PBS_KBITS, "$METER_SPEC_PBS_KBITS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+    } else if (meter.unit == DPDKMeter::Unit::PACKETS) {
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_CIR_PPS, "$METER_SPEC_CIR_PPS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_PIR_PPS, "$METER_SPEC_PIR_PPS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_CBS_PKTS, "$METER_SPEC_CBS_PKTS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_PBS_PKTS, "$METER_SPEC_PBS_PKTS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+    } else {
+        BUG("Unknown meter unit");
+    }
+}
+
 
 void
 BFRuntimeGenerator::addActionProfCommon(Util::JsonArray* tablesJson,
@@ -855,12 +1020,22 @@ BFRuntimeGenerator::addCounters(Util::JsonArray* tablesJson) const {
         if (counterInstance == boost::none) continue;
         addCounterCommon(tablesJson, *counterInstance);
     }
+    for (const auto& counter : p4info.dpdk_counters()) {
+        auto counterInstance = DPDKCounter::from(counter);
+        if (counterInstance == boost::none) continue;
+        addCounterCommon(tablesJson, *counterInstance);
+    }
 }
 
 void
 BFRuntimeGenerator::addMeters(Util::JsonArray* tablesJson) const {
     for (const auto& meter : p4info.meters()) {
         auto meterInstance = Meter::from(meter);
+        if (meterInstance == boost::none) continue;
+        addMeterCommon(tablesJson, *meterInstance);
+    }
+    for (const auto& meter : p4info.dpdk_meters()) {
+        auto meterInstance = DPDKMeter::from(meter);
         if (meterInstance == boost::none) continue;
         addMeterCommon(tablesJson, *meterInstance);
     }
