@@ -56,6 +56,8 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
     };
     // Externs only for DPDK backend
     struct ActionSelector;
+    struct DPDKCounter;
+    struct DPDKMeter;
 
     void addDPDKExterns(Util::JsonArray* tablesJson, Util::JsonArray* learnFiltersJson) const;
     void addActionSelectorCommon(Util::JsonArray* tablesJson,
@@ -86,6 +88,13 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         return ActionProf{pre.name(), pre.id(), actionProfile.size(), tableIds,
                           transformAnnotations(pre)};
     };
+    void addDPDKCounters(Util::JsonArray* tablesJson) const;
+    void addDPDKMeters(Util::JsonArray* tablesJson) const;
+    void addCounterCommon(Util::JsonArray* tablesJson, const DPDKCounter& counter) const;
+    void addMeterCommon(Util::JsonArray* tablesJson, const DPDKMeter& meter) const;
+    static void addMeterDataFields(Util::JsonArray* dataJson, const DPDKMeter& meter);
+    static void addCounterDataFields(Util::JsonArray* dataJson, const DPDKCounter& counter);
+
 };
 
 }  // namespace BFRT

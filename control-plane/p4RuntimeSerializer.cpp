@@ -887,11 +887,9 @@ class P4RuntimeAnalyzer {
         dupCnt += checkForDuplicatesOfSameType(p4Info->actions(), "action", &ids);
         dupCnt += checkForDuplicatesOfSameType(p4Info->action_profiles(), "action profile", &ids);
         dupCnt += checkForDuplicatesOfSameType(p4Info->counters(), "counter", &ids);
-        dupCnt += checkForDuplicatesOfSameType(p4Info->dpdk_counters(), "dpdk counter", &ids);
 
         dupCnt += checkForDuplicatesOfSameType(p4Info->direct_counters(), "direct counter", &ids);
         dupCnt += checkForDuplicatesOfSameType(p4Info->meters(), "meter", &ids);
-        dupCnt += checkForDuplicatesOfSameType(p4Info->dpdk_meters(), "dpdk meter", &ids);
         dupCnt += checkForDuplicatesOfSameType(p4Info->direct_meters(), "direct meter", &ids);
         dupCnt += checkForDuplicatesOfSameType(
             p4Info->controller_packet_metadata(), "controller packet metadata", &ids);

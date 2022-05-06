@@ -364,35 +364,6 @@ class BFRuntimeGenerator {
         static boost::optional<Meter> fromDirect(const p4configv1::DirectMeter& meterInstance);
     };
 
-    /// Common counter representation between PSA and other architectures
-    struct DPDKCounter {
-        enum Unit { UNSPECIFIED = 0, BYTES = 1, PACKETS = 2, BOTH = 3 };
-        std::string name;
-        P4Id id;
-        int64_t size;
-        Unit unit;
-        Util::JsonArray* annotations;
-
-        static boost::optional<DPDKCounter>
-        from(const p4configv1::DPDKCounter& counterInstance);
-        static boost::optional<DPDKCounter>
-        fromDirect(const p4configv1::DirectCounter& counterInstance);
-    };
-
-    /// Common meter representation between PSA and other architectures
-    struct DPDKMeter {
-        enum Unit { UNSPECIFIED = 0, BYTES = 1, PACKETS = 2 };
-        enum Type { COLOR_UNAWARE = 0, COLOR_AWARE = 1 };
-        std::string name;
-        P4Id id;
-        int64_t size;
-        Unit unit;
-        Util::JsonArray* annotations;
-
-        static boost::optional<DPDKMeter> from(const p4configv1::DPDKMeter& meterInstance);
-        static boost::optional<DPDKMeter> fromDirect(const p4configv1::DirectMeter& meterInstance);
-    };
-
     /// Common action profile / selector representation between PSA and other
     /// architectures
     struct ActionProf {
@@ -439,8 +410,6 @@ class BFRuntimeGenerator {
 
     void addCounterCommon(Util::JsonArray* tablesJson, const Counter& counter) const;
     void addMeterCommon(Util::JsonArray* tablesJson, const Meter& meter) const;
-    void addCounterCommon(Util::JsonArray* tablesJson, const DPDKCounter& counter) const;
-    void addMeterCommon(Util::JsonArray* tablesJson, const DPDKMeter& meter) const;
     void addRegisterCommon(Util::JsonArray* tablesJson, const Register& meter) const;
     void addActionProfCommon(Util::JsonArray* tablesJson, const ActionProf& actionProf) const;
     void addLearnFilters(Util::JsonArray* learnFiltersJson) const;
@@ -478,7 +447,6 @@ class BFRuntimeGenerator {
                                        P4Id idOffset = 1) const;
 
     static void addMeterDataFields(Util::JsonArray* dataJson, const Meter& meter);
-    static void addMeterDataFields(Util::JsonArray* dataJson, const DPDKMeter& meter);
     static Util::JsonObject* makeCommonDataField(P4Id id, cstring name,
                                                  Util::JsonObject* type, bool repeated,
                                                  Util::JsonArray* annotations = nullptr);
@@ -496,7 +464,6 @@ class BFRuntimeGenerator {
                             Util::JsonArray* annotations = nullptr);
 
     static void addCounterDataFields(Util::JsonArray* dataJson, const Counter& counter);
-    static void addCounterDataFields(Util::JsonArray* dataJson, const DPDKCounter& counter);
     static Util::JsonObject* initTableJson(const std::string& name, P4Id id, cstring tableType,
                                            int64_t size, Util::JsonArray* annotations = nullptr);
 

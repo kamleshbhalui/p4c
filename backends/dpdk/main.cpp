@@ -96,22 +96,15 @@ int main(int argc, char *const argv[]) {
     auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
     if (options.arch == "psa")
         p4RuntimeSerializer->registerArch("psa",
-                new P4::ControlPlaneAPI::Standard::DPDKPSAArchHandlerBuilder());
+                new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
     if (options.arch == "pna")
         p4RuntimeSerializer->registerArch("pna",
-                new P4::ControlPlaneAPI::Standard::DPDKPNAArchHandlerBuilder());
+                new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
     P4::serializeP4RuntimeIfRequired(program, options);
     if (::errorCount() > 0)
         return 1;
 
     if (!options.bfRtSchema.isNullOrEmpty()) {
-        auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
-        if (options.arch == "psa")
-            p4RuntimeSerializer->registerArch("psa",
-                new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
-        if (options.arch == "pna")
-            p4RuntimeSerializer->registerArch("pna",
-                new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
         auto p4Runtime = P4::generateP4Runtime(program, options.arch);
         auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info);
         std::ostream* out = openFile(options.bfRtSchema, false);

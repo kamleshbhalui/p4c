@@ -51,6 +51,206 @@ struct BFRuntimeSchemaGenerator::ActionSelector {
     };
 };
 
+struct BFRuntimeSchemaGenerator::DPDKCounter {
+        enum Unit { UNSPECIFIED = 0, BYTES = 1, PACKETS = 2, BOTH = 3 };
+        std::string name;
+        P4Id id;
+        int64_t size;
+        Unit unit;
+        Util::JsonArray* annotations;
+
+        static boost::optional<DPDKCounter>
+        fromDPDK(const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
+            const auto& pre = externInstance.preamble();
+            ::dpdk::DPDKCounter counter;
+            if (!externInstance.info().UnpackTo(&counter)) {
+                ::error("Extern instance %1% does not pack an DPDKCounter object", pre.name());
+            return boost::none;
+            }
+            auto id = makeBFRuntimeId(pre.id(), ::dpdk::P4Ids::DPDK_COUNTER);
+            // TODO(antonin): this works because the enum values are the same for
+            // Counter::Unit and for CounterSpec::Unit, but this may not be very
+            // future-proof.
+            auto unit = static_cast<Unit>(counter.spec().unit());
+            return DPDKCounter{pre.name(), id, counter.size(), unit, transformAnnotations(pre)};
+        }
+        static boost::optional<DPDKCounter>
+        fromDirectDPDK(const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
+                const auto& pre = externInstance.preamble();
+            p4configv1::DirectCounter counter;
+            if (!externInstance.info().UnpackTo(&counter)) {
+                ::error("Extern instance %1% does not pack an DirectCounter object", pre.name());
+            return boost::none;
+            }
+
+            auto id = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::DIRECT_COUNTER);
+            auto unit = static_cast<Unit>(counter.spec().unit());
+            return DPDKCounter{pre.name(), id, 0, unit, transformAnnotations(pre)};
+        }
+};
+
+struct BFRuntimeSchemaGenerator::DPDKMeter {
+        enum Unit { UNSPECIFIED = 0, BYTES = 1, PACKETS = 2 };
+        enum Type { COLOR_UNAWARE = 0, COLOR_AWARE = 1 };
+        std::string name;
+        P4Id id;
+        int64_t size;
+        Unit unit;
+        Util::JsonArray* annotations;
+
+        static boost::optional<DPDKMeter>
+        fromDPDK(const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
+            const auto& pre = externInstance.preamble();
+            ::dpdk::DPDKMeter meter;
+            if (!externInstance.info().UnpackTo(&meter)) {
+                ::error("Extern instance %1% does not pack an DPDKMeter object", pre.name());
+            return boost::none;
+            }
+            auto id = makeBFRuntimeId(pre.id(), ::dpdk::P4Ids::DPDK_METER);
+            auto unit = static_cast<Unit>(meter.spec().unit());
+            return DPDKMeter{pre.name(), id, meter.size(), unit, transformAnnotations(pre)};
+        }
+        static boost::optional<DPDKMeter>
+        fromDirect(const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
+            const auto& pre = externInstance.preamble();
+            p4configv1::DirectMeter meter;
+            if (!externInstance.info().UnpackTo(&meter)) {
+                ::error("Extern instance %1% does not pack an DirectMeter object", pre.name());
+            return boost::none;
+            }
+            auto id = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::DIRECT_METER);
+            auto unit = static_cast<Unit>(meter.spec().unit());
+            return DPDKMeter{pre.name(), id, 0, unit, transformAnnotations(pre)};
+        }
+};
+
+void
+BFRuntimeSchemaGenerator::addCounterCommon(Util::JsonArray* tablesJson,
+        const BFRuntimeSchemaGenerator::DPDKCounter& counter) const {
+    auto* tableJson = initTableJson(
+        counter.name, counter.id, "DPDKCounter", counter.size, counter.annotations);
+
+    auto* keyJson = new Util::JsonArray();
+    addKeyField(keyJson, TD_DATA_COUNTER_INDEX, "$COUNTER_INDEX",
+                true /* mandatory */, "Exact", makeType("uint32"));
+    tableJson->emplace("key", keyJson);
+
+    auto* dataJson = new Util::JsonArray();
+    addCounterDataFields(dataJson, counter);
+    tableJson->emplace("data", dataJson);
+
+    auto* operationsJson = new Util::JsonArray();
+    operationsJson->append("Sync");
+    tableJson->emplace("supported_operations", operationsJson);
+
+    tableJson->emplace("attributes", new Util::JsonArray());
+
+    tablesJson->append(tableJson);
+}
+
+void
+BFRuntimeSchemaGenerator::addCounterDataFields(Util::JsonArray* dataJson,
+        const BFRuntimeSchemaGenerator::DPDKCounter& counter) {
+    static const uint64_t defaultCounterValue = 0u;
+    if (counter.unit == DPDKCounter::Unit::BYTES
+        || counter.unit == DPDKCounter::Unit::BOTH) {
+        auto* f = makeCommonDataField(
+            TD_DATA_COUNTER_SPEC_BYTES, "$COUNTER_SPEC_BYTES",
+            makeType("uint64", defaultCounterValue), false /* repeated */);
+        addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+    }
+    if (counter.unit == DPDKCounter::Unit::PACKETS
+        || counter.unit == DPDKCounter::Unit::BOTH) {
+        auto* f = makeCommonDataField(
+            TD_DATA_COUNTER_SPEC_PKTS, "$COUNTER_SPEC_PKTS",
+            makeType("uint64", defaultCounterValue), false /* repeated */);
+        addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+    }
+}
+
+void
+BFRuntimeSchemaGenerator::addMeterCommon(Util::JsonArray* tablesJson,
+        const BFRuntimeSchemaGenerator::DPDKMeter& meter) const {
+    auto* tableJson = initTableJson(meter.name, meter.id, "DPDKMeter", meter.size);
+
+    auto* keyJson = new Util::JsonArray();
+    addKeyField(keyJson, TD_DATA_METER_INDEX, "$METER_INDEX",
+                true /* mandatory */, "Exact", makeType("uint32"));
+    tableJson->emplace("key", keyJson);
+
+    auto* dataJson = new Util::JsonArray();
+    addMeterDataFields(dataJson, meter);
+    tableJson->emplace("data", dataJson);
+
+    tableJson->emplace("supported_operations", new Util::JsonArray());
+
+    auto* attributesJson = new Util::JsonArray();
+    attributesJson->append("MeterByteCountAdjust");
+    tableJson->emplace("attributes", attributesJson);
+
+    tablesJson->append(tableJson);
+}
+
+void
+BFRuntimeSchemaGenerator::addMeterDataFields(Util::JsonArray* dataJson,
+        const BFRuntimeSchemaGenerator::DPDKMeter& meter) {
+    // default value for rates and bursts (all GREEN)
+    static const uint64_t maxUint64 = std::numeric_limits<uint64_t>::max();
+    if (meter.unit == DPDKMeter::Unit::BYTES) {
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_CIR_KBPS, "$METER_SPEC_CIR_KBPS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_PIR_KBPS, "$METER_SPEC_PIR_KBPS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_CBS_KBITS, "$METER_SPEC_CBS_KBITS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_PBS_KBITS, "$METER_SPEC_PBS_KBITS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+    } else if (meter.unit == DPDKMeter::Unit::PACKETS) {
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_CIR_PPS, "$METER_SPEC_CIR_PPS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_PIR_PPS, "$METER_SPEC_PIR_PPS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_CBS_PKTS, "$METER_SPEC_CBS_PKTS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+        {
+            auto* f = makeCommonDataField(
+                TD_DATA_METER_SPEC_PBS_PKTS, "$METER_SPEC_PBS_PKTS",
+                makeType("uint64", maxUint64), false /* repeated */);
+            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+        }
+    } else {
+        BUG("Unknown meter unit");
+    }
+}
+
 void
 BFRuntimeSchemaGenerator::addMatchActionData(const p4configv1::Table& table,
         Util::JsonObject* tableJson, Util::JsonArray* dataJson,
@@ -246,6 +446,25 @@ BFRuntimeSchemaGenerator::addDPDKExterns(Util::JsonArray* tablesJson,
                     addActionSelectorGetMemberCommon(tablesJson, *actionSelector);
                 }
             }
+        } else if(externTypeId == ::dpdk::P4Ids::DPDK_COUNTER) {
+            for (const auto& externInstance : externType.instances()) {
+
+            auto counter = DPDKCounter::fromDPDK(p4info, externInstance);
+                if (counter != boost::none) {
+                    addCounterCommon(tablesJson, *counter);
+                }
+            }
+
+        } else if (externTypeId == ::dpdk::P4Ids::DPDK_METER) {
+            for (const auto& externInstance : externType.instances()) {
+
+            auto meter = DPDKMeter::fromDPDK(p4info, externInstance);
+
+            if (meter != boost::none) {
+                    addMeterCommon(tablesJson, *meter);
+                }
+            }
+
         }
     }
 }

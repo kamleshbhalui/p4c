@@ -10,6 +10,8 @@ message P4Ids {
     UNSPECIFIED                 = 0;
     ACTION_SELECTOR             = 0x81;
     ACTION_SELECTOR_GET_MEMBER  = 0x82;
+    DPDK_COUNTER                = 0x83;
+    DPDK_METER                  = 0x84;
   }
 }
 
@@ -19,25 +21,6 @@ message ActionSelector {
   int64 max_group_size = 3;
   int64 num_groups = 4;
   uint32 action_profile_id = 5;
-}
-
-message P4Info {
-  p4.config.v1.PkgInfo pkg_info = 1;
-  repeated p4.config.v1.Table tables = 2;
-  repeated p4.config.v1.Action actions = 3;
-  repeated p4.config.v1.ActionProfile action_profiles = 4;
-  repeated p4.config.v1.Counter counters = 5;
-  repeated p4.config.v1.DirectCounter direct_counters = 6;
-  repeated p4.config.v1.Meter meters = 7;
-  repeated p4.config.v1.DirectMeter direct_meters = 8;
-  repeated p4.config.v1.ControllerPacketMetadata controller_packet_metadata = 9;
-  repeated p4.config.v1.ValueSet value_sets = 10;
-  repeated p4.config.v1.Register registers = 11;
-  repeated p4.config.v1.Digest digests = 12;
-  repeated p4.config.v1.Extern externs = 100;
-  repeated DPDKCounter dpdk_counters = 101;
-  repeated DPDKMeter dpdk_meters = 102;
-  p4.config.v1.P4TypeInfo type_info = 200;
 }
 
 message DPDKCounter {
