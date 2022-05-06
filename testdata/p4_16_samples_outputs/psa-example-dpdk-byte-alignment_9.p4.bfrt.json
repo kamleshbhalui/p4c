@@ -82,7 +82,7 @@
     },
     {
       "name" : "ip.ingress.counter0",
-      "id" : 314114784,
+      "id" : 2209940192,
       "table_type" : "DPDKCounter",
       "size" : 1024,
       "annotations" : [],
@@ -135,7 +135,7 @@
     },
     {
       "name" : "ip.ingress.counter1",
-      "id" : 318473483,
+      "id" : 2214298891,
       "table_type" : "DPDKCounter",
       "size" : 1024,
       "annotations" : [],
@@ -174,7 +174,7 @@
     },
     {
       "name" : "ip.ingress.counter2",
-      "id" : 313911423,
+      "id" : 2209736831,
       "table_type" : "DPDKCounter",
       "size" : 1024,
       "annotations" : [],
@@ -213,7 +213,7 @@
     },
     {
       "name" : "ip.ingress.meter0",
-      "id" : 344514043,
+      "id" : 2223562235,
       "table_type" : "DPDKMeter",
       "size" : 1024,
       "depends_on" : [],

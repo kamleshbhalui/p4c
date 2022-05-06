@@ -189,7 +189,6 @@ class SymbolTypeDPDK final : public SymbolType {
     static P4RuntimeSymbolType DPDK_METER() {
         return P4RuntimeSymbolType::make(dpdk::P4Ids::DPDK_METER);
     }
-
 };
 
 /// The information about an action profile which is necessary to generate its
@@ -310,7 +309,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                               size->to<IR::Constant>()->asInt(),
                               actionSelDecl->to<IR::IAnnotated>()};
     }
-    
+
     void addActionSelector(const P4RuntimeSymbolTableIface& symbols,
                           p4configv1::P4Info* p4Info,
                           const ActionSelector& actionSelector, cstring pipeName = "") {
@@ -350,8 +349,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
 
     void addDPDKCounter(const P4RuntimeSymbolTableIface& symbols,
                           p4configv1::P4Info* p4Info,
-                          const Helpers::Counterlike<ArchCounterExtern>& counterInstance) {
-
+                          const Helpers::Counterlike<ArchCounterExtern>& counterInstance,
+                          cstring pipeName= "") {
             ::dpdk::DPDKCounter counter;
             auto id = symbols.getId(SymbolTypeDPDK::DPDK_COUNTER(),
                                     counterInstance.name);
@@ -360,11 +359,9 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             if (counterInstance.index_type_name) {
                 counter.mutable_index_type_name()->set_name(counterInstance.index_type_name);
             }
-        
-
         addP4InfoExternInstance(symbols, SymbolTypeDPDK::DPDK_COUNTER(),
                 "DPDKCounter", counterInstance.name, counterInstance.annotations,
-                counter, p4Info);
+                counter, p4Info, pipeName);
     }
     /// Set common fields between Meter and DirectMeter.
     template <typename Kind>
@@ -380,7 +377,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
 
     void addDPDKMeter(const P4RuntimeSymbolTableIface& symbols,
                           p4configv1::P4Info* p4Info,
-                          const Helpers::Counterlike<ArchMeterExtern>& meterInstance) {
+                          const Helpers::Counterlike<ArchMeterExtern>& meterInstance,
+                          cstring pipeName = "") {
         ::dpdk::DPDKMeter meter;
             auto id = symbols.getId(SymbolTypeDPDK::DPDK_METER(),
                                     meterInstance.name);
@@ -393,7 +391,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
 
         addP4InfoExternInstance(symbols, SymbolTypeDPDK::DPDK_METER(),
                 "DPDKMeter", meterInstance.name, meterInstance.annotations,
-                meter, p4Info);
+                meter, p4Info, pipeName);
     }
 
     void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
@@ -493,12 +491,12 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                      auto meter = Helpers::Counterlike<ArchMeterExtern>::from(
                 externBlock, this->refMap, this->typeMap, p4RtTypeInfo);
 
-            if (meter) addDPDKMeter(symbols, p4info, *meter);
+            if (meter) addDPDKMeter(symbols, p4info, *meter, pipeName);
         } else if (externBlock->type->name == "DPDKCounter") {
                         auto counter = Helpers::Counterlike<ArchCounterExtern>::from(
                 externBlock, this->refMap, this->typeMap, p4RtTypeInfo);
 
-            if (counter) addDPDKCounter(symbols, p4info, *counter);
+            if (counter) addDPDKCounter(symbols, p4info, *counter, pipeName);
         }
     }
 

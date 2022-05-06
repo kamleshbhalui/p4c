@@ -60,7 +60,8 @@ struct BFRuntimeSchemaGenerator::DPDKCounter {
         Util::JsonArray* annotations;
 
         static boost::optional<DPDKCounter>
-        fromDPDK(const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
+        fromDPDK(const p4configv1::P4Info& p4info,
+                const p4configv1::ExternInstance& externInstance) {
             const auto& pre = externInstance.preamble();
             ::dpdk::DPDKCounter counter;
             if (!externInstance.info().UnpackTo(&counter)) {
@@ -75,7 +76,8 @@ struct BFRuntimeSchemaGenerator::DPDKCounter {
             return DPDKCounter{pre.name(), id, counter.size(), unit, transformAnnotations(pre)};
         }
         static boost::optional<DPDKCounter>
-        fromDirectDPDK(const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
+        fromDirectDPDK(const p4configv1::P4Info& p4info,
+                const p4configv1::ExternInstance& externInstance) {
                 const auto& pre = externInstance.preamble();
             p4configv1::DirectCounter counter;
             if (!externInstance.info().UnpackTo(&counter)) {
@@ -99,7 +101,8 @@ struct BFRuntimeSchemaGenerator::DPDKMeter {
         Util::JsonArray* annotations;
 
         static boost::optional<DPDKMeter>
-        fromDPDK(const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
+        fromDPDK(const p4configv1::P4Info& p4info,
+                const p4configv1::ExternInstance& externInstance) {
             const auto& pre = externInstance.preamble();
             ::dpdk::DPDKMeter meter;
             if (!externInstance.info().UnpackTo(&meter)) {
@@ -111,7 +114,8 @@ struct BFRuntimeSchemaGenerator::DPDKMeter {
             return DPDKMeter{pre.name(), id, meter.size(), unit, transformAnnotations(pre)};
         }
         static boost::optional<DPDKMeter>
-        fromDirect(const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
+        fromDirect(const p4configv1::P4Info& p4info,
+                const p4configv1::ExternInstance& externInstance) {
             const auto& pre = externInstance.preamble();
             p4configv1::DirectMeter meter;
             if (!externInstance.info().UnpackTo(&meter)) {
@@ -446,25 +450,20 @@ BFRuntimeSchemaGenerator::addDPDKExterns(Util::JsonArray* tablesJson,
                     addActionSelectorGetMemberCommon(tablesJson, *actionSelector);
                 }
             }
-        } else if(externTypeId == ::dpdk::P4Ids::DPDK_COUNTER) {
+        } else if (externTypeId == ::dpdk::P4Ids::DPDK_COUNTER) {
             for (const auto& externInstance : externType.instances()) {
-
-            auto counter = DPDKCounter::fromDPDK(p4info, externInstance);
+                auto counter = DPDKCounter::fromDPDK(p4info, externInstance);
                 if (counter != boost::none) {
                     addCounterCommon(tablesJson, *counter);
                 }
             }
-
         } else if (externTypeId == ::dpdk::P4Ids::DPDK_METER) {
             for (const auto& externInstance : externType.instances()) {
-
-            auto meter = DPDKMeter::fromDPDK(p4info, externInstance);
-
-            if (meter != boost::none) {
+                auto meter = DPDKMeter::fromDPDK(p4info, externInstance);
+                if (meter != boost::none) {
                     addMeterCommon(tablesJson, *meter);
                 }
             }
-
         }
     }
 }
