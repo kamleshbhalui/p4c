@@ -62,6 +62,7 @@ struct BFRuntimeSchemaGenerator::DPDKCounter {
         static boost::optional<DPDKCounter>
         fromDPDK(const p4configv1::P4Info& p4info,
                 const p4configv1::ExternInstance& externInstance) {
+            (void) p4info;
             const auto& pre = externInstance.preamble();
             ::dpdk::DPDKCounter counter;
             if (!externInstance.info().UnpackTo(&counter)) {
@@ -78,7 +79,8 @@ struct BFRuntimeSchemaGenerator::DPDKCounter {
         static boost::optional<DPDKCounter>
         fromDirectDPDK(const p4configv1::P4Info& p4info,
                 const p4configv1::ExternInstance& externInstance) {
-                const auto& pre = externInstance.preamble();
+            (void) p4info;
+            const auto& pre = externInstance.preamble();
             p4configv1::DirectCounter counter;
             if (!externInstance.info().UnpackTo(&counter)) {
                 ::error("Extern instance %1% does not pack an DirectCounter object", pre.name());
@@ -103,6 +105,7 @@ struct BFRuntimeSchemaGenerator::DPDKMeter {
         static boost::optional<DPDKMeter>
         fromDPDK(const p4configv1::P4Info& p4info,
                 const p4configv1::ExternInstance& externInstance) {
+            (void)p4info;
             const auto& pre = externInstance.preamble();
             ::dpdk::DPDKMeter meter;
             if (!externInstance.info().UnpackTo(&meter)) {
@@ -116,6 +119,7 @@ struct BFRuntimeSchemaGenerator::DPDKMeter {
         static boost::optional<DPDKMeter>
         fromDirect(const p4configv1::P4Info& p4info,
                 const p4configv1::ExternInstance& externInstance) {
+            (void)p4info;
             const auto& pre = externInstance.preamble();
             p4configv1::DirectMeter meter;
             if (!externInstance.info().UnpackTo(&meter)) {
