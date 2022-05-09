@@ -293,6 +293,8 @@ proto_library(
     name = "p4info_dpdk_proto",
     srcs = ["p4/config/dpdk/p4info.proto"],
     deps = [
+        "@com_github_p4lang_p4runtime//:p4info_proto",
+        "@com_github_p4lang_p4runtime//:p4types_proto",
         "@com_google_protobuf//:any_proto",
         "@com_google_protobuf//:descriptor_proto",
     ],
