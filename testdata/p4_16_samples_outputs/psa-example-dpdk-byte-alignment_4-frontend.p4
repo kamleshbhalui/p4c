@@ -3,7 +3,8 @@ error {
     BadIPv4HeaderChecksum
 }
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <psa.p4>
+#include <dpdk/psa_ext.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -86,19 +87,23 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.drop") action drop_1() {
-        meta_2 = ostd;
-        meta_2.drop = true;
-        ostd = meta_2;
+        @noWarnUnused {
+            meta_2 = ostd;
+            meta_2.drop = true;
+            ostd = meta_2;
+        }
     }
     @name("ingress.forward") action forward(@name("port") PortId_t port, @name("srcAddr") bit<32> srcAddr_1) {
         user_meta.fwd_metadata.old_srcAddr = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = srcAddr_1;
-        meta_3 = ostd;
-        egress_port_1 = port;
-        meta_3.drop = false;
-        meta_3.multicast_group = (MulticastGroup_t)32w0;
-        meta_3.egress_port = egress_port_1;
-        ostd = meta_3;
+        @noWarnUnused {
+            meta_3 = ostd;
+            egress_port_1 = port;
+            meta_3.drop = false;
+            meta_3.multicast_group = (MulticastGroup_t)32w0;
+            meta_3.egress_port = egress_port_1;
+            ostd = meta_3;
+        }
     }
     @name("ingress.route") table route_0 {
         key = {
