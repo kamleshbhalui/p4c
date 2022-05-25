@@ -1,0 +1,12 @@
+psa.p4(523): [--Wwarn=unused] warning: 'W' is unused
+extern Counter<W, S> {
+               ^
+psa.p4(552): [--Wwarn=unused] warning: 'W' is unused
+extern DirectCounter<W> {
+                     ^
+psa_ext.p4(34): [--Wwarn=unused] warning: 'W' is unused
+extern DPDKCounter<W, S> {
+                   ^
+psa-meter3-dpdk-pass.p4(51): [--Wwarn=unsupported] warning: MyIC.meter0: Packet metering is not supported. Falling back to byte metering.
+    DPDKMeter<bit<12>>(1024, PSA_MeterType_t.PACKETS) meter0;
+                                                      ^^^^^^

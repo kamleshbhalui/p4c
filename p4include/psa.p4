@@ -20,20 +20,6 @@ limitations under the License.
  *   P4-16 declaration of the Portable Switch Architecture
  */
 
-/**********************************************************************
- * Beginning of the part of this target-customized psa.p4 include file
- * that declares data plane widths for one particular target device.
- **********************************************************************/
-
-/* Target device for which this section is customized:
- *
- * BMv2 PSA as implemented by the psa_switch software switch from the
- * repository https://github.com/p4lang/behavioral-model
- *
- * The bit widths for BMv2 psa_switch have been chosen to be the same
- * as the corresponding InHeader types later.  This simplifies the
- * implementation of P4Runtime for BMv2 psa_switch. */
-
 // BEGIN:Type_defns
 /* These are defined using `typedef`, not `type`, so they are truly
  * just different names for the type bit<W> for the particular width W
@@ -56,15 +42,6 @@ typedef bit<8>  ClassOfServiceUint_t;
 typedef bit<16> PacketLengthUint_t;
 typedef bit<16> EgressInstanceUint_t;
 typedef bit<64> TimestampUint_t;
-
-/* Note: clone_spec in BMv2 simple_switch v1model is 32 bits wide, but
- * it is used such that 16 of its bits contain a clone/mirror session
- * id, and 16 bits contain the numeric id of a field_list.  Only the
- * 16 bits of clone/mirror session id are comparable to the type
- * CloneSessionIdUint_t here.  See occurrences of clone_spec in this
- * file for details:
- * https://github.com/p4lang/behavioral-model/blob/main/targets/simple_switch/simple_switch.cpp
- */
 
 @p4runtime_translation("p4.org/psa/v1/PortId_t", 32)
 type PortIdUint_t         PortId_t;
@@ -363,7 +340,7 @@ match_kind {
 /// This action does not change whether a clone or resubmit operation
 /// will occur.
 
-@noWarn("unused")
+@noWarnUnused
 action send_to_port(inout psa_ingress_output_metadata_t meta,
                     in PortId_t egress_port)
 {
@@ -380,7 +357,7 @@ action send_to_port(inout psa_ingress_output_metadata_t meta,
 /// This action does not change whether a clone or resubmit operation
 /// will occur.
 
-@noWarn("unused")
+@noWarnUnused
 action multicast(inout psa_ingress_output_metadata_t meta,
                  in MulticastGroup_t multicast_group)
 {
@@ -396,7 +373,7 @@ action multicast(inout psa_ingress_output_metadata_t meta,
 /// This action does not change whether a clone will occur.  It will
 /// prevent a packet from being resubmitted.
 
-@noWarn("unused")
+@noWarnUnused
 action ingress_drop(inout psa_ingress_output_metadata_t meta)
 {
     meta.drop = true;
@@ -409,7 +386,7 @@ action ingress_drop(inout psa_ingress_output_metadata_t meta)
 
 /// This action does not change whether a clone will occur.
 
-@noWarn("unused")
+@noWarnUnused
 action egress_drop(inout psa_egress_output_metadata_t meta)
 {
     meta.drop = true;
@@ -543,7 +520,6 @@ enum PSA_CounterType_t {
 /// Indirect counter with n_counters independent counter values, where
 /// every counter value has a data plane size specified by type W.
 
-@noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PSA_CounterType_t type);
   void count(in S index);
@@ -573,7 +549,6 @@ extern Counter<W, S> {
 // END:Counter_extern
 
 // BEGIN:DirectCounter_extern
-@noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
   void count();

@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -92,18 +92,22 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name("ingress.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
     @name("ingress.next_hop") action next_hop(@name("oport") PortId_t oport) {
         per_prefix_pkt_byte_count_0.count();
-        meta_2 = ostd;
-        egress_port_1 = oport;
-        meta_2.drop = false;
-        meta_2.multicast_group = (MulticastGroup_t)32w0;
-        meta_2.egress_port = egress_port_1;
-        ostd = meta_2;
+        @noWarnUnused {
+            meta_2 = ostd;
+            egress_port_1 = oport;
+            meta_2.drop = false;
+            meta_2.multicast_group = (MulticastGroup_t)32w0;
+            meta_2.egress_port = egress_port_1;
+            ostd = meta_2;
+        }
     }
     @name("ingress.default_route_drop") action default_route_drop() {
         per_prefix_pkt_byte_count_0.count();
-        meta_3 = ostd;
-        meta_3.drop = true;
-        ostd = meta_3;
+        @noWarnUnused {
+            meta_3 = ostd;
+            meta_3.drop = true;
+            ostd = meta_3;
+        }
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {

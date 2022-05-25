@@ -1,5 +1,8 @@
 syntax = "proto3";
 
+import "p4/config/v1/p4types.proto";
+import "p4/config/v1/p4info.proto";
+
 package dpdk;
 
 message P4Ids {
@@ -7,6 +10,8 @@ message P4Ids {
     UNSPECIFIED                 = 0;
     ACTION_SELECTOR             = 0x81;
     ACTION_SELECTOR_GET_MEMBER  = 0x82;
+    DPDK_COUNTER                = 0x83;
+    DPDK_METER                  = 0x84;
   }
 }
 
@@ -17,3 +22,22 @@ message ActionSelector {
   int64 num_groups = 4;
   uint32 action_profile_id = 5;
 }
+
+message DPDKCounter {
+  p4.config.v1.Preamble preamble = 1;
+  p4.config.v1.CounterSpec spec = 2;
+  // number of entries in the counter array
+  int64 size = 3;
+  // unset if index is not user-defined type
+  p4.config.v1.P4NamedType index_type_name = 4;
+}
+
+message DPDKMeter {
+  p4.config.v1.Preamble preamble = 1;
+  p4.config.v1.MeterSpec spec = 2;
+  // number of entries in the meter array
+  int64 size = 3;
+  // unset if index is not user-defined type
+  p4.config.v1.P4NamedType index_type_name = 4;
+}
+

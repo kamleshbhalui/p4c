@@ -464,7 +464,6 @@ class BFRuntimeGenerator {
                             Util::JsonArray* annotations = nullptr);
 
     static void addCounterDataFields(Util::JsonArray* dataJson, const Counter& counter);
-
     static Util::JsonObject* initTableJson(const std::string& name, P4Id id, cstring tableType,
                                            int64_t size, Util::JsonArray* annotations = nullptr);
 

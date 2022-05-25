@@ -131,7 +131,9 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
                     {"Register", "read"},
                     {"Register", "write"},
                     {"Counter", "count"},
+                    {"DPDKCounter", "count"},
                     {"Meter", "execute"},
+                    {"DPDKMeter", "execute"},
                     {"Digest", "pack"},
                 };
                 for (auto f : doNotCopyPropList) {

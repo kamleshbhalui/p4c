@@ -3,7 +3,7 @@ error {
     BadIPv4HeaderChecksum
 }
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -100,7 +100,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     bool hasExited;
-    @noWarn("unused") @name(".ingress_drop") action ingress_drop_0() {
+    @noWarnUnused @name(".ingress_drop") action ingress_drop_0() {
         ostd.drop = true;
     }
     @name("ingress.parser_error_counts") DirectCounter<PacketCounter_t>(PSA_CounterType_t.PACKETS) parser_error_counts_0;

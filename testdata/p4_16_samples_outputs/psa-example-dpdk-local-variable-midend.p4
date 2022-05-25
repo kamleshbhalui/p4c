@@ -1,5 +1,6 @@
 #include <core.p4>
-#include <dpdk/psa.p4>
+#include <psa.p4>
+#include <dpdk/psa_ext.p4>
 
 struct EMPTY {
 }
@@ -29,17 +30,17 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @hidden action psaexampledpdklocalvariable35() {
+    @hidden action psaexampledpdklocalvariable36() {
         hdr.ethernet.etherType = 16w0xff;
     }
-    @hidden table tbl_psaexampledpdklocalvariable35 {
+    @hidden table tbl_psaexampledpdklocalvariable36 {
         actions = {
-            psaexampledpdklocalvariable35();
+            psaexampledpdklocalvariable36();
         }
-        const default_action = psaexampledpdklocalvariable35();
+        const default_action = psaexampledpdklocalvariable36();
     }
     apply {
-        tbl_psaexampledpdklocalvariable35.apply();
+        tbl_psaexampledpdklocalvariable36.apply();
     }
 }
 

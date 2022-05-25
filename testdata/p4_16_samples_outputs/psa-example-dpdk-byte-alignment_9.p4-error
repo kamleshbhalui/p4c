@@ -1,1 +1,10 @@
+psa.p4(523): [--Wwarn=unused] warning: 'W' is unused
+extern Counter<W, S> {
+               ^
+psa.p4(552): [--Wwarn=unused] warning: 'W' is unused
+extern DirectCounter<W> {
+                     ^
+psa_ext.p4(34): [--Wwarn=unused] warning: 'W' is unused
+extern DPDKCounter<W, S> {
+                   ^
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata

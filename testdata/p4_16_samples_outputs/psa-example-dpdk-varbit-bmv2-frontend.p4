@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -84,7 +84,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
+    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
         meta_0 = d;
         egress_port_0 = (PortId_t)32w0;
         meta_0.drop = false;

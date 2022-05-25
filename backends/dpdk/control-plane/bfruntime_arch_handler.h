@@ -52,6 +52,120 @@ namespace P4 {
  */
 namespace ControlPlaneAPI {
 
+    /// Declarations specific to standard architectures (v1model & PSA).
+namespace Standard {
+
+template <Arch arch> struct DPDKCounterExtern { };
+template <Arch arch> struct DPDKMeterExtern { };
+}
+namespace Helpers {
+/// @ref CounterlikeTraits<> specialization for @ref DPDKCounterExtern for PSA
+template<> struct CounterlikeTraits<Standard::DPDKCounterExtern<Standard::Arch::PSA> > {
+    static const cstring name() { return "counter"; }
+    static const cstring directPropertyName() {
+        return "psa_direct_counter";
+    }
+    static const cstring typeName() {
+        return "DPDKCounter";
+    }
+    static const cstring directTypeName() {
+        return "DirectCounter";
+    }
+    static const cstring sizeParamName() {
+        return "n_counters";
+    }
+    static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
+        using p4configv1::CounterSpec;
+        if (name == "PACKETS") return CounterSpec::PACKETS;
+        else if (name == "BYTES") return CounterSpec::BYTES;
+        else if (name == "PACKETS_AND_BYTES") return CounterSpec::BOTH;
+        return CounterSpec::UNSPECIFIED;
+    }
+    // the index of the type parameter for the counter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+};
+
+/// @ref CounterlikeTraits<> specialization for @ref DPDKCounterExtern for PNA
+template<> struct CounterlikeTraits<Standard::DPDKCounterExtern<Standard::Arch::PNA> > {
+    static const cstring name() { return "counter"; }
+    static const cstring directPropertyName() {
+        return "pna_direct_counter";
+    }
+    static const cstring typeName() {
+        return "DPDKCounter";
+    }
+    static const cstring directTypeName() {
+        return "DirectCounter";
+    }
+    static const cstring sizeParamName() {
+        return "n_counters";
+    }
+    static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
+        using p4configv1::CounterSpec;
+        if (name == "PACKETS") return CounterSpec::PACKETS;
+        else if (name == "BYTES") return CounterSpec::BYTES;
+        else if (name == "PACKETS_AND_BYTES") return CounterSpec::BOTH;
+        return CounterSpec::UNSPECIFIED;
+    }
+    // the index of the type parameter for the counter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+};
+
+/// @ref CounterlikeTraits<> specialization for @ref DPDKMeterExtern for PSA
+template<> struct CounterlikeTraits<Standard::DPDKMeterExtern<Standard::Arch::PSA> > {
+    static const cstring name() { return "meter"; }
+    static const cstring directPropertyName() {
+        return "psa_direct_meter";
+    }
+    static const cstring typeName() {
+        return "DPDKMeter";
+    }
+    static const cstring directTypeName() {
+        return "DirectMeter";
+    }
+    static const cstring sizeParamName() {
+        return "n_meters";
+    }
+    static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
+        using p4configv1::MeterSpec;
+        if (name == "PACKETS") return MeterSpec::PACKETS;
+        else if (name == "BYTES") return MeterSpec::BYTES;
+        return MeterSpec::UNSPECIFIED;
+    }
+    // the index of the type parameter for the meter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+};
+
+/// @ref CounterlikeTraits<> specialization for @ref DPDKMeterExtern for PNA
+template<> struct CounterlikeTraits<Standard::DPDKMeterExtern<Standard::Arch::PNA> > {
+    static const cstring name() { return "meter"; }
+    static const cstring directPropertyName() {
+        return "pna_direct_meter";
+    }
+    static const cstring typeName() {
+        return "DPDKMeter";
+    }
+    static const cstring directTypeName() {
+        return "DirectMeter";
+    }
+    static const cstring sizeParamName() {
+        return "n_meters";
+    }
+    static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
+        using p4configv1::MeterSpec;
+        if (name == "PACKETS") return MeterSpec::PACKETS;
+        else if (name == "BYTES") return MeterSpec::BYTES;
+        return MeterSpec::UNSPECIFIED;
+    }
+    // the index of the type parameter for the meter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+};
+
+}
 /// Declarations specific to standard architectures (v1model & PSA).
 namespace Standard {
 
@@ -66,6 +180,14 @@ class SymbolTypeDPDK final : public SymbolType {
 
     static P4RuntimeSymbolType ACTION_SELECTOR() {
         return P4RuntimeSymbolType::make(dpdk::P4Ids::ACTION_SELECTOR);
+    }
+
+    static P4RuntimeSymbolType DPDK_COUNTER() {
+        return P4RuntimeSymbolType::make(dpdk::P4Ids::DPDK_COUNTER);
+    }
+
+    static P4RuntimeSymbolType DPDK_METER() {
+        return P4RuntimeSymbolType::make(dpdk::P4Ids::DPDK_METER);
     }
 };
 
@@ -90,6 +212,15 @@ template <Arch arch>
 class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
  protected:
     std::unordered_map<const IR::Block *, cstring> blockNamePrefixMap;
+    using ArchCounterExtern = DPDKCounterExtern<arch>;
+    using CounterTraits = Helpers::CounterlikeTraits<ArchCounterExtern>;
+    using ArchMeterExtern = DPDKMeterExtern<arch>;
+    using MeterTraits = Helpers::CounterlikeTraits<ArchMeterExtern>;
+
+    using DPDKCounter = ::dpdk::DPDKCounter;
+    using DPDKMeter = ::dpdk::DPDKMeter;
+    using CounterSpec = p4configv1::CounterSpec;
+    using MeterSpec = p4configv1::MeterSpec;
 
  public:
     template <typename Func>
@@ -111,16 +242,6 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             function(pipeName, pipe->to<IR::PackageBlock>());
         }
     }
-
-    using ArchCounterExtern = CounterExtern<arch>;
-    using CounterTraits = Helpers::CounterlikeTraits<ArchCounterExtern>;
-    using ArchMeterExtern = MeterExtern<arch>;
-    using MeterTraits = Helpers::CounterlikeTraits<ArchMeterExtern>;
-
-    using Counter = p4configv1::Counter;
-    using Meter = p4configv1::Meter;
-    using CounterSpec = p4configv1::CounterSpec;
-    using MeterSpec = p4configv1::MeterSpec;
 
     BFRuntimeArchHandler(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
@@ -215,6 +336,64 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                 selector, p4Info, pipeName);
     }
 
+    /// Set common fields between Counter and DirectCounter.
+    template <typename Kind>
+    void setCounterCommon(const P4RuntimeSymbolTableIface& symbols, Kind *counter, p4rt_id_t id,
+                          const Helpers::Counterlike<ArchCounterExtern>& counterInstance) {
+        setPreamble(counter->mutable_preamble(), id,
+                    counterInstance.name, symbols.getAlias(counterInstance.name),
+                    counterInstance.annotations);
+        auto counter_spec = counter->mutable_spec();
+        counter_spec->set_unit(CounterTraits::mapUnitName(counterInstance.unit));
+    }
+
+    void addDPDKCounter(const P4RuntimeSymbolTableIface& symbols,
+                          p4configv1::P4Info* p4Info,
+                          const Helpers::Counterlike<ArchCounterExtern>& counterInstance,
+                          cstring pipeName= "") {
+            ::dpdk::DPDKCounter counter;
+            auto id = symbols.getId(SymbolTypeDPDK::DPDK_COUNTER(),
+                                    counterInstance.name);
+            setCounterCommon(symbols, &counter, id, counterInstance);
+            counter.set_size(counterInstance.size);
+            if (counterInstance.index_type_name) {
+                counter.mutable_index_type_name()->set_name(counterInstance.index_type_name);
+            }
+        addP4InfoExternInstance(symbols, SymbolTypeDPDK::DPDK_COUNTER(),
+                "DPDKCounter", counterInstance.name, counterInstance.annotations,
+                counter, p4Info, pipeName);
+    }
+    /// Set common fields between Meter and DirectMeter.
+    template <typename Kind>
+    void setMeterCommon(const P4RuntimeSymbolTableIface& symbols, Kind *meter, p4rt_id_t id,
+                        const Helpers::Counterlike<ArchMeterExtern>& meterInstance) {
+        setPreamble(meter->mutable_preamble(), id,
+                    meterInstance.name, symbols.getAlias(meterInstance.name),
+                    meterInstance.annotations);
+        auto meter_spec = meter->mutable_spec();
+        meter_spec->set_unit(MeterTraits::mapUnitName(meterInstance.unit));
+    }
+
+
+    void addDPDKMeter(const P4RuntimeSymbolTableIface& symbols,
+                          p4configv1::P4Info* p4Info,
+                          const Helpers::Counterlike<ArchMeterExtern>& meterInstance,
+                          cstring pipeName = "") {
+        ::dpdk::DPDKMeter meter;
+            auto id = symbols.getId(SymbolTypeDPDK::DPDK_METER(),
+                                    meterInstance.name);
+            setMeterCommon(symbols, &meter, id, meterInstance);
+            meter.set_size(meterInstance.size);
+            if (meterInstance.index_type_name) {
+                meter.mutable_index_type_name()->set_name(meterInstance.index_type_name);
+            }
+
+
+        addP4InfoExternInstance(symbols, SymbolTypeDPDK::DPDK_METER(),
+                "DPDKMeter", meterInstance.name, meterInstance.annotations,
+                meter, p4Info, pipeName);
+    }
+
     void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
                                const IR::ExternBlock* externBlock) override {
         P4RuntimeArchHandlerCommon<arch>::collectExternInstance(symbols, externBlock);
@@ -228,6 +407,10 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             auto profName = decl->controlPlaneName();
             symbols->add(SymbolTypeDPDK::ACTION_SELECTOR(), selName);
             symbols->add(SymbolType::ACTION_PROFILE(), profName);
+        } else if (externBlock->type->name == "DPDKCounter") {
+            symbols->add(SymbolTypeDPDK::DPDK_COUNTER(), decl);
+        } else if (externBlock->type->name == "DPDKMeter") {
+            symbols->add(SymbolTypeDPDK::DPDK_METER(), decl);
         }
     }
 
@@ -304,6 +487,16 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     break;
                 }
             }
+        } else if (externBlock->type->name == "DPDKMeter") {
+                     auto meter = Helpers::Counterlike<ArchMeterExtern>::from(
+                externBlock, this->refMap, this->typeMap, p4RtTypeInfo);
+
+            if (meter) addDPDKMeter(symbols, p4info, *meter, pipeName);
+        } else if (externBlock->type->name == "DPDKCounter") {
+                        auto counter = Helpers::Counterlike<ArchCounterExtern>::from(
+                externBlock, this->refMap, this->typeMap, p4RtTypeInfo);
+
+            if (counter) addDPDKCounter(symbols, p4info, *counter, pipeName);
         }
     }
 

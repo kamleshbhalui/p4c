@@ -1,5 +1,6 @@
 #include <core.p4>
-#include <dpdk/psa.p4>
+#include <psa.p4>
+#include <dpdk/psa_ext.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -55,7 +56,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.color_in") PSA_MeterColor_t color_in_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("ingress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
+    @name("ingress.meter0") DPDKMeter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
     @name("ingress.execute") action execute_1(@name("index") bit<12> index_1) {
         color_out_0 = meter0_0.execute(index_1, color_in_0, (bit<32>)hdr.ipv4.totalLen);
         user_meta.port_out = (color_out_0 == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
@@ -70,17 +71,17 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         }
         default_action = NoAction_1();
     }
-    @hidden action psaexampledpdkmeter56() {
+    @hidden action psaexampledpdkmeter57() {
         color_in_0 = PSA_MeterColor_t.RED;
     }
-    @hidden table tbl_psaexampledpdkmeter56 {
+    @hidden table tbl_psaexampledpdkmeter57 {
         actions = {
-            psaexampledpdkmeter56();
+            psaexampledpdkmeter57();
         }
-        const default_action = psaexampledpdkmeter56();
+        const default_action = psaexampledpdkmeter57();
     }
     apply {
-        tbl_psaexampledpdkmeter56.apply();
+        tbl_psaexampledpdkmeter57.apply();
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
         }
@@ -99,18 +100,18 @@ control egress(inout headers hdr, inout metadata_t user_meta, in psa_egress_inpu
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampledpdkmeter92() {
+    @hidden action psaexampledpdkmeter93() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampledpdkmeter92 {
+    @hidden table tbl_psaexampledpdkmeter93 {
         actions = {
-            psaexampledpdkmeter92();
+            psaexampledpdkmeter93();
         }
-        const default_action = psaexampledpdkmeter92();
+        const default_action = psaexampledpdkmeter93();
     }
     apply {
-        tbl_psaexampledpdkmeter92.apply();
+        tbl_psaexampledpdkmeter93.apply();
     }
 }
 

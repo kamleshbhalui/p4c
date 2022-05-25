@@ -41,16 +41,5 @@ actions {
     bitwidth: 12
   }
 }
-meters {
-  preamble {
-    id: 344514043
-    name: "ingress.meter0"
-    alias: "meter0"
-  }
-  spec {
-    unit: PACKETS
-  }
-  size: 1024
-}
 type_info {
 }

@@ -653,7 +653,7 @@ class CollectExternDeclaration : public Inspector {
     bool preorder(const IR::Declaration_Instance *d) override {
         if (auto type = d->type->to<IR::Type_Specialized>()) {
             auto externTypeName = type->baseType->path->name.name;
-            if (externTypeName == "Meter") {
+            if (externTypeName == "DPDKMeter") {
                 if (d->arguments->size() != 2) {
                     ::error(ErrorType::ERR_EXPECTED,
                             "%1%: expected number of meters and type of meter as arguments", d);
@@ -664,7 +664,7 @@ class CollectExternDeclaration : public Inspector {
                              "%1%: Packet metering is not supported."
                              " Falling back to byte metering.", d);
                 }
-            } else if (externTypeName == "Counter") {
+            } else if (externTypeName == "DPDKCounter") {
                 if (d->arguments->size() != 2) {
                     ::error(ErrorType::ERR_EXPECTED,
                             "%1%: expected number of counters and type of counter as arguments", d);
