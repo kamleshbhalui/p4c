@@ -827,7 +827,69 @@ void BFRuntimeGenerator::addMeters(Util::JsonArray* tablesJson) const {
     }
 }
 
-const Util::JsonObject* BFRuntimeGenerator::genSchema() const {
+Util::JsonObject*
+BFRuntimeGenerator::makeTypeBitsOrBytes(int bitwidth,
+                                             boost::optional<cstring> defaultValue) const {
+    auto* type_obj = new Util::JsonObject();
+    if (bitwidth % 8) {
+        type_obj->emplace("type", "bits");
+        type_obj->emplace("width", bitwidth);
+    } else {
+        type_obj->emplace("type", "bytes");
+        type_obj->emplace("width", bitwidth >> 3);
+    }
+    if (defaultValue != boost::none)
+        type_obj->emplace("default_value", *defaultValue);
+    return type_obj;
+}
+
+void
+BFRuntimeGenerator::addMatchValueLookupTables(Util::JsonArray* tables_json_array) const {
+    for (const auto& emvlt : p4info.emvlts()) {
+         const auto pre = emvlt.preamble();
+         auto* annotations = transformAnnotations(pre.annotations().begin(),
+                                                  pre.annotations().end());
+         cstring table_name = IR::P4Program::main + "." + pre.name();
+         cstring table_type = "MatchValueLookupTable";
+         auto table_json = this->initTableJson((std::string)table_name, pre.id(), table_type,
+                                            emvlt.size(), annotations);
+         table_json->emplace("has_const_default_action", false);
+
+         auto* keys_json = new Util::JsonArray();
+         for (const auto& mf : emvlt.match_fields()) {
+              boost::optional<cstring> match_type = boost::none;
+              switch (mf.match_case()) {
+                  case p4configv1::MatchField::kMatchType:
+                      if (mf.match_type() != p4configv1::MatchField_MatchType_EXACT) {
+                          BUG("Invalid match type for table %1%, expected Exact",
+                              table_name);
+                      }
+                      match_type = cstring("Exact");
+                      break;
+                  default:
+                      BUG("Invalid oneof case for the match type of table '%1%'", pre.name());
+                      break;
+              }
+         addKeyField(keys_json, mf.id(), mf.name(), false /* mandatory */,
+                     *match_type, makeTypeBitsOrBytes(mf.bitwidth(), boost::none));
+         }
+         table_json->emplace("key", keys_json);
+         auto* data_json = new Util::JsonArray();
+         for (const auto& p : emvlt.params()) {
+              auto data_obj = makeCommonDataField(p.id(), p.name(),
+                                                  makeTypeBitsOrBytes(p.bitwidth()),
+                                                    false /* repeated */);
+              data_obj->emplace("mandatory", false);
+              data_obj->emplace("read_only", false);
+              data_json->append(data_obj);
+         }
+         table_json->emplace("data", data_json);
+         tables_json_array->append(table_json);
+    }
+}
+
+const Util::JsonObject*
+BFRuntimeGenerator::genSchema() const {
     auto* json = new Util::JsonObject();
 
     json->emplace("schema_version", cstring("1.0.0"));
@@ -836,6 +898,7 @@ const Util::JsonObject* BFRuntimeGenerator::genSchema() const {
     json->emplace("tables", tablesJson);
 
     addMatchTables(tablesJson);
+    addMatchValueLookupTables(tablesJson);
     addActionProfs(tablesJson);
     addCounters(tablesJson);
     addMeters(tablesJson);

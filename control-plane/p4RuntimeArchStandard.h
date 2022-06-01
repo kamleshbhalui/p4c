@@ -299,6 +299,9 @@ class SymbolType : public P4RuntimeSymbolType {
     static P4RuntimeSymbolType REGISTER() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::REGISTER);
     }
+    static P4RuntimeSymbolType EXACT_MATCH_VALUE_LOOKUP_TABLE() {
+        return P4RuntimeSymbolType::make(p4configv1::P4Ids::EXACT_MATCH_VALUE_LOOKUP_TABLE);
+    }
 };
 
 /// Traits for the action profile extern, must be specialized for v1model and
@@ -371,6 +374,47 @@ struct ActionSelectorTraits<Arch::PNA> : public ActionProfileTraits<Arch::PNA> {
     static const cstring typeName() { return "ActionSelector"; }
 };
 
+// Traits for the MatchValueLookupTable extern
+template<Arch arch> struct MatchValueLookupTableTraits;
+
+template<> struct MatchValueLookupTableTraits<Arch::PNA> {
+    static const cstring name() { return "emvlt"; }
+    static const cstring typeName() {
+        return "MatchValueLookupTable";
+    }
+    static const cstring sizeParamName() {
+        return "size";
+    }
+};
+template<> struct MatchValueLookupTableTraits<Arch::PSA> {
+    static const cstring name() { return "emvlt"; }
+    static const cstring typeName() {
+        return "MatchValueLookupTable";
+    }
+    static const cstring sizeParamName() {
+        return "size";
+    }
+};
+
+template<> struct MatchValueLookupTableTraits<Arch::V1MODEL2020> {
+    static const cstring name() { return "emvlt"; }
+    static const cstring typeName() {
+        return "MatchValueLookupTable";
+    }
+    static const cstring sizeParamName() {
+        return "size";
+    }
+};
+
+template<> struct MatchValueLookupTableTraits<Arch::V1MODEL> {
+    static const cstring name() { return "emvlt"; }
+    static const cstring typeName() {
+        return "MatchValueLookupTable";
+    }
+    static const cstring sizeParamName() {
+        return "size";
+    }
+};
 /// Traits for the register extern, must be specialized for v1model and PSA.
 template <Arch arch>
 struct RegisterTraits;
@@ -429,6 +473,84 @@ struct Digest {
                                         // declaration.
 };
 
+//// The information about a emvlt extern, needed for serialization
+struct param_t {
+    uint32_t id;
+    cstring name;
+    uint32_t bitwidth;
+};
+struct MatchValueLookupTable {
+    const cstring name;
+    uint32_t key_bitwidth;
+    std::vector<param_t> params;
+    const uint32_t size;
+    const IR::IAnnotated* annotations;
+    MatchValueLookupTable(cstring n, uint32_t kbw, std::vector<param_t> params_list,
+                          uint32_t sz, const IR::IAnnotated* annos = nullptr) :
+        name(n), key_bitwidth(kbw), params(params_list), size(sz), annotations(annos) {}
+    static void add_mvlut_param(uint32_t &param_count, std::vector<param_t>* params_list,
+                         const IR::Type* type, cstring decl_name, cstring prefix) {
+        if (type->is<IR::Type_Struct>()) {
+            auto stype = type->to<IR::Type_Struct>();
+            cstring newprefix = prefix != "" ? prefix + "_" + decl_name : decl_name;
+            for (auto field : stype->fields) {
+                add_mvlut_param(param_count, params_list, field->type,
+                            field->getName().name, newprefix);
+            }
+        } else {
+            cstring param_name = prefix == "" ? decl_name :
+                prefix + "_" + decl_name;
+            params_list->emplace_back(param_t{param_count++, param_name,
+                                                (uint32_t)type->width_bits()});
+        }
+    }
+    /// @return the information required to serialize an @instance of register
+    /// or boost::none in case of error.
+    template <Arch arch>
+    static boost::optional<MatchValueLookupTable>
+    from(const IR::ExternBlock* instance,
+         const ReferenceMap* refMap,
+         P4::TypeMap* typeMap,
+         p4configv1::P4TypeInfo* p4RtTypeInfo) {
+        (void)p4RtTypeInfo;
+        CHECK_NULL(instance);
+        auto decl = instance->node->to<IR::Declaration_Instance>();
+        BUG_CHECK(decl->type->is<IR::Type_Specialized>(),
+              "%1%: expected Type_Specialized", decl->type);
+        auto type = decl->type->to<IR::Type_Specialized>();
+        BUG_CHECK(type->arguments->size() == 3, "%1%: expected three type arguments ", decl);
+        // get key parameter bitwidth
+        uint32_t key_parameter_bitwidth = 0;
+        auto arg1_type = type->arguments->at(0);
+        if (auto atype = arg1_type->to<IR::Type_Bits>()) {
+            key_parameter_bitwidth = (uint32_t)atype->width_bits();
+        } else {
+            error("%1%: Invalid key type as argument 1, only bit types are supported", decl);
+        }
+        // get size field value
+        auto size_param = instance->getParameterValue("size")->to<IR::Constant>();
+        // create the MVLUT object
+        MatchValueLookupTable tbl = { decl->controlPlaneName(), key_parameter_bitwidth, {},
+                                  (uint32_t)size_param->value,
+                                  decl->to<IR::IAnnotated>() };
+
+        // record the parameter values for MVLUT
+        uint32_t param_count = 1;
+        auto arg_type = type->arguments->at(1);
+        if (auto* type_name = arg_type->to<IR::Type_Name>()) {
+            auto* decl = refMap->getDeclaration(type_name->path, true);
+            CHECK_NULL(decl);
+            const IR::Type* type = typeMap->getType(decl->getNode());
+            type = type->is<IR::Type_Type>() ? type->to<IR::Type_Type>()->type : type;
+            add_mvlut_param(param_count, &tbl.params, type, "", "");
+        } else if (auto atype = arg_type->to<IR::Type_Bits>()) {
+            add_mvlut_param(param_count, &tbl.params, atype, "", "");
+        } else {
+            BUG("%1%: Unexpected type for argument 2", decl);
+        }
+        return tbl;
+    }
+};
 struct Register {
     const cstring name;                 // The fully qualified external name of this register.
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
@@ -606,6 +728,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             symbols->add(SymbolType::ACTION_PROFILE(), decl);
         } else if (externBlock->type->name == RegisterTraits<arch>::typeName()) {
             symbols->add(SymbolType::REGISTER(), decl);
+        } else if (externBlock->type->name == MatchValueLookupTableTraits<arch>::typeName()) {
+            symbols->add(SymbolType::EXACT_MATCH_VALUE_LOOKUP_TABLE(), decl);
         }
     }
 
@@ -691,6 +815,10 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                    externBlock->type->name == ActionSelectorTraits<arch>::typeName()) {
             auto actionProfile = getActionProfile(externBlock);
             if (actionProfile) addActionProfile(symbols, p4info, *actionProfile);
+        } else if (externBlock->type->name == MatchValueLookupTableTraits<arch>::typeName()) {
+            auto emvlt_ = MatchValueLookupTable::from<arch>(externBlock, refMap, typeMap,
+                                                                 p4RtTypeInfo);
+            if (emvlt_) addMatchValueLookupTable(symbols, p4info, *emvlt_);
         }
     }
 
@@ -845,6 +973,30 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                 meter->mutable_index_type_name()->set_name(meterInstance.index_type_name);
             }
         }
+    }
+    void addMatchValueLookupTable(const P4RuntimeSymbolTableIface& symbols,
+                     p4configv1::P4Info* p4Info,
+                     const MatchValueLookupTable& emvltInstance) {
+        auto emvlt_ = p4Info->add_emvlts();
+        auto id = symbols.getId(SymbolType::EXACT_MATCH_VALUE_LOOKUP_TABLE(),
+                                emvltInstance.name);
+        setPreamble(emvlt_->mutable_preamble(), id,
+                    emvltInstance.name, symbols.getAlias(emvltInstance.name),
+                    emvltInstance.annotations);
+        // set fixed match filed
+        auto match = emvlt_->add_match_fields();
+        match->set_id(1);
+        match->set_name("");
+        match->set_bitwidth(emvltInstance.key_bitwidth);
+        match->set_match_type(p4configv1::MatchField_MatchType_EXACT);
+        // set values
+        for (auto const p : emvltInstance.params) {
+            auto param = emvlt_->add_params();
+            param->set_id(p.id);
+            param->set_name(p.name.c_str());
+            param->set_bitwidth(p.bitwidth);
+        }
+        emvlt_->set_size(emvltInstance.size);
     }
 
     void addRegister(const P4RuntimeSymbolTableIface& symbols, p4configv1::P4Info* p4Info,

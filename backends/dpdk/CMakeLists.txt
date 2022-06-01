@@ -46,6 +46,7 @@ add_custom_command(
   )
 
 add_library(dpdk_runtime STATIC ${DPDK_P4RUNTIME_INFO_GEN_SRCS})
+add_dependencies(dpdk_runtime controlplane)
 set_source_files_properties (${DPDK_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 
 set(P4C_DPDK_SOURCES
