@@ -219,6 +219,7 @@ BFRuntimeSchemaGenerator::genSchema() const {
     json->emplace("tables", tablesJson);
 
     addMatchTables(tablesJson);
+    addMatchValueLookupTables(tablesJson);
     addActionProfs(tablesJson);
     addCounters(tablesJson);
     addMeters(tablesJson);
