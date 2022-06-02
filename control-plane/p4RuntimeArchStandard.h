@@ -474,21 +474,23 @@ struct Digest {
 };
 
 //// The information about a emvlt extern, needed for serialization
-struct param_t {
+struct Param {
     uint32_t id;
     cstring name;
     uint32_t bitwidth;
 };
+
 struct MatchValueLookupTable {
     const cstring name;
-    uint32_t key_bitwidth;
-    std::vector<param_t> params;
+    uint32_t keyBitwidth;
+    std::vector<Param> params;
     const uint32_t size;
     const IR::IAnnotated* annotations;
-    MatchValueLookupTable(cstring n, uint32_t kbw, std::vector<param_t> params_list,
+    MatchValueLookupTable(cstring n, uint32_t kbw, std::vector<Param> params_list,
                           uint32_t sz, const IR::IAnnotated* annos = nullptr) :
-        name(n), key_bitwidth(kbw), params(params_list), size(sz), annotations(annos) {}
-    static void add_mvlut_param(uint32_t &param_count, std::vector<param_t>* params_list,
+        name(n), keyBitwidth(kbw), params(params_list), size(sz), annotations(annos) {}
+
+    static void add_mvlut_param(uint32_t &param_count, std::vector<Param>* params_list,
                          const IR::Type* type, cstring decl_name, cstring prefix) {
         if (type->is<IR::Type_Struct>()) {
             auto stype = type->to<IR::Type_Struct>();
@@ -500,7 +502,7 @@ struct MatchValueLookupTable {
         } else {
             cstring param_name = prefix == "" ? decl_name :
                 prefix + "_" + decl_name;
-            params_list->emplace_back(param_t{param_count++, param_name,
+            params_list->emplace_back(Param{param_count++, param_name,
                                                 (uint32_t)type->width_bits()});
         }
     }
@@ -974,6 +976,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             }
         }
     }
+
     void addMatchValueLookupTable(const P4RuntimeSymbolTableIface& symbols,
                      p4configv1::P4Info* p4Info,
                      const MatchValueLookupTable& emvltInstance) {
@@ -987,7 +990,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto match = emvlt_->add_match_fields();
         match->set_id(1);
         match->set_name("");
-        match->set_bitwidth(emvltInstance.key_bitwidth);
+        match->set_bitwidth(emvltInstance.keyBitwidth);
         match->set_match_type(p4configv1::MatchField_MatchType_EXACT);
         // set values
         for (auto const p : emvltInstance.params) {
