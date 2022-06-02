@@ -909,7 +909,7 @@ BFRuntimeGenerator::addMatchValueLookupTables(Util::JsonArray* tables_json_array
                       BUG("Invalid oneof case for the match type of table '%1%'", pre.name());
                       break;
               }
-         addKeyField(keys_json, mf.id(), mf.name(), false /* mandatory */,
+              addKeyField(keys_json, mf.id(), mf.name(), false /* mandatory */,
                      *match_type, makeTypeBitsOrBytes(mf.bitwidth(), boost::none));
          }
          table_json->emplace("key", keys_json);
