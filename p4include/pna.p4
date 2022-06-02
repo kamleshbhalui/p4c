@@ -474,25 +474,6 @@ extern Digest<T> {
 }
 // END:Digest_extern
 
-struct mod_mirror_profile_cfg_t {
-    bit<1>   dest_type;
-    bit<11>  dest;
-    bit<1>   trunc;
-    bit<9>   trunc_size;
-    bit<1>   store_port;
-    bit<1>   store_vsi;
-    bit<16>  md_loc0;
-    bit<16>  md_val0;
-    bit<16>  md_loc1;
-    bit<16>  md_val1;
-    bit<1>   func_valid;
-    bit<6>   pf;
-    bit<2>   func_type;
-    bit<11>  func_num;
-    bit<3>   host_id;
-    bit<14>  dest_q;
-}
-
 // BEGIN:MatchValueLookupTable
 extern MatchValueLookupTable<K, V, E> {
     /**
@@ -529,8 +510,6 @@ extern MatchValueLookupTable<K, V, E> {
      *     values;
      */
     MatchValueLookupTable(int size, V default_value, E const_entries);
-    //MatchValueLookupTable(int size, tuple<tuple<K, E>> const_entries);
-
     /**
      * Look up the key in the table.  Always hits, so always returns a
      * value of type V.
@@ -538,6 +517,7 @@ extern MatchValueLookupTable<K, V, E> {
     V lookup(in K key);
 }
 // END:MatchValueLookupTable
+
 enum PNA_Direction_t {
     NET_TO_HOST,
     HOST_TO_NET
