@@ -34,7 +34,7 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
             PARSE(IR::Annotation::nameAnnotation, StringLiteral),
             PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
             PARSE(IR::Annotation::noWarnAnnotation, StringLiteral),
-
+            PARSE(IR::Annotation::matchValueLookupTableAnnotation, StringLiteral),
             // @length has an expression argument.
             PARSE(IR::Annotation::lengthAnnotation, Expression),
 
