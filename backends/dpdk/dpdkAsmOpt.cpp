@@ -264,5 +264,120 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
     return false;
 }
 
+const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstring str) {
+    if (replacementMap.count(str) == 0)
+        return nullptr;
+    if (!str.startsWith("m."))
+        return nullptr;
+    auto expr = replacementMap[str];
+    const IR::Expression* prev = nullptr;
+    while (expr != nullptr && expr->is<IR::Member>() && str != expr->toString()
+        && haveSingleUseDefCopy(expr->toString())) {
+        prev = expr;
+        expr = replacementMap[expr->toString()];
+    }
+    return prev;
+}
+
+void CopyPropagationAndElimination::markUseDef(const IR::DpdkBinaryStatement *b) {
+    usesInfo[b->src1->toString()]++;
+    usesInfo[b->src2->toString()]++;
+    defInfo[b->dst->toString()]++;
+}
+
+void CopyPropagationAndElimination::markUseDef(const IR::DpdkMovStatement *mv) {
+    copyInfo[mv->dst->toString()]++;
+    defInfo[mv->dst->toString()]++;
+    usesInfo[mv->src->toString()]++;
+    replacementMap[mv->dst->toString()] = mv->src;
+}
+
+void CopyPropagationAndElimination::markUseDef(const IR::DpdkUnaryStatement *u) {
+    usesInfo[u->src->toString()]++;
+    defInfo[u->dst->toString()]++;
+}
+
+void CopyPropagationAndElimination::markUseDef(const IR::DpdkCastStatement *c) {
+    usesInfo[c->src->toString()]++;
+    defInfo[c->dst->toString()]++;
+    copyInfo[c->dst->toString()]++;
+    replacementMap[c->dst->toString()] = c->src;
+}
+
+void CopyPropagationAndElimination::markUseDef(const IR::DpdkJmpCondStatement *b) {
+    usesInfo[b->src1->toString()]++;
+    usesInfo[b->src2->toString()]++;
+}
+
+const IR::Expression* CopyPropagationAndElimination::replaceIfCopy(const IR::Expression *expr) {
+    auto str = expr->toString();
+    if (haveSingleUseDefCopy(str)) {
+        if (auto rexpr = getIrreplaceableExpr(str)) {
+            return rexpr;
+        }
+    }
+    return expr;
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement>
+CopyPropagationAndElimination::copyPropAndDeadCodeElim(
+    IR::IndexedVector<IR::DpdkAsmStatement> stmts) {
+    for (auto stmt : stmts) {
+        if (auto mv = stmt->to<IR::DpdkMovStatement>()) {
+            markUseDef(mv);
+        } else if (auto b = stmt->to<IR::DpdkBinaryStatement>()) {
+            markUseDef(b);
+        } else if (auto c = stmt->to<IR::DpdkUnaryStatement>()) {
+            markUseDef(c);
+        } else if (auto c = stmt->to<IR::DpdkCastStatement>()) {
+            markUseDef(c);
+        } else if (auto jc = stmt->to<IR::DpdkJmpCondStatement>()) {
+            markUseDef(jc);
+        }
+    }
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    for (auto stmt1 = stmts.rbegin(); stmt1!=stmts.rend();stmt1++) {
+        auto stmt = *stmt1;
+        if (auto mv = stmt->to<IR::DpdkMovStatement>()) {
+            auto src = mv->src->toString();
+            auto dst = mv->dst->toString();
+            if (haveSingleUseDefCopy(src) && haveSingleUseDefCopy(dst)
+                    && src.startsWith("m.") && dst.startsWith("m.")
+                    && dontEliminate.count(src) == 0 && dontEliminate.count(dst) == 0) {
+                continue;
+            }
+            if (auto r = replaceIfCopy(mv->src)) {
+                if (dst != r->toString())
+                    instr.push_back(new IR::DpdkMovStatement(mv->dst, r));
+                else
+                    instr.push_back(stmt);
+            }
+        } else if (auto mv = stmt->to<IR::DpdkCastStatement>()) {
+            auto src = mv->src->toString();
+            auto dst = mv->dst->toString();
+            if (haveSingleUseDefCopy(src) && haveSingleUseDefCopy(dst)
+                    && src.startsWith("m.") && dst.startsWith("m.")
+                    && dontEliminate.count(src) == 0 && dontEliminate.count(dst) == 0) {
+                continue;
+            }
+            if (auto r = replaceIfCopy(mv->src)) {
+                if (dst != r->toString())
+                    instr.push_back(new IR::DpdkMovStatement(mv->dst, r));
+                else
+                    instr.push_back(stmt);
+            }
+        } else if (auto jc = stmt->to<IR::DpdkJmpGreaterStatement>()) {
+            instr.push_back(new IR::DpdkJmpGreaterStatement(jc->label,
+                        replaceIfCopy(jc->src1), replaceIfCopy(jc->src2)));
+        } else {
+            instr.push_back(stmt);
+        }
+    }
+    IR::IndexedVector<IR::DpdkAsmStatement> instrr;
+    for (auto stmt = instr.rbegin(); stmt != instr.rend(); stmt++) {
+        instrr.push_back(*stmt);
+    }
+    return instrr;
+}
 size_t ShortenTokenLength::count = 0;
 }  // namespace DPDK

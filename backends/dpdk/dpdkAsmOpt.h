@@ -290,6 +290,58 @@ class ShortenTokenLength : public Transform {
     }
 };
 
+// This pass identify redundant copies/moves and eliminate it
+// and propogate original sources.
+class CopyPropagationAndElimination : public Transform {
+    std::unordered_map<cstring, int> copyInfo;
+    std::unordered_map<cstring, int> usesInfo;
+    std::unordered_map<cstring, int> defInfo;
+    std::unordered_map<cstring /*def*/, const IR::Expression* /*use*/> replacementMap;
+    std::set<cstring> dontEliminate;
+
+    bool haveSingleUseDefCopy(cstring str) {
+        return copyInfo[str] == 1 && defInfo[str] == 1 && usesInfo[str] == 1;
+    }
+
+    const IR::Expression* getIrreplaceableExpr(cstring str);
+    void markUseDef(const IR::DpdkBinaryStatement *b);
+    void markUseDef(const IR::DpdkMovStatement *mv);
+    void markUseDef(const IR::DpdkUnaryStatement *u);
+    void markUseDef(const IR::DpdkCastStatement *c);
+    void markUseDef(const IR::DpdkJmpCondStatement *b);
+    const IR::Expression* replaceIfCopy(const IR::Expression *expr);
+
+    IR::IndexedVector<IR::DpdkAsmStatement>
+    copyPropAndDeadCodeElim(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
+    void clear() {
+        replacementMap.clear();
+        usesInfo.clear();
+        defInfo.clear();
+        copyInfo.clear();
+    }
+
+ public:
+    const IR::Node* postorder(IR::DpdkAction* a) override {
+        clear();
+        a->statements = copyPropAndDeadCodeElim(a->statements);
+        return a;
+    }
+    const IR::Node* postorder(IR::DpdkListStatement *l) override {
+        clear();
+        return new IR::DpdkListStatement(copyPropAndDeadCodeElim(l->statements));
+    }
+
+    const IR::Node* preorder(IR::DpdkTable *t) override {
+        auto keys = t->match_keys;
+        if (keys)
+        for (auto ke : keys->keyElements) {
+            dontEliminate.insert(ke->expression->toString());
+        }
+        return t;
+    }
+};
+
+
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
 class DpdkAsmOptimization : public PassRepeated {
