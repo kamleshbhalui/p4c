@@ -133,14 +133,10 @@ struct ImmediateFields {
 };
 
 struct LookupHwBlocks {
-    cstring name;
-    cstring hw_interface;
     cstring hw_resource;
     int hw_resource_id;
     std::vector<ImmediateFields*> immediate_fields;
         LookupHwBlocks() {
-            name = "";
-            hw_interface = "";
             hw_resource = "";
             hw_resource_id = 0;
         }
@@ -271,7 +267,6 @@ class DpdkContextGenerator : public Inspector {
 
     unsigned int getNewTableHandle();
     unsigned int getNewActionHandle();
-    unsigned int getNewMVLutHandle();
 
     void serializeContextJson(std::ostream* destination);
     const Util::JsonObject* genContextJsonObject();

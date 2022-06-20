@@ -21,7 +21,6 @@ namespace DPDK {
 
 unsigned DpdkContextGenerator::newTableHandle = 0;
 unsigned DpdkContextGenerator::newActionHandle = 0;
-unsigned DpdkContextGenerator::newMVLTableHandle = 0;
 
 // Returns a unique ID for table
 unsigned int DpdkContextGenerator::getNewTableHandle() {
@@ -31,11 +30,6 @@ unsigned int DpdkContextGenerator::getNewTableHandle() {
 // Returns a unique ID for action
 unsigned int DpdkContextGenerator::getNewActionHandle() {
     return action_handle_prefix | newActionHandle++;
-}
-
-// Returns a unique ID for match value look table
-unsigned int DpdkContextGenerator::getNewMVLutHandle() {
-    return mvlt_handle_prefix | newMVLTableHandle++;
 }
 
 // This function collects all tables in a vector and sets the table attributes required
@@ -523,10 +517,10 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     auto resname = resnameexpr->to<IR::StringLiteral>()->value;
 
     /* validate resource name */
-    if (resname != "mirror_profile" && resname != "lpm_profile") {
-        ::error("Invalid argument '%1%' for 'intel_lut_type' annotation for '%2%'"
-                " it should be '%3%' or '%4%'.",
-                resname, d->externalName(), "mirror_profile", "lpm_profile");
+    if (resname != "mirror_profile") {
+        ::error("Invalid argument '%1%' for 'mvlt_type' annotation for '%2%'"
+                " it should be '%3%'.",
+                resname, d->externalName(), "mirror_profile");
         return;
     }
 
@@ -534,7 +528,7 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     if (type->is<IR::Type_SpecializedCanonical>() == false) return;
 
     auto exactMVLut = new  P4MatchLookupTableInfo();
-    exactMVLut->handle = getNewMVLutHandle();
+    exactMVLut->handle = getNewTableHandle();
     exactMVLut->ctrlName = ctrl_name;
     exactMVLut->tblName = d->externalName();
     exactMVLut->p4Hidden = false;
@@ -553,11 +547,8 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     }
     auto type1 = typelist->at(1);
     auto hwblk = new LookupHwBlocks();
-    hwblk->name = "MOD";
-    // hwblk->id = MOD;
-    hwblk->hw_interface = "CP_CHANNEL";
     hwblk->hw_resource = resname;
-    hwblk->hw_resource_id = 7;
+    hwblk->hw_resource_id = 0;
     exactMVLut->matchAttributes = new LookupMatchAttributes();
     exactMVLut->matchAttributes->hardware_blocks.push_back(hwblk);
     UpdateMatchKeys(exactMVLut, type0);
@@ -618,9 +609,6 @@ void DpdkContextGenerator::outputLutMatchAttributes(Util::JsonObject* matchJsons
     if (tblInfo->matchAttributes != nullptr) {
         for (auto hwBlock : tblInfo->matchAttributes->hardware_blocks) {
             auto* matchAttr = new Util::JsonObject();
-            matchAttr->emplace("name", hwBlock->name);
-            // matchAttr->emplace("id", hwBlock->id);
-            matchAttr->emplace("hw_interface", hwBlock->hw_interface);
             matchAttr->emplace("hw_resource", hwBlock->hw_resource);
             matchAttr->emplace("hw_resource_id", hwBlock->hw_resource_id);
             auto* immFields = new Util::JsonArray();
