@@ -319,6 +319,35 @@ const IR::Expression* CopyPropagationAndElimination::replaceIfCopy(const IR::Exp
     return expr;
 }
 
+void CopyPropagationAndElimination::elimCastOrMov(const IR::DpdkAsmStatement* stmt, IR::IndexedVector<IR::DpdkAsmStatement>& instr) {
+    const IR::Expression* srcExpr = nullptr, *dstExpr = nullptr;
+    if (stmt->is<IR::DpdkMovStatement>()) {
+        auto mv = stmt->to<IR::DpdkMovStatement>();
+        srcExpr = mv->src;
+        dstExpr = mv->dst;
+    } else {
+        auto mv = stmt->to<IR::DpdkCastStatement>();
+        srcExpr = mv->src;
+        dstExpr = mv->dst;
+    }
+
+    auto src = srcExpr->toString();
+    auto dst = dstExpr->toString();
+    bool dropCopy = false;
+    if (haveSingleUseDefCopy(src) && haveSingleUseDefCopy(dst)
+            && src.startsWith("m.") && dst.startsWith("m.")
+            && dontEliminate.count(src) == 0 && dontEliminate.count(dst) == 0) {
+            dropCopy = true; // do nothing, drop the statement
+    }
+    if (!dropCopy) {
+        auto r = replaceIfCopy(srcExpr);
+        if (dst != r->toString())
+            instr.push_back(new IR::DpdkMovStatement(dstExpr, r));
+        else
+            instr.push_back(stmt);
+    }
+}
+
 IR::IndexedVector<IR::DpdkAsmStatement>
 CopyPropagationAndElimination::copyPropAndDeadCodeElim(
     IR::IndexedVector<IR::DpdkAsmStatement> stmts) {
@@ -338,35 +367,9 @@ CopyPropagationAndElimination::copyPropAndDeadCodeElim(
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
     for (auto stmt1 = stmts.rbegin(); stmt1!=stmts.rend();stmt1++) {
         auto stmt = *stmt1;
-        if (auto mv = stmt->to<IR::DpdkMovStatement>()) {
-            auto src = mv->src->toString();
-            auto dst = mv->dst->toString();
-            if (haveSingleUseDefCopy(src) && haveSingleUseDefCopy(dst)
-                    && src.startsWith("m.") && dst.startsWith("m.")
-                    && dontEliminate.count(src) == 0 && dontEliminate.count(dst) == 0) {
-                continue;
-            }
-            if (auto r = replaceIfCopy(mv->src)) {
-                if (dst != r->toString())
-                    instr.push_back(new IR::DpdkMovStatement(mv->dst, r));
-                else
-                    instr.push_back(stmt);
-            }
-        } else if (auto mv = stmt->to<IR::DpdkCastStatement>()) {
-            auto src = mv->src->toString();
-            auto dst = mv->dst->toString();
-            if (haveSingleUseDefCopy(src) && haveSingleUseDefCopy(dst)
-                    && src.startsWith("m.") && dst.startsWith("m.")
-                    && dontEliminate.count(src) == 0 && dontEliminate.count(dst) == 0) {
-                continue;
-            }
-            if (auto r = replaceIfCopy(mv->src)) {
-                if (dst != r->toString())
-                    instr.push_back(new IR::DpdkMovStatement(mv->dst, r));
-                else
-                    instr.push_back(stmt);
-            }
-        } else if (auto jc = stmt->to<IR::DpdkJmpGreaterStatement>()) {
+        if (stmt->is<IR::DpdkMovStatement>() || stmt->is<IR::DpdkCastStatement>())
+            elimCastOrMov(stmt, instr);
+        else if (auto jc = stmt->to<IR::DpdkJmpGreaterStatement>()) {
             instr.push_back(new IR::DpdkJmpGreaterStatement(jc->label,
                         replaceIfCopy(jc->src1), replaceIfCopy(jc->src2)));
         } else {

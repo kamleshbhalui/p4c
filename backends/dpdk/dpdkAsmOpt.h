@@ -310,7 +310,7 @@ class CopyPropagationAndElimination : public Transform {
     void markUseDef(const IR::DpdkCastStatement *c);
     void markUseDef(const IR::DpdkJmpCondStatement *b);
     const IR::Expression* replaceIfCopy(const IR::Expression *expr);
-
+    void elimCastOrMov(const IR::DpdkAsmStatement*, IR::IndexedVector<IR::DpdkAsmStatement>& instr);
     IR::IndexedVector<IR::DpdkAsmStatement>
     copyPropAndDeadCodeElim(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
     void clear() {
