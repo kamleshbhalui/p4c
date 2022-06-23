@@ -282,7 +282,7 @@ const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstrin
         prev = expr;
         expr = replacementMap[expr->toString()];
     }
-    return prev;
+    return expr? expr : prev;
 }
 
 void CopyPropagationAndElimination::markUseDef(const IR::DpdkBinaryStatement *b) {
