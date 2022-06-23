@@ -29,6 +29,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
+#include "dpdkUtils.h"
 
 #define DPDK_TABLE_MAX_KEY_SIZE 64*8
 
@@ -296,23 +297,38 @@ class CopyPropagationAndElimination : public Transform {
     std::unordered_map<cstring, int> copyInfo;
     std::unordered_map<cstring, int> usesInfo;
     std::unordered_map<cstring, int> defInfo;
+    std::unordered_map<cstring, int> newUsesInfo;
     std::unordered_map<cstring /*def*/, const IR::Expression* /*use*/> replacementMap;
     std::set<cstring> dontEliminate;
+    P4::TypeMap* typeMap;
+
+ public:
+    explicit CopyPropagationAndElimination(P4::TypeMap* typeMap) : typeMap(typeMap) {
+        dontEliminate.insert("m.pna_main_output_metadata_output_port");
+        dontEliminate.insert("m.psa_ingress_output_metadata_drop");
+        dontEliminate.insert("m.psa_ingress_output_metadata_egress_port");
+    }
 
     bool haveSingleUseDefCopy(cstring str) {
         return copyInfo[str] == 1 && defInfo[str] == 1 && usesInfo[str] == 1;
     }
 
-    const IR::Expression* getIrreplaceableExpr(cstring str);
+    bool haveSingleUseDef(cstring str) {
+        return defInfo[str] == 1 && usesInfo[str] == 1;
+    }
+
+    const IR::Expression* getIrreplaceableExpr(cstring str, bool isdst);
     void markUseDef(const IR::DpdkBinaryStatement *b);
     void markUseDef(const IR::DpdkMovStatement *mv);
     void markUseDef(const IR::DpdkUnaryStatement *u);
     void markUseDef(const IR::DpdkCastStatement *c);
     void markUseDef(const IR::DpdkJmpCondStatement *b);
-    const IR::Expression* replaceIfCopy(const IR::Expression *expr);
+    void markUseDef(const IR::DpdkLearnStatement*);
+    const IR::Expression* replaceIfCopy(const IR::Expression *expr, bool isdst = false);
     void elimCastOrMov(const IR::DpdkAsmStatement*, IR::IndexedVector<IR::DpdkAsmStatement>& instr);
     IR::IndexedVector<IR::DpdkAsmStatement>
     copyPropAndDeadCodeElim(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
+    void collectUseDef(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
     void clear() {
         replacementMap.clear();
         usesInfo.clear();
@@ -326,6 +342,7 @@ class CopyPropagationAndElimination : public Transform {
         a->statements = copyPropAndDeadCodeElim(a->statements);
         return a;
     }
+
     const IR::Node* postorder(IR::DpdkListStatement *l) override {
         clear();
         return new IR::DpdkListStatement(copyPropAndDeadCodeElim(l->statements));

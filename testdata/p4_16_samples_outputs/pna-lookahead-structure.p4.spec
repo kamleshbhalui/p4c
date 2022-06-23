@@ -22,7 +22,6 @@ struct main_metadata_t {
 	bit<24> MainParserT_parser_tmp_0
 	bit<8> MainParserT_parser_tmp_1
 	bit<16> MainParserT_parser_tmp_2
-	bit<24> MainParserT_parser_tmp_3
 	bit<24> MainParserT_parser_tmp_4
 }
 metadata instanceof main_metadata_t
@@ -39,8 +38,7 @@ regarray direction size 0x100 initval 0
 apply {
 	rx m.pna_main_input_metadata_input_port
 	lookahead h.MainParserT_parser_lookahead_1
-	mov m.MainParserT_parser_tmp_3 h.MainParserT_parser_lookahead_1.f
-	mov m.MainParserT_parser_tmp_0 m.MainParserT_parser_tmp_3
+	mov m.MainParserT_parser_tmp_0 h.MainParserT_parser_lookahead_1.f
 	shr m.MainParserT_parser_tmp_0 0x8
 	mov m.MainParserT_parser_tmp_2 m.MainParserT_parser_tmp_0
 	jmpeq MAINPARSERIMPL_PARSE_H1 m.MainParserT_parser_tmp_2 0x1234
