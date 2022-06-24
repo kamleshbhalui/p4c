@@ -30,6 +30,8 @@ struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<8> local_metadata_timeout
 	bit<32> pna_main_output_metadata_output_port
+	bit<32> learnArg
+	bit<32> learnArg_0
 }
 metadata instanceof main_metadata_t
 
@@ -44,7 +46,8 @@ action ct_next_hop_0 args instanceof ct_next_hop_0_arg_t {
 }
 
 action ct_add_on_miss_action_0 args none {
-	learn ct_next_hop_0 0x0 m.local_metadata_timeout
+	mov m.learnArg 0x0
+	learn ct_next_hop_0 m.learnArg m.local_metadata_timeout
 	return
 }
 
@@ -54,7 +57,8 @@ action next_hop1 args instanceof next_hop1_arg_t {
 }
 
 action add_on_miss_action args none {
-	learn next_hop1 0x0 m.local_metadata_timeout
+	mov m.learnArg_0 0x0
+	learn next_hop1 m.learnArg_0 m.local_metadata_timeout
 	return
 }
 

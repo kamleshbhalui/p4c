@@ -265,7 +265,7 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
 }
 
 const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstring str,
-                                                                        bool isdst) {
+                                                                        bool allowConst) {
     if (dontEliminate.count(str))
         return nullptr;
     if (!str.startsWith("m."))
@@ -273,16 +273,21 @@ const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstrin
     auto expr = replacementMap[str];
     const IR::Expression* prev = nullptr;
     while (expr != nullptr
-        && (isdst ? expr->is<IR::Member>() : true)
+        && (!allowConst ? expr->is<IR::Member>() : true)
         && str != expr->toString()
-        && (isdst ? expr->toString().startsWith("m.") : true)
+        && (!allowConst ? expr->toString().startsWith("m.") : true)
         && dontEliminate.count(expr->toString()) == 0
         && newUsesInfo[expr->toString()] == 0
         && (expr->is<IR::Member>() ? haveSingleUseDef(expr->toString()) : true)) {
         prev = expr;
         expr = replacementMap[expr->toString()];
     }
-    return expr? expr : prev;
+    if (expr != nullptr &&  allowConst)
+        return expr;
+    else if (expr != nullptr && expr->is<IR::Member>())
+        return expr;
+    else
+        return prev;
 }
 
 void CopyPropagationAndElimination::markUseDef(const IR::DpdkBinaryStatement *b) {
@@ -322,16 +327,16 @@ void CopyPropagationAndElimination::markUseDef(const IR::DpdkLearnStatement *b) 
 }
 
 const IR::Expression* CopyPropagationAndElimination::replaceIfCopy(const IR::Expression *expr,
-                                                                    bool isdst) {
+                                                                    bool allowConst) {
     if (!expr)
         return expr;
     auto str = expr->toString();
     if (haveSingleUseDef(str)) {
-        if (auto rexpr = getIrreplaceableExpr(str, isdst)) {
+        if (auto rexpr = getIrreplaceableExpr(str, allowConst)) {
             return rexpr;
         }
     }
-    if (!isdst)
+     if (!expr->is<IR::Constant>())
         newUsesInfo[expr->toString()]++;
     return expr;
 }
@@ -464,19 +469,19 @@ CopyPropagationAndElimination::copyPropAndDeadCodeElim(
             elimCastOrMov(stmt, instr);
         else if (auto jc = stmt->to<IR::DpdkJmpLessStatement>()) {
             instr.push_back(new IR::DpdkJmpLessStatement(jc->label,
-                        replaceIfCopy(jc->src1), replaceIfCopy(jc->src2)));
+                        replaceIfCopy(jc->src1, false), replaceIfCopy(jc->src2)));
         } else if (auto jc = stmt->to<IR::DpdkJmpGreaterStatement>()) {
             instr.push_back(new IR::DpdkJmpGreaterStatement(jc->label,
-                        replaceIfCopy(jc->src1), replaceIfCopy(jc->src2)));
+                        replaceIfCopy(jc->src1, false), replaceIfCopy(jc->src2)));
         } else if (auto je = stmt->to<IR::DpdkJmpEqualStatement>()) {
             instr.push_back(new IR::DpdkJmpEqualStatement(je->label,
-                        replaceIfCopy(je->src1), replaceIfCopy(je->src2)));
+                        replaceIfCopy(je->src1, false), replaceIfCopy(je->src2)));
         } else if (auto jne = stmt->to<IR::DpdkJmpNotEqualStatement>()) {
             instr.push_back(new IR::DpdkJmpNotEqualStatement(jne->label,
-                        replaceIfCopy(jne->src1), replaceIfCopy(jne->src2)));
+                        replaceIfCopy(jne->src1, false), replaceIfCopy(jne->src2)));
        } else if (auto l = stmt->to<IR::DpdkLearnStatement>()) {
             instr.push_back(new IR::DpdkLearnStatement(l->action,
-                        replaceIfCopy(l->timeout), replaceIfCopy(l->argument)));
+                        replaceIfCopy(l->timeout, false), replaceIfCopy(l->argument, false)));
        } else if (auto m = stmt->to<IR::DpdkMeterExecuteStatement>()) {
             instr.push_back(new IR::DpdkMeterExecuteStatement(m->meter,
                     replaceIfCopy(m->index), replaceIfCopy(m->length),

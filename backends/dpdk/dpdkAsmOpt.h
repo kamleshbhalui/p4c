@@ -317,14 +317,14 @@ class CopyPropagationAndElimination : public Transform {
         return defInfo[str] == 1 && usesInfo[str] == 1;
     }
 
-    const IR::Expression* getIrreplaceableExpr(cstring str, bool isdst);
+    const IR::Expression* getIrreplaceableExpr(cstring str, bool allowConst);
     void markUseDef(const IR::DpdkBinaryStatement *b);
     void markUseDef(const IR::DpdkMovStatement *mv);
     void markUseDef(const IR::DpdkUnaryStatement *u);
     void markUseDef(const IR::DpdkCastStatement *c);
     void markUseDef(const IR::DpdkJmpCondStatement *b);
     void markUseDef(const IR::DpdkLearnStatement*);
-    const IR::Expression* replaceIfCopy(const IR::Expression *expr, bool isdst = false);
+    const IR::Expression* replaceIfCopy(const IR::Expression *expr, bool allowConst = true);
     void elimCastOrMov(const IR::DpdkAsmStatement*, IR::IndexedVector<IR::DpdkAsmStatement>& instr);
     IR::IndexedVector<IR::DpdkAsmStatement>
     copyPropAndDeadCodeElim(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
