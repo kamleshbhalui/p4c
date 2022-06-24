@@ -294,7 +294,6 @@ class ShortenTokenLength : public Transform {
 // This pass identify redundant copies/moves and eliminate it
 // and propogate original sources.
 class CopyPropagationAndElimination : public Transform {
-    std::unordered_map<cstring, int> copyInfo;
     std::unordered_map<cstring, int> usesInfo;
     std::unordered_map<cstring, int> defInfo;
     std::unordered_map<cstring, int> newUsesInfo;
@@ -307,10 +306,6 @@ class CopyPropagationAndElimination : public Transform {
         dontEliminate.insert("m.pna_main_output_metadata_output_port");
         dontEliminate.insert("m.psa_ingress_output_metadata_drop");
         dontEliminate.insert("m.psa_ingress_output_metadata_egress_port");
-    }
-
-    bool haveSingleUseDefCopy(cstring str) {
-        return copyInfo[str] == 1 && defInfo[str] == 1 && usesInfo[str] == 1;
     }
 
     bool haveSingleUseDef(cstring str) {
@@ -333,7 +328,6 @@ class CopyPropagationAndElimination : public Transform {
         replacementMap.clear();
         usesInfo.clear();
         defInfo.clear();
-        copyInfo.clear();
     }
 
  public:

@@ -297,7 +297,6 @@ void CopyPropagationAndElimination::markUseDef(const IR::DpdkBinaryStatement *b)
 }
 
 void CopyPropagationAndElimination::markUseDef(const IR::DpdkMovStatement *mv) {
-    copyInfo[mv->dst->toString()]++;
     defInfo[mv->dst->toString()]++;
     usesInfo[mv->src->toString()]++;
     replacementMap[mv->dst->toString()] = mv->src;
@@ -311,7 +310,6 @@ void CopyPropagationAndElimination::markUseDef(const IR::DpdkUnaryStatement *u) 
 void CopyPropagationAndElimination::markUseDef(const IR::DpdkCastStatement *c) {
     usesInfo[c->src->toString()]++;
     defInfo[c->dst->toString()]++;
-    copyInfo[c->dst->toString()]++;
     replacementMap[c->dst->toString()] = c->src;
 }
 
