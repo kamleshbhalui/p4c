@@ -546,6 +546,18 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
         return;
     }
     auto type1 = typelist->at(1);
+    if (resname == "mirror_profile") {
+        if (auto s = type1->to<IR::Type_Struct>()) {
+            if (s->fields.size() != 2)
+                ::error("mirror profile expect exactly two immediate key in %1%.", type1);
+            auto fields =  s->fields;
+            if (fields[0]->name != "dest_type"
+                    || fields[1]->name != "dest") {
+                ::error("mirror profile for expect exactly two immediate key in"
+                        " %1% with name dest_type and dest.", type1);
+            }
+        }
+    }
     auto hwblk = new LookupHwBlocks();
     hwblk->hw_resource = resname;
     hwblk->hw_resource_id = 0;
