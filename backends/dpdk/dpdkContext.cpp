@@ -551,10 +551,10 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
             if (s->fields.size() != 2)
                 ::error("mirror profile expect exactly two immediate key in %1%.", type1);
             auto fields =  s->fields;
-            if (fields[0]->name != "dest_type"
-                    || fields[1]->name != "dest") {
+            if (fields[0]->name != "trunc_size"
+                    || fields[1]->name != "store_port") {
                 ::error("mirror profile for expect exactly two immediate key in"
-                        " %1% with name dest_type and dest.", type1);
+                        " %1% with name trunc_size and store_port.", type1);
             }
         }
     }
