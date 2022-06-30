@@ -1,0 +1,98 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "ip.ingress.simple_table_1",
+      "id" : 36787877,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : false,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "key",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 48
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 27880877,
+          "name" : "ingress.dummy_action",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 21257015,
+          "name" : "NoAction",
+          "action_scope" : "DefaultOnly",
+          "annotations" : [
+            {
+              "name" : "@defaultonly"
+            }
+          ],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "ip.ingress.simple_table_2",
+      "id" : 48738834,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : false,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "key",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 48
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 27880877,
+          "name" : "ingress.dummy_action",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 21257015,
+          "name" : "NoAction",
+          "action_scope" : "DefaultOnly",
+          "annotations" : [
+            {
+              "name" : "@defaultonly"
+            }
+          ],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}

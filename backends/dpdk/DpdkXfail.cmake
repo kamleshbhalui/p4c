@@ -1,4 +1,33 @@
 p4c_add_xfail_reason("dpdk"
+  "Unhandled type for varbit<32> Ingress_s"
+    testdata/p4_16_samples/psa-dpdk-issue447-5-bmv2.p4
+  )
+
+  p4c_add_xfail_reason("dpdk"
+  "package EgressPipeline"
+  testdata/p4_16_samples/psa-dpdk-free-form-annotation.p4
+  )
+
+  p4c_add_xfail_reason("dpdk"
+  "Field local_metadata_ipv4_lkp_ipv4_sa is not a member of structure struct M"
+  testdata/p4_16_samples/psa-dpdk-hash-bmv2.p4
+  )
+
+  p4c_add_xfail_reason("dpdk"
+  "ostd: declaration not found"
+  testdata/p4_16_samples/psa-dpdk-issue1660-bmv2.p4
+  )
+
+  p4c_add_xfail_reason("dpdk"
+  "Unsupported parser loop"
+  testdata/p4_16_samples/psa-dpdk-issue1660-bmv2.p4
+  )
+  p4c_add_xfail_reason("dpdk"
+  "Unknown architecture"
+  testdata/p4_16_samples/psa-dpdk-pred.p4 
+)
+
+p4c_add_xfail_reason("dpdk"
   "Expected packet length argument for count method of indirect counter"
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )

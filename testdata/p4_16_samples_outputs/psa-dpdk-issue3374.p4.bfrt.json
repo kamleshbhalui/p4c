@@ -1,0 +1,76 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "ip.ingressControlImpl.stub",
+      "id" : 34411041,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1000000,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdrs.vlan_tag[meta.depth].vid",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 12
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 28119643,
+          "name" : "ingressControlImpl.execute",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "ip.ingressControlImpl.stub1",
+      "id" : 48274176,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1000000,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdrs.ethernet.etherType",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 16
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 25418768,
+          "name" : "ingressControlImpl.execute_1",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}

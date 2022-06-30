@@ -1,0 +1,41 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "ip.cIngress.guh",
+      "id" : 48165785,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : false,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.ethernet.srcAddr",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 48
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 25131402,
+          "name" : "cIngress.foo",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}
