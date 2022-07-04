@@ -15,16 +15,27 @@ p4c_add_xfail_reason("dpdk"
 
   p4c_add_xfail_reason("dpdk"
   "ostd: declaration not found"
-  testdata/p4_16_samples/psa-dpdk-issue1660-bmv2.p4
+  testdata/p4_16_samples/psa-dpdk-issue1660.p4
   )
 
   p4c_add_xfail_reason("dpdk"
-  "Unsupported parser loop"
-  testdata/p4_16_samples/psa-dpdk-issue1660-bmv2.p4
+  "not implemented"
+  testdata/p4_16_samples/psa-dpdk-issue1630-bmv2.p4
   )
+
   p4c_add_xfail_reason("dpdk"
-  "Unknown architecture"
+  "Error compiling"
+  testdata/p4_16_samples/psa-dpdk-issue2314.p4
+)
+
+  p4c_add_xfail_reason("dpdk"
+  "Error compiling"
   testdata/p4_16_samples/psa-dpdk-pred.p4 
+)
+
+p4c_add_xfail_reason("dpdk"
+"Error compiling"
+testdata/p4_16_samples/psa-dpdk-issue1653-complex.p4
 )
 
 p4c_add_xfail_reason("dpdk"
