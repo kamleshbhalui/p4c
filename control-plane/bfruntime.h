@@ -162,10 +162,13 @@ static inline Util::JsonObject* makeTypeBool(boost::optional<bool> defaultValue 
     return typeObj;
 }
 
-static inline Util::JsonObject* makeTypeBytes(int width,
+static inline Util::JsonObject* makeTypeBitsOrBytes(int width,
         boost::optional<int64_t> defaultValue = boost::none) {
     auto* typeObj = new Util::JsonObject();
-    typeObj->emplace("type", "bytes");
+    if (width % 8 == 0)
+        typeObj->emplace("type", "bits");
+    else
+        typeObj->emplace("type", "bytes");
     typeObj->emplace("width", width);
     if (defaultValue != boost::none)
         typeObj->emplace("default_value", *defaultValue);
@@ -477,9 +480,6 @@ class BFRuntimeGenerator {
     void addRegisterDataFields(Util::JsonArray* dataJson,
                                const Register& register_,
                                P4Id idOffset = 1) const;
-    Util::JsonObject*
-    makeTypeBitsOrBytes(int bitwidth,
-                        boost::optional<cstring> defaultValue = boost::none) const;
     void addMatchValueLookupTables(Util::JsonArray* tablesJson) const;
 
 

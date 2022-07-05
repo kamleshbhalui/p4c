@@ -46,14 +46,14 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
                         e, instanceType, instanceName);
                 return;
             }
-            type = makeTypeBytes(typeEnum->second.underlying_type().bitwidth());
+            type = makeTypeBitsOrBytes(typeEnum->second.underlying_type().bitwidth());
         } else if (fSpec.has_bitstring()) {
             if (fSpec.bitstring().has_bit())
-                type = makeTypeBytes(fSpec.bitstring().bit().bitwidth());
+                type = makeTypeBitsOrBytes(fSpec.bitstring().bit().bitwidth());
             else if (fSpec.bitstring().has_int_())
-                type = makeTypeBytes(fSpec.bitstring().int_().bitwidth());
+                type = makeTypeBitsOrBytes(fSpec.bitstring().int_().bitwidth());
             else if (fSpec.bitstring().has_varbit())
-                type = makeTypeBytes(fSpec.bitstring().varbit().max_bitwidth());
+                type = makeTypeBitsOrBytes(fSpec.bitstring().varbit().max_bitwidth());
         } else if (fSpec.has_bool_()) {
             type = makeTypeBool(1);
         } else if (fSpec.has_new_type()) {
@@ -66,7 +66,7 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
                         typeName, instanceType, instanceName);
                 return;
             }
-            type = makeTypeBytes(newType->second.translated_type().sdn_bitwidth());
+            type = makeTypeBitsOrBytes(newType->second.translated_type().sdn_bitwidth());
         }
 
         if (!type) {
@@ -123,7 +123,7 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
                   "Header name '%1%' not found in P4Info map", headerName);
         P4Id id = idOffset;
         for (const auto& member : p_it->second.members()) {
-            auto* type = makeTypeBytes(member.type_spec().bit().bitwidth());
+            auto* type = makeTypeBitsOrBytes(member.type_spec().bit().bitwidth());
             fields.push_back({prefix + member.name() + suffix, id++, type});
         }
     } else if (typeSpec.has_serializable_enum()) {
@@ -133,7 +133,7 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
                   "Serializable name '%1%' not found in P4Info map", enumName);
         P4Id id = idOffset;
         for (const auto& member : p_it->second.members()) {
-            auto* type = makeTypeBytes(p_it->second.underlying_type().bitwidth());
+            auto* type = makeTypeBitsOrBytes(p_it->second.underlying_type().bitwidth());
             fields.push_back({prefix + member.name() + suffix, id++, type});
         }
     } else {
@@ -603,7 +603,7 @@ BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
                 param.annotations().begin(), param.annotations().end());
             addActionDataField(
                 dataJson, param.id(), param.name(), true /* mandatory */,
-                false /* read_only */, makeTypeBytes(param.bitwidth()), annotations);
+                false /* read_only */, makeTypeBitsOrBytes(param.bitwidth()), annotations);
             if (param.id() > maxId) maxId = param.id();
         }
         spec->emplace("data", dataJson);
@@ -751,7 +751,7 @@ BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
             // driver initialized default value (0).
             addKeyField(keyJson, mf.id(), keyName,
                         false /* mandatory */, *matchType,
-                        makeTypeBytes(mf.bitwidth(), boost::none),
+                        makeTypeBitsOrBytes(mf.bitwidth(), boost::none),
                         annotations);
         }
         if (needsPriority) {
@@ -864,22 +864,6 @@ BFRuntimeGenerator::addMeters(Util::JsonArray* tablesJson) const {
         if (meterInstance == boost::none) continue;
         addMeterCommon(tablesJson, *meterInstance);
     }
-}
-
-Util::JsonObject*
-BFRuntimeGenerator::makeTypeBitsOrBytes(int bitwidth,
-                                             boost::optional<cstring> defaultValue) const {
-    auto* type_obj = new Util::JsonObject();
-    if (bitwidth % 8) {
-        type_obj->emplace("type", "bits");
-        type_obj->emplace("width", bitwidth);
-    } else {
-        type_obj->emplace("type", "bytes");
-        type_obj->emplace("width", bitwidth >> 3);
-    }
-    if (defaultValue != boost::none)
-        type_obj->emplace("default_value", *defaultValue);
-    return type_obj;
 }
 
 void
