@@ -97,7 +97,7 @@ control egressDeparserImpl(
     out EMPTY_CLONE a,
     out EMPTY_RECIRC b,
     inout EMPTY_H c1,
-    in Header_t d,
+    in Meta_t d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
     apply { }

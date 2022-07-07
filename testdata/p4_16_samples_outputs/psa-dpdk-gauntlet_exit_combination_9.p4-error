@@ -1,0 +1,6 @@
+psa-dpdk-gauntlet_exit_combination_9.p4(58): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            48w1: exact @name("Vmhbwk") ;
+            ^^^^
+psa-dpdk-gauntlet_exit_combination_9.p4(58): [--Wwarn=mismatch] warning: 48w1: Constant key field
+            48w1: exact @name("Vmhbwk") ;
+            ^^^^

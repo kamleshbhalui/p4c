@@ -1,0 +1,41 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "ip.ingress.c.t",
+      "id" : 43577110,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [],
+      "action_specs" : [
+        {
+          "id" : 29022044,
+          "name" : "ingress.c.add",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : [
+            {
+              "id" : 1,
+              "name" : "data",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 32
+              }
+            }
+          ]
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}

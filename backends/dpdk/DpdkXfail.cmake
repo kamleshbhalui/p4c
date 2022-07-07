@@ -1,16 +1,11 @@
 p4c_add_xfail_reason("dpdk"
   "Unhandled type for varbit<32> Ingress_s"
-    testdata/p4_16_samples/psa-dpdk-issue447-5-bmv2.p4
-  )
-
-  p4c_add_xfail_reason("dpdk"
-  "package EgressPipeline"
-  testdata/p4_16_samples/psa-dpdk-free-form-annotation.p4
+    testdata/p4_16_samples/psa-dpdk-issue447-5.p4
   )
 
   p4c_add_xfail_reason("dpdk"
   "Field local_metadata_ipv4_lkp_ipv4_sa is not a member of structure struct M"
-  testdata/p4_16_samples/psa-dpdk-hash-bmv2.p4
+  testdata/p4_16_samples/psa-dpdk-hash.p4
   )
 
   p4c_add_xfail_reason("dpdk"
@@ -20,7 +15,7 @@ p4c_add_xfail_reason("dpdk"
 
   p4c_add_xfail_reason("dpdk"
   "not implemented"
-  testdata/p4_16_samples/psa-dpdk-issue1630-bmv2.p4
+  testdata/p4_16_samples/psa-dpdk-issue1630.p4
   )
 
   p4c_add_xfail_reason("dpdk"

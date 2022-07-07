@@ -29,7 +29,7 @@ header hdr {
     bit<64> c;
 }
 
-#include "arith-skeleton-dpdk.p4"
+#include "arith-skeleton-d.p4"
 
 control ingress(inout Headers h, inout Meta m, in psa_ingress_input_metadata_t istd,
                             inout psa_ingress_output_metadata_t ostd) {

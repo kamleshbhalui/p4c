@@ -38,4 +38,4 @@ control compute(inout hdr h) {
     apply { t.apply(); }
 }
 
-#include "arith-inline-skeleton-dpdk.p4"
+#include "arith-inline-skeleton-d.p4"
