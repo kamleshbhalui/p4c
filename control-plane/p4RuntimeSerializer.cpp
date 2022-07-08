@@ -1447,6 +1447,12 @@ static void analyzeParser(P4RuntimeAnalyzer& analyzer,
 /// into a P4Runtime WriteRequest message which can be used by a target to
 /// initialize its tables.
 class P4RuntimeEntriesConverter {
+ public:
+    /// We represent all static table entries as one P4Runtime WriteRequest object
+    p4v1::WriteRequest *entries;
+    /// The symbols used in the API and their ids.
+    const P4RuntimeSymbolTable& symbols;
+
  private:
     friend class P4RuntimeAnalyzer;
 
@@ -1788,11 +1794,6 @@ class P4RuntimeEntriesConverter {
         BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
         return mt->name.name;
     }
-
-    /// We represent all static table entries as one P4Runtime WriteRequest object
-    p4v1::WriteRequest *entries;
-    /// The symbols used in the API and their ids.
-    const P4RuntimeSymbolTable& symbols;
 };
 
 /* static */ P4RuntimeAPI
@@ -1870,6 +1871,12 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
         if (block->is<IR::TableBlock>())
             entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap,
                                              typeMap, archHandler);
+        else if (block->is<IR::ExternBlock>()) {
+            // add entries for arch specific extern types
+            archHandler->addExternEntries(entriesConverter.getEntries(),
+                                          symbols,
+                                          block->to<IR::ExternBlock>());
+        }
     });
 
     auto* p4Info = analyzer.getP4Info();

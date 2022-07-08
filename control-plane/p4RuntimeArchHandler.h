@@ -33,6 +33,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
 #include "typeSpecConverter.h"
+#include "p4/v1/p4runtime.pb.h"
 
 namespace P4 {
 
@@ -176,6 +177,10 @@ class P4RuntimeArchHandlerIface {
     /// requires some logic to be performed then.
     virtual void postAdd(const P4RuntimeSymbolTableIface& symbols,
                          ::p4::config::v1::P4Info* p4info) = 0;
+        /// This method is called to add target specific extern entries
+    virtual void addExternEntries(const p4::v1::WriteRequest* entries,
+                                  const P4RuntimeSymbolTableIface& symbols,
+                                  const IR::ExternBlock* externBlock) = 0;
 };
 
 /// A functor interface that needs to be implemented for each

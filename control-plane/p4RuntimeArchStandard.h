@@ -23,6 +23,7 @@ limitations under the License.
 
 #include "p4RuntimeArchHandler.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "bytestrings.h"
 
 namespace p4configv1 = ::p4::config::v1;
 
@@ -703,6 +704,13 @@ struct ActionProfile {
 /// extern type in PSA.
 template <Arch arch>
 class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
+ private:
+    const p4::v1::WriteRequest* rtEntries = nullptr;
+    unsigned keyBitwidth = 64;
+    const cstring EXACT_MVLUT_NAME = "MatchValueLookupTable";
+    const cstring ENTRIES_ARG_NAME = "const_entries";
+    const cstring DEFAULT_ARG_NAME = "default_value";
+
  protected:
     using ArchCounterExtern = CounterExtern<arch>;
     using CounterTraits = Helpers::CounterlikeTraits<ArchCounterExtern>;
@@ -916,6 +924,139 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         (void)p4info;
     }
 
+    void addExternEntries(const p4::v1::WriteRequest* entries,
+                          const P4RuntimeSymbolTableIface& symbols,
+                          const IR::ExternBlock* externBlock) override {
+        rtEntries = entries;
+        CHECK_NULL(externBlock);
+        auto decl = externBlock->node->to<IR::Declaration_Instance>();
+        // skip if decl is empty or decl is not specialized type (extern template)
+        if (decl == nullptr) return;
+        if (!decl->type->is<IR::Type_Specialized>()) return;
+        // skip if the table is not Exact/ Ternary MVLUT
+        auto mvlut_type_name = decl->type->to<IR::Type_Specialized>()->baseType->path->name;
+        if (!((mvlut_type_name == EXACT_MVLUT_NAME))) {
+            return;
+        }
+        P4RuntimeSymbolType sym_type = SymbolType::EXACT_MATCH_VALUE_LOOKUP_TABLE();
+        auto sym_id = symbols.getId(sym_type, decl->controlPlaneName());
+        uint32_t entries_arg_idx = UINT32_MAX;
+        uint32_t default_arg_idx = UINT32_MAX;
+        for (uint32_t idx = 0; idx < decl->arguments->size(); idx++) {
+            auto arg_name = decl->arguments->at(idx)->name.originalName;
+            if (arg_name == ENTRIES_ARG_NAME)
+                entries_arg_idx = idx;
+            else if (arg_name == DEFAULT_ARG_NAME)
+                default_arg_idx = idx;
+        }
+        // handle const_entries
+        if (entries_arg_idx != UINT32_MAX) {
+            const IR::Argument* arg = decl->arguments->at(entries_arg_idx);
+            auto arg_name = arg->name.originalName;
+            if (arg->expression->is<IR::ListExpression>() == false) {
+                ::error(ErrorType::ERR_UNEXPECTED, "Unexpected expression for %1% in %2%, "
+                        "expected ListExpression", arg_name, decl);
+                return;
+            }
+            uint32_t e_cnt = 1;
+            for (auto e : arg->expression->to<IR::ListExpression>()->components) {
+                if (e->is<IR::ListExpression>() == false) {
+                    ::error(ErrorType::ERR_UNEXPECTED, "Unexpected expression for entry "
+                            "%1% of %2%", e_cnt, arg_name);
+                    return;
+                }
+                keyBitwidth =
+                    decl->type->to<IR::Type_Specialized>()->arguments->at(0)->width_bits();
+                add_mvlut_entry(e->to<IR::ListExpression>(), mvlut_type_name, sym_id, false);
+            }
+        }
+
+        // handle default_value
+        if (default_arg_idx != UINT32_MAX) {
+            const IR::Argument* arg = decl->arguments->at(default_arg_idx);
+            add_mvlut_entry(arg->expression, mvlut_type_name, sym_id, true);
+        }
+    }
+    void add_mvlut_entry(const IR::Expression* entry_exp,
+                                               cstring mvlut_type_name,
+                                               p4rt_id_t rt_symbol_id,
+                                               bool is_default) {
+        CHECK_NULL(this->rtEntries);
+        auto protoUpdate = const_cast<p4::v1::WriteRequest*>(rtEntries)->add_updates();
+        protoUpdate->set_type(p4::v1::Update::INSERT);
+        auto protoEntity = protoUpdate->mutable_entity();
+        auto protoEntry = protoEntity->mutable_extern_entry();
+        protoEntry->set_extern_type_id((rt_symbol_id & 0xff000000) >> 24);
+        // create an MVLUT proto object and set fields
+        p4::v1::MVLUTEntry mvlut_entry;
+        mvlut_entry.set_mvlut_id(rt_symbol_id);
+        // add 0 as key expr for default_value
+        uint32_t paramId = 1;
+        if (is_default == true) {
+            add_mvlut_match_entry(&mvlut_entry, mvlut_type_name, new IR::Constant(0));
+        }
+        if (entry_exp->is<IR::ListExpression>()) {
+            uint32_t param_cnt = 1;
+            for (auto exp : entry_exp->to<IR::ListExpression>()->components) {
+                if ((param_cnt == 1) && (is_default == false)) {
+                    add_mvlut_match_entry(&mvlut_entry, mvlut_type_name, exp);
+                } else {
+                    add_mvlut_param_entry(&mvlut_entry, exp, paramId);
+                }
+                param_cnt++;
+            }
+        } else {
+            add_mvlut_param_entry(&mvlut_entry, entry_exp, paramId);
+        }
+
+        auto any_type_entry = protoEntry->mutable_entry();
+        any_type_entry->PackFrom(mvlut_entry);
+    }
+    void add_mvlut_match_entry(p4::v1::MVLUTEntry* proto_mvlut_entry,
+                                                     cstring type_name,
+                                                     const IR::Expression* exp) {
+        uint32_t field_cnt = 1;
+        if (exp->is<IR::Constant>()) {
+            auto proto_match = proto_mvlut_entry->add_match();
+            proto_match->set_field_id(field_cnt);
+            if (type_name == EXACT_MVLUT_NAME) {
+                auto proto_exact = proto_match->mutable_exact();
+                auto value = stringRepr(exp->to<IR::Constant>(), keyBitwidth);
+                proto_exact->set_value(*value);
+            }
+        } else if (exp->is<IR::ListExpression>()) {
+            for (auto k : exp->to<IR::ListExpression>()->components) {
+                BUG_CHECK(k->is<IR::Constant>(),
+                        "Non const expression for key in const_entries"
+                        " of %1%", type_name);
+                add_mvlut_match_entry(proto_mvlut_entry, type_name, k);
+            }
+        }
+    }
+
+    void add_mvlut_param_entry(p4::v1::MVLUTEntry* proto_mvlut_entry,
+                              const IR::Expression* exp, uint32_t &param_count) {
+        auto proto_param = proto_mvlut_entry->mutable_param();
+        add_mvlut_param_value_entry(proto_param, exp, param_count);
+    }
+
+    void add_mvlut_param_value_entry(p4::v1::MVLUTParam* proto_mvlut_param,
+                                                            const IR::Expression* exp,
+                                                            uint32_t &param_count) {
+        if (exp->is<IR::Constant>()) {
+            uint32_t val = (uint32_t)exp->to<IR::Constant>()->value;
+            auto proto_param = proto_mvlut_param->add_params();
+            proto_param->set_param_id(param_count++);
+            proto_param->set_param_value(val);
+        } else if (exp->is<IR::ListExpression>()) {
+            for (auto e : exp->to<IR::ListExpression>()->components) {
+                add_mvlut_param_value_entry(proto_mvlut_param, e, param_count);
+            }
+        } else {
+            BUG("Unexpected expression %1% for value field at %2%, expected const"
+                " or list of const expressions", exp->toString(), param_count);
+        }
+    }
     static boost::optional<ActionProfile>
     getActionProfile(cstring name,
                      const IR::Type_Extern* type,
