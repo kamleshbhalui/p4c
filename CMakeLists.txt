@@ -41,7 +41,7 @@ OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_GMP "Use GMP library" ON)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
-
+set(P4C_USE_SANITIZER "" CACHE STRING "Enable Address Sanitizer")
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
 set(MAX_LOGGING_LEVEL 10 CACHE STRING "Control the maximum logging level for -T logs")
@@ -50,6 +50,11 @@ add_definitions(-DMAX_LOGGING_LEVEL=${MAX_LOGGING_LEVEL})
 
 if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE "RELEASE")
+endif()
+
+if ("${P4C_USE_SANITIZER}" STREQUAL "Address")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 endif()
 
 if (NOT $ENV{P4C_VERSION} STREQUAL "")
