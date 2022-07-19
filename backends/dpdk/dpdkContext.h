@@ -16,7 +16,6 @@ limitations under the License.
 
 #ifndef BACKENDS_DPDK_DPDKCONTEXT_H_
 #define BACKENDS_DPDK_DPDKCONTEXT_H_
-
 #include "dpdkProgramStructure.h"
 #include "options.h"
 #include "constants.h"
@@ -122,22 +121,22 @@ struct ImmediateFields {
     cstring param_name;
     int param_handle;
     int dest_start;
-    int bitwidth;
+    int dest_width;
     ImmediateFields() {
         param_name = "";
         param_handle = -1;
         dest_start = -1;
-        bitwidth = 0;
+        dest_width = 0;
     }
 };
 
 struct LookupHwBlocks {
-    cstring hw_resource;
-    int hw_resource_id;
+    cstring resource;
+    int resource_id;
     std::vector<ImmediateFields*> immediate_fields;
         LookupHwBlocks() {
-            hw_resource = "";
-            hw_resource_id = 0;
+            resource = "";
+            resource_id = 0;
         }
 };
 
@@ -283,7 +282,7 @@ class DpdkContextGenerator : public Inspector {
     void outputLutMatchAttributes(Util::JsonObject* matchJson,
             struct P4MatchLookupTableInfo* tblInfo);
     void outputKeys(Util::JsonObject* matchJson,
-            std::vector<struct MatchKeyField*> &keylist, bool isLut);
+            std::vector<struct MatchKeyField*> &keylist);
     void outputImmediateField(Util::JsonArray* immFieldJson,
         ImmediateFields* immfld);
     Util::JsonObject* initTableCommonJson(const cstring name, const struct TableAttributes & attr);

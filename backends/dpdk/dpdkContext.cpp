@@ -489,7 +489,7 @@ void DpdkContextGenerator::UpdateImmediateFields(P4MatchLookupTableInfo* emvlut,
                 param->param_handle = index++;
                 param->dest_start = size;
                 auto sz = f->type->to<IR::Type_Bits>()->width_bits();
-                param->bitwidth = sz;
+                param->dest_width = sz;
                 size += sz >> 3;
                 emvlut->matchAttributes->hardware_blocks.at(0)->immediate_fields.push_back(param);
             }
@@ -558,8 +558,8 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
         }
     }
     auto hwblk = new LookupHwBlocks();
-    hwblk->hw_resource = resname;
-    hwblk->hw_resource_id = 0;
+    hwblk->resource = resname;
+    hwblk->resource_id = 0;
     exactMVLut->matchAttributes = new LookupMatchAttributes();
     exactMVLut->matchAttributes->hardware_blocks.push_back(hwblk);
     UpdateMatchKeys(exactMVLut, type0);
@@ -573,12 +573,12 @@ void DpdkContextGenerator::outputImmediateField(Util::JsonArray* immFields,
     immField->emplace("param_name", immfld->param_name);
     immField->emplace("param_handle", immfld->param_handle);
     immField->emplace("dest_start", immfld->dest_start);
-    immField->emplace("bitwidth", immfld->bitwidth);
+    immField->emplace("dest_width", immfld->dest_width);
     immFields->append(immField);
 }
 
 void DpdkContextGenerator::outputKeys(Util::JsonObject* keyJsonObj,
-    std::vector<struct MatchKeyField*> &keylist, bool isLut) {
+    std::vector<struct MatchKeyField*> &keylist) {
     auto* keyJsons = new Util::JsonArray();
     keyJsonObj->emplace("match_key_fields", keyJsons);
 
@@ -604,7 +604,7 @@ void DpdkContextGenerator::outputKeys(Util::JsonObject* keyJsonObj,
             keyJson->emplace("match_type", "selector");
         }
         keyJson->emplace("start_bit", keyInfo->startBit);
-        keyJson->emplace(isLut ? "dest_width" : "bit_width", keyInfo->bitWidth);
+        keyJson->emplace("bit_width", keyInfo->bitWidth);
         keyJson->emplace("bit_width_full", keyInfo->bitWidthFull);
         keyJson->emplace("index", keyInfo->index);
         keyJson->emplace("position", keyInfo->position);
@@ -616,12 +616,12 @@ void DpdkContextGenerator::outputLutMatchAttributes(Util::JsonObject* matchJsons
     auto* matchAttr0 = new Util::JsonObject();
     auto* matchAttrs = new Util::JsonArray();
     matchJsons->emplace("match_attributes", matchAttr0);
-    matchAttr0->emplace("hardware_blocks", matchAttrs);
+    matchAttr0->emplace("stage_tables", matchAttrs);
     if (tblInfo->matchAttributes != nullptr) {
         for (auto hwBlock : tblInfo->matchAttributes->hardware_blocks) {
             auto* matchAttr = new Util::JsonObject();
-            matchAttr->emplace("hw_resource", hwBlock->hw_resource);
-            matchAttr->emplace("hw_resource_id", hwBlock->hw_resource_id);
+            matchAttr->emplace("resource", hwBlock->resource);
+            matchAttr->emplace("resource_id", hwBlock->resource_id);
             auto* immFields = new Util::JsonArray();
             matchAttr->emplace("immediate_fields", immFields);
             for (auto immfld : hwBlock->immediate_fields) {
@@ -645,7 +645,7 @@ void DpdkContextGenerator::outputLutTable(Util::JsonArray* tablesJson) {
             tableJson->emplace("p4_hidden", tbl->p4Hidden);
         }
         tablesJson->append(tableJson);
-        outputKeys(tableJson, tbl->keyList, true);
+        outputKeys(tableJson, tbl->keyList);
         outputLutMatchAttributes(tableJson, tbl);
     }
 }
