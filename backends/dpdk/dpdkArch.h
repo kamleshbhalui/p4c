@@ -679,9 +679,11 @@ class CollectExternDeclaration : public Inspector {
                             "%1%: expected size and optionally init_val as arguments", d);
                 }
             } else if (externTypeName == "MatchValueLookupTable") {
-                if (d->arguments->size() != 3) {
+                if (d->arguments->size() != 1 &&
+                    d->arguments->size() != 2 &&
+                    d->arguments->size() != 3) {
                     ::error(ErrorType::ERR_EXPECTED,
-                            "%1%: requires three arguments arguments", d);
+                            "%1%: requires one or two or three arguments arguments", d);
                 }
             } else {
                 // unsupported extern type

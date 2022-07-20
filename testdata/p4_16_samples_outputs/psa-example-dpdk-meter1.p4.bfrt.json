@@ -18,7 +18,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bytes",
+            "type" : "bits",
             "width" : 48
           }
         }
@@ -45,7 +45,19 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bytes",
+                "type" : "bits",
+                "width" : 12
+              }
+            },
+            {
+              "id" : 1,
+              "name" : "index",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bits",
                 "width" : 12
               }
             }

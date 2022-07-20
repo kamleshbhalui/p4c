@@ -567,12 +567,6 @@ void DpdkContextGenerator::UpdateImmediateFields(P4MatchLookupTableInfo* emvlut,
 
 void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_Instance* d) {
     cstring ctrl_name="";
-    if (d->arguments->size() < 3) {
-        ::error("%1%vRequires 3 arguments, provided  %2% arguments", d->externalName(),
-                d->arguments->size());
-        return;
-    }
-
     auto annotations = d->getAnnotations();
     if (annotations == nullptr) return;
 

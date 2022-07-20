@@ -18,7 +18,7 @@
           "mandatory" : false,
           "match_type" : "LPM",
           "type" : {
-            "type" : "bytes",
+            "type" : "bits",
             "width" : 32
           }
         }
@@ -38,7 +38,19 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bytes",
+                "type" : "bits",
+                "width" : 32
+              }
+            },
+            {
+              "id" : 1,
+              "name" : "addr",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bits",
                 "width" : 32
               }
             }

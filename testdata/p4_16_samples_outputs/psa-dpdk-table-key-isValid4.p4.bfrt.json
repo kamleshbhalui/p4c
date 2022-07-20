@@ -18,7 +18,7 @@
           "mandatory" : false,
           "match_type" : "Optional",
           "type" : {
-            "type" : "bytes",
+            "type" : "bits",
             "width" : 1
           }
         },
@@ -30,7 +30,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bytes",
+            "type" : "bits",
             "width" : 48
           }
         },
@@ -42,7 +42,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bytes",
+            "type" : "bits",
             "width" : 48
           }
         },
