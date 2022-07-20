@@ -576,9 +576,9 @@ Util::JsonArray* BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& ta
                                    false /* read_only */, makeTypeEnum({"RED", "GREEN", "YELLOW"}),
                                    annotations);
             } else {
-                addActionDataField(dataJson, param.id(), param.name(), true /* mandatory */,
-                                   false /* read_only */, makeTypeBytes(param.bitwidth()),
-                                   annotations);
+                addActionDataField(
+                    dataJson, param.id(), param.name(), true /* mandatory */,
+                    false /* read_only */, makeTypeBitsOrBytes(param.bitwidth()), annotations);
             }
             addActionDataField(
                 dataJson, param.id(), param.name(), true /* mandatory */,

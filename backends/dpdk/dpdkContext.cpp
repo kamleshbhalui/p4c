@@ -120,6 +120,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
         }
     }
 
+<<<<<<< HEAD
     for (auto ed : structure->externDecls) {
         cstring externTypeName = "";
         if (auto type = ed->type->to<IR::Type_Name>()) {
@@ -725,8 +726,6 @@ void DpdkContextGenerator::addMatchValueLookupTables(Util::JsonArray* tablesJson
     outputLutTable(tablesJson);
 }
 
-
->>>>>>> Emit context json for MatchValueLookupTable externs (#19)
 const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
     auto* json = new Util::JsonObject();
     auto* tablesJson = new Util::JsonArray();
