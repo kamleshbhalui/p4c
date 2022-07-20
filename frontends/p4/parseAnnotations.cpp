@@ -20,35 +20,35 @@ namespace P4 {
 
 ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
     return {
-        // These annotations have empty bodies.
-        PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
-        PARSE_EMPTY(IR::Annotation::defaultOnlyAnnotation),
-        PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
-        PARSE_EMPTY(IR::Annotation::atomicAnnotation),
-        PARSE_EMPTY(IR::Annotation::optionalAnnotation),
-        PARSE_EMPTY(IR::Annotation::pureAnnotation),
-        PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
-        PARSE_EMPTY("disable_optimization"),
+            // These annotations have empty bodies.
+            PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
+            PARSE_EMPTY(IR::Annotation::defaultOnlyAnnotation),
+            PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
+            PARSE_EMPTY(IR::Annotation::atomicAnnotation),
+            PARSE_EMPTY(IR::Annotation::optionalAnnotation),
+            PARSE_EMPTY(IR::Annotation::pureAnnotation),
+            PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
+            PARSE_EMPTY("disable_optimization"),
 
-        // string literal argument.
-        PARSE(IR::Annotation::nameAnnotation, StringLiteral),
-        PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
-        PARSE(IR::Annotation::noWarnAnnotation, StringLiteral),
+            // string literal argument.
+            PARSE(IR::Annotation::nameAnnotation, StringLiteral),
+            PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
+            PARSE(IR::Annotation::noWarnAnnotation, StringLiteral),
+            PARSE(IR::Annotation::matchValueLookupTableAnnotation, StringLiteral),
+            // @length has an expression argument.
+            PARSE(IR::Annotation::lengthAnnotation, Expression),
 
-        // @length has an expression argument.
-        PARSE(IR::Annotation::lengthAnnotation, Expression),
+            // @pkginfo has a key-value list argument.
+            PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation),
 
-        // @pkginfo has a key-value list argument.
-        PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation),
+            // @synchronous has a list of method names
+            PARSE_EXPRESSION_LIST(IR::Annotation::synchronousAnnotation),
+            // @field_list also has a list of expressions
+            PARSE_EXPRESSION_LIST(IR::Annotation::fieldListAnnotation),
 
-        // @synchronous has a list of method names
-        PARSE_EXPRESSION_LIST(IR::Annotation::synchronousAnnotation),
-        // @field_list also has a list of expressions
-        PARSE_EXPRESSION_LIST(IR::Annotation::fieldListAnnotation),
-
-        // @match has an expression argument
-        PARSE(IR::Annotation::matchAnnotation, Expression),
-    };
+            // @match has an expression argument
+            PARSE(IR::Annotation::matchAnnotation, Expression),
+        };
 }
 
 bool ParseAnnotations::parseSkip(IR::Annotation*) { return false; }

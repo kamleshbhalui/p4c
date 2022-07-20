@@ -110,6 +110,15 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
             }
         }
     }
+    // for match value lookup tables decls
+    for (auto ed :  structure->externDecls) {
+        if (auto type = ed->type->to<IR::Type_Specialized>()) {
+            auto externTypeName = type->baseType->path->name.name;
+            if (externTypeName == "MatchValueLookupTable") {
+                mvlTables.push_back(ed);
+            }
+        }
+    }
 
     for (auto ed : structure->externDecls) {
         cstring externTypeName = "";
@@ -518,6 +527,206 @@ void DpdkContextGenerator::addExternInfo(Util::JsonArray* externsJson) {
     }
 }
 
+void DpdkContextGenerator::UpdateMatchKeys(P4MatchLookupTableInfo* emvlut, const IR::Type* type) {
+    if (type->is<IR::Type_Bits>()) {
+        auto key = new MatchKeyField();
+        key->name = "";
+        key->isInstanceName = true;
+        key->instanceName = "meta";
+        key->isFieldName = true;
+        key->fieldName = "key";
+        key->matchType = exact;
+        key->startBit = 0;
+        key->bitWidth = type->to<IR::Type_Bits>()->width_bits();
+        key->bitWidthFull = type->to<IR::Type_Bits>()->width_bits();
+        key->index = 0;
+        emvlut->keyList.push_back(key);
+    }
+}
+
+void DpdkContextGenerator::UpdateImmediateFields(P4MatchLookupTableInfo* emvlut,
+    const IR::Type* type) {
+    int index = 0;
+    int size = 0;
+    if (type->is<IR::Type_Struct>()) {
+        for (auto f : type->to<IR::Type_Struct>()->fields) {
+            if (f->type->is<IR::Type_Bits>()) {
+                auto param = new ImmediateFields();
+                param->param_name = f->name.name;
+                param->param_handle = index++;
+                param->dest_start = size;
+                auto sz = f->type->to<IR::Type_Bits>()->width_bits();
+                param->dest_width = sz;
+                size += sz >> 3;
+                emvlut->matchAttributes->hardware_blocks.at(0)->immediate_fields.push_back(param);
+            }
+       }
+    }
+}
+
+void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_Instance* d) {
+    cstring ctrl_name="";
+    if (d->arguments->size() < 3) {
+        ::error("%1%vRequires 3 arguments, provided  %2% arguments", d->externalName(),
+                d->arguments->size());
+        return;
+    }
+
+    auto annotations = d->getAnnotations();
+    if (annotations == nullptr) return;
+
+    auto lut_type = annotations->getSingle(IR::Annotation::matchValueLookupTableAnnotation);
+    if (lut_type == nullptr) return;
+    auto resnameexpr = lut_type->expr.at(0);
+    if (resnameexpr->is<IR::StringLiteral>() == false) return;
+
+    auto resname = resnameexpr->to<IR::StringLiteral>()->value;
+
+    /* validate resource name */
+    if (resname != "mirror_profile") {
+        ::error("Invalid argument '%1%' for 'mvlt_type' annotation for '%2%'"
+                " it should be '%3%'.",
+                resname, d->externalName(), "mirror_profile");
+        return;
+    }
+
+    auto type = typemap->getType(d);
+    if (type->is<IR::Type_SpecializedCanonical>() == false) return;
+
+    auto exactMVLut = new  P4MatchLookupTableInfo();
+    exactMVLut->handle = getNewTableHandle();
+    exactMVLut->ctrlName = ctrl_name;
+    exactMVLut->tblName = d->externalName();
+    exactMVLut->p4Hidden = false;
+    exactMVLut->isP4Hidden = true;
+    if (d->arguments->at(0)->expression->is<IR::Constant>()) {
+        exactMVLut->size = d->arguments->at(0)->expression->to<IR::Constant>()->asInt();
+    } else {
+        exactMVLut->size = 255;
+    }
+    exactMVLut->isSize = true;
+    auto typelist = type->to<IR::Type_SpecializedCanonical>()->arguments;
+    auto type0 =  typelist->at(0);
+    if (!type0->is<IR::Type_Bits>()) {
+        ::error("Invalid key type '%1%' for '%2%' 'Type_Bits' expected.", type0, d->externalName());
+        return;
+    }
+    auto type1 = typelist->at(1);
+    if (resname == "mirror_profile") {
+        if (auto s = type1->to<IR::Type_Struct>()) {
+            if (s->fields.size() != 2)
+                ::error("mirror profile expect exactly two immediate key in %1%.", type1);
+            /*auto fields =  s->fields;
+            if (fields[0]->name != "trunc_size"
+                    || fields[1]->name != "store_port") {
+                ::error("mirror profile for expect exactly two immediate key in"
+                        " %1% with name trunc_size and store_port.", type1);
+            }*/
+        }
+    }
+    auto hwblk = new LookupHwBlocks();
+    hwblk->resource = resname;
+    hwblk->resource_id = 0;
+    exactMVLut->matchAttributes = new LookupMatchAttributes();
+    exactMVLut->matchAttributes->hardware_blocks.push_back(hwblk);
+    UpdateMatchKeys(exactMVLut, type0);
+    UpdateImmediateFields(exactMVLut, type1);
+    contextLutTables.push_back(exactMVLut);
+}
+
+void DpdkContextGenerator::outputImmediateField(Util::JsonArray* immFields,
+        ImmediateFields* immfld) {
+    auto* immField = new Util::JsonObject();
+    immField->emplace("param_name", immfld->param_name);
+    immField->emplace("param_handle", immfld->param_handle);
+    immField->emplace("dest_start", immfld->dest_start);
+    immField->emplace("dest_width", immfld->dest_width);
+    immFields->append(immField);
+}
+
+void DpdkContextGenerator::outputKeys(Util::JsonObject* keyJsonObj,
+    std::vector<struct MatchKeyField*> &keylist) {
+    auto* keyJsons = new Util::JsonArray();
+    keyJsonObj->emplace("match_key_fields", keyJsons);
+
+    for (auto keyInfo : keylist) {
+        auto* keyJson = new Util::JsonObject();
+        keyJsons->append(keyJson);
+        keyJson->emplace("name", keyInfo->name);
+        if (keyInfo->isInstanceName) {
+            keyJson->emplace("instance_name", keyInfo->instanceName);
+        }
+        if (keyInfo->isFieldName) {
+            keyJson->emplace("field_name", keyInfo->fieldName);
+        }
+        if (keyInfo->matchType == exact) {
+            keyJson->emplace("match_type", "exact");
+        } else if (keyInfo->matchType == ternary) {
+            keyJson->emplace("match_type", "ternary");
+        } else if (keyInfo->matchType == lpm) {
+            keyJson->emplace("match_type", "lpm");
+        } else if (keyInfo->matchType == range) {
+            keyJson->emplace("match_type", "range");
+        } else if (keyInfo->matchType == selector) {
+            keyJson->emplace("match_type", "selector");
+        }
+        keyJson->emplace("start_bit", keyInfo->startBit);
+        keyJson->emplace("bit_width", keyInfo->bitWidth);
+        keyJson->emplace("bit_width_full", keyInfo->bitWidthFull);
+        keyJson->emplace("index", keyInfo->index);
+        keyJson->emplace("position", keyInfo->position);
+    }
+}
+
+void DpdkContextGenerator::outputLutMatchAttributes(Util::JsonObject* matchJsons,
+     struct P4MatchLookupTableInfo* tblInfo) {
+    auto* matchAttr0 = new Util::JsonObject();
+    auto* matchAttrs = new Util::JsonArray();
+    matchJsons->emplace("match_attributes", matchAttr0);
+    matchAttr0->emplace("stage_tables", matchAttrs);
+    if (tblInfo->matchAttributes != nullptr) {
+        for (auto hwBlock : tblInfo->matchAttributes->hardware_blocks) {
+            auto* matchAttr = new Util::JsonObject();
+            matchAttr->emplace("resource", hwBlock->resource);
+            matchAttr->emplace("resource_id", hwBlock->resource_id);
+            auto* immFields = new Util::JsonArray();
+            matchAttr->emplace("immediate_fields", immFields);
+            for (auto immfld : hwBlock->immediate_fields) {
+                outputImmediateField(immFields, immfld);
+            }
+            matchAttrs->append(matchAttr);
+        }
+    }
+}
+
+void DpdkContextGenerator::outputLutTable(Util::JsonArray* tablesJson) {
+    for (auto tbl : contextLutTables) {
+        auto* tableJson = new Util::JsonObject();
+        tableJson->emplace("table_type", "MatchValueLookupTable");
+        tableJson->emplace("handle", tbl->handle);
+        tableJson->emplace("name", tbl->tblName);
+        if (tbl->isSize) {
+            tableJson->emplace("size", tbl->size);
+        }
+        if (tbl->isP4Hidden) {
+            tableJson->emplace("p4_hidden", tbl->p4Hidden);
+        }
+        tablesJson->append(tableJson);
+        outputKeys(tableJson, tbl->keyList);
+        outputLutMatchAttributes(tableJson, tbl);
+    }
+}
+
+// Add match value lookup tables to the context json
+void DpdkContextGenerator::addMatchValueLookupTables(Util::JsonArray* tablesJson) {
+    for (auto tbl : mvlTables) {
+        ProcessMatchValueLookupTable(tbl);
+    }
+    outputLutTable(tablesJson);
+}
+
+
+>>>>>>> Emit context json for MatchValueLookupTable externs (#19)
 const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
     auto* json = new Util::JsonObject();
     auto* tablesJson = new Util::JsonArray();
@@ -534,6 +743,7 @@ const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
     addMatchTables(tablesJson);
     json->emplace("externs", externsJson);
     addExternInfo(externsJson);
+    addMatchValueLookupTables(tablesJson);
     return json;
 }
 
