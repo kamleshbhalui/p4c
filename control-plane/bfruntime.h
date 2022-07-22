@@ -155,10 +155,10 @@ static inline Util::JsonObject* makeTypeBool(boost::optional<bool> defaultValue 
     return typeObj;
 }
 
-static inline Util::JsonObject* makeTypeBits(int width,
+static inline Util::JsonObject* makeTypeBytes(int width,
         boost::optional<int64_t> defaultValue = boost::none) {
     auto* typeObj = new Util::JsonObject();
-    typeObj->emplace("type", "bits");
+    typeObj->emplace("type", "bytes");
     typeObj->emplace("width", width);
     if (defaultValue != boost::none) typeObj->emplace("default_value", *defaultValue);
     return typeObj;

@@ -157,6 +157,7 @@ struct P4MatchLookupTableInfo {
     cstring name;
     cstring ctrlName;
     cstring tblName;
+    cstring targetName;
     unsigned int size;
     bool isSize;
     bool p4Hidden;

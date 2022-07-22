@@ -592,6 +592,11 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     exactMVLut->handle = getNewTableHandle();
     exactMVLut->ctrlName = ctrl_name;
     exactMVLut->tblName = d->externalName();
+    for (auto kv : structure->pipelines) {
+        auto control = kv.second->to<IR::P4Control>();
+        cstring tableName = control->name.originalName + "." + d->name.originalName;
+        exactMVLut->targetName =  tableName;
+    }
     exactMVLut->p4Hidden = false;
     exactMVLut->isP4Hidden = true;
     if (d->arguments->at(0)->expression->is<IR::Constant>()) {
@@ -697,9 +702,10 @@ void DpdkContextGenerator::outputLutMatchAttributes(Util::JsonObject* matchJsons
 void DpdkContextGenerator::outputLutTable(Util::JsonArray* tablesJson) {
     for (auto tbl : contextLutTables) {
         auto* tableJson = new Util::JsonObject();
-        tableJson->emplace("table_type", "MatchValueLookupTable");
+        tableJson->emplace("table_type", "match_value_lookup_table");
         tableJson->emplace("handle", tbl->handle);
         tableJson->emplace("name", tbl->tblName);
+        tableJson->emplace("target_name", tbl->targetName);
         if (tbl->isSize) {
             tableJson->emplace("size", tbl->size);
         }
