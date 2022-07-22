@@ -18,7 +18,7 @@
           "mandatory" : false,
           "match_type" : "Ternary",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 8
           }
         },
@@ -78,7 +78,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 32
           }
         },
@@ -90,7 +90,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 32
           }
         },
@@ -102,7 +102,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 8
           }
         },
@@ -114,7 +114,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 16
           }
         },
@@ -126,7 +126,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 16
           }
         }

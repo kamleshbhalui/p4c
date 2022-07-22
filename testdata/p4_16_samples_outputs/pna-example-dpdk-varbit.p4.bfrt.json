@@ -18,7 +18,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 48
           }
         }
@@ -45,19 +45,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 1,
-              "name" : "param",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             }
@@ -85,7 +73,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 48
           }
         }
@@ -112,19 +100,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 48
-              }
-            },
-            {
-              "id" : 1,
-              "name" : "param",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 48
               }
             }

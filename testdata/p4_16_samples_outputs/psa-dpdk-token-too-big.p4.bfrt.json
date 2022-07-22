@@ -18,7 +18,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 48
           }
         }
@@ -38,19 +38,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 48
-              }
-            },
-            {
-              "id" : 1,
-              "name" : "ethernet_dst_addr",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 48
               }
             },
@@ -62,19 +50,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 48
-              }
-            },
-            {
-              "id" : 2,
-              "name" : "ethernet_src_addr",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 48
               }
             },
@@ -86,19 +62,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 3,
-              "name" : "ethernet_ether_type",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -110,19 +74,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 8
-              }
-            },
-            {
-              "id" : 4,
-              "name" : "ipv4_ver_ihl",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 8
               }
             },
@@ -134,19 +86,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 8
-              }
-            },
-            {
-              "id" : 5,
-              "name" : "ipv4_diffserv",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 8
               }
             },
@@ -158,19 +98,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 6,
-              "name" : "ipv4_total_len",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -182,19 +110,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 7,
-              "name" : "ipv4_identification",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -206,19 +122,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 8,
-              "name" : "ipv4_flags_offset",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -230,19 +134,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 8
-              }
-            },
-            {
-              "id" : 9,
-              "name" : "ipv4_ttl",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 8
               }
             },
@@ -254,19 +146,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 8
-              }
-            },
-            {
-              "id" : 10,
-              "name" : "ipv4_protocol",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 8
               }
             },
@@ -278,19 +158,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 11,
-              "name" : "ipv4_hdr_checksum",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -302,19 +170,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 32
-              }
-            },
-            {
-              "id" : 12,
-              "name" : "ipv4_src_addr",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 32
               }
             },
@@ -326,19 +182,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 32
-              }
-            },
-            {
-              "id" : 13,
-              "name" : "ipv4_dst_addr",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 32
               }
             },
@@ -350,19 +194,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 14,
-              "name" : "udp_src_port",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -374,19 +206,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 15,
-              "name" : "udp_dst_port",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -398,19 +218,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 16,
-              "name" : "udp_length",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -422,19 +230,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 16
-              }
-            },
-            {
-              "id" : 17,
-              "name" : "udp_checksum",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 16
               }
             },
@@ -446,19 +242,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 8
-              }
-            },
-            {
-              "id" : 18,
-              "name" : "vxlan_flags",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 8
               }
             },
@@ -470,19 +254,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 24
-              }
-            },
-            {
-              "id" : 19,
-              "name" : "vxlan_reserved",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 24
               }
             },
@@ -494,19 +266,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 24
-              }
-            },
-            {
-              "id" : 20,
-              "name" : "vxlan_vni",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 24
               }
             },
@@ -518,19 +278,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 8
-              }
-            },
-            {
-              "id" : 21,
-              "name" : "vxlan_reserved2",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 8
               }
             },
@@ -542,19 +290,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 32
-              }
-            },
-            {
-              "id" : 22,
-              "name" : "port_out",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 32
               }
             }

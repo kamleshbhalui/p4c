@@ -18,7 +18,7 @@
           "mandatory" : false,
           "match_type" : "LPM",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 48
           }
         },
@@ -30,7 +30,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 48
           }
         },
@@ -42,7 +42,7 @@
           "mandatory" : false,
           "match_type" : "Exact",
           "type" : {
-            "type" : "bits",
+            "type" : "bytes",
             "width" : 8
           }
         }

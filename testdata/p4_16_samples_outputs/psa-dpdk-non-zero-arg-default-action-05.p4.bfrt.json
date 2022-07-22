@@ -25,19 +25,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 32
-              }
-            },
-            {
-              "id" : 1,
-              "name" : "tmp1",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 32
               }
             },
@@ -49,19 +37,7 @@
               "read_only" : false,
               "annotations" : [],
               "type" : {
-                "type" : "bits",
-                "width" : 32
-              }
-            },
-            {
-              "id" : 2,
-              "name" : "tmp2",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bits",
+                "type" : "bytes",
                 "width" : 32
               }
             }
