@@ -528,21 +528,32 @@ void DpdkContextGenerator::addExternInfo(Util::JsonArray* externsJson) {
     }
 }
 
-void DpdkContextGenerator::UpdateMatchKeys(P4MatchLookupTableInfo* emvlut, const IR::Type* type) {
+void DpdkContextGenerator::UpdateMatchKeys(P4MatchLookupTableInfo* emvlut,
+                                           const IR::Type* type,
+                                           cstring instanceName) {
+    auto key = new MatchKeyField();
     if (type->is<IR::Type_Bits>()) {
-        auto key = new MatchKeyField();
-        key->name = "";
-        key->isInstanceName = true;
-        key->instanceName = "meta";
-        key->isFieldName = true;
-        key->fieldName = "key";
-        key->matchType = exact;
-        key->startBit = 0;
+        key->name = instanceName + "_key";
         key->bitWidth = type->to<IR::Type_Bits>()->width_bits();
         key->bitWidthFull = type->to<IR::Type_Bits>()->width_bits();
-        key->index = 0;
-        emvlut->keyList.push_back(key);
+    } else if (auto st = type->to<IR::Type_Struct>()) {
+        auto field = st->fields[0];
+        key->name = field->name;
+        key->bitWidth = field->type->to<IR::Type_Bits>()->width_bits();
+        key->bitWidthFull = field->type->to<IR::Type_Bits>()->width_bits();
+    } else {
+        ::error("invalid key type %1% for MatchValueLookupTable"
+                "only Type_Bits and Type_Struct with singled field allowed",
+                type->toString());
     }
+    key->isInstanceName = true;
+    key->instanceName = "meta";
+    key->isFieldName = true;
+    key->fieldName = "key";
+    key->matchType = exact;
+    key->startBit = 0;
+    key->index = 0;
+    emvlut->keyList.push_back(key);
 }
 
 void DpdkContextGenerator::UpdateImmediateFields(P4MatchLookupTableInfo* emvlut,
@@ -607,8 +618,9 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     exactMVLut->isSize = true;
     auto typelist = type->to<IR::Type_SpecializedCanonical>()->arguments;
     auto type0 =  typelist->at(0);
-    if (!type0->is<IR::Type_Bits>()) {
-        ::error("Invalid key type '%1%' for '%2%' 'Type_Bits' expected.", type0, d->externalName());
+    if (!type0->is<IR::Type_Bits>() && !type0->is<IR::Type_Struct>()) {
+        ::error("Invalid key type '%1%' for '%2%' 'Type_Bits' or 'Type_Struct'"
+                "expected.", type0, d->externalName());
         return;
     }
     auto type1 = typelist->at(1);
@@ -616,12 +628,6 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
         if (auto s = type1->to<IR::Type_Struct>()) {
             if (s->fields.size() != 2)
                 ::error("mirror profile expect exactly two immediate key in %1%.", type1);
-            /*auto fields =  s->fields;
-            if (fields[0]->name != "trunc_size"
-                    || fields[1]->name != "store_port") {
-                ::error("mirror profile for expect exactly two immediate key in"
-                        " %1% with name trunc_size and store_port.", type1);
-            }*/
         }
     }
     auto hwblk = new LookupHwBlocks();
@@ -629,7 +635,7 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     hwblk->resource_id = 0;
     exactMVLut->matchAttributes = new LookupMatchAttributes();
     exactMVLut->matchAttributes->hardware_blocks.push_back(hwblk);
-    UpdateMatchKeys(exactMVLut, type0);
+    UpdateMatchKeys(exactMVLut, type0,  exactMVLut->tblName);
     UpdateImmediateFields(exactMVLut, type1);
     contextLutTables.push_back(exactMVLut);
 }

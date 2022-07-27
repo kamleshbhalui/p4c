@@ -482,13 +482,15 @@ struct Param {
 
 struct MatchValueLookupTable {
     const cstring name;
+    cstring keyName;
     uint32_t keyBitwidth;
     std::vector<Param> params;
     const uint32_t size;
     const IR::IAnnotated* annotations;
-    MatchValueLookupTable(cstring n, uint32_t kbw, std::vector<Param> params_list,
+    MatchValueLookupTable(cstring n, cstring keyname, uint32_t kbw, std::vector<Param> params_list,
                           uint32_t sz, const IR::IAnnotated* annos = nullptr) :
-        name(n), keyBitwidth(kbw), params(params_list), size(sz), annotations(annos) {}
+        name(n), keyName(keyname), keyBitwidth(kbw), params(params_list),
+        size(sz), annotations(annos) {}
 
     static void add_mvlut_param(uint32_t &param_count, std::vector<Param>* params_list,
                          const IR::Type* type, cstring decl_name, cstring prefix) {
@@ -524,17 +526,28 @@ struct MatchValueLookupTable {
         // get key parameter bitwidth
         uint32_t key_parameter_bitwidth = 0;
         auto arg1_type = type->arguments->at(0);
-        if (auto atype = arg1_type->to<IR::Type_Bits>()) {
+        cstring key_parameter_name="";
+        if (auto atype = arg1_type->to<IR::Type_Name>()) {
+            auto btype = typeMap->getTypeType(atype, true);
+            for (auto f : btype->to<IR::Type_Struct>()->fields) {
+                key_parameter_name += f->name;
+            }
+            auto  fwidth = (uint32_t)btype->width_bits();
+            key_parameter_bitwidth = fwidth;
+        } else if (auto atype = arg1_type->to<IR::Type_Bits>()) {
             key_parameter_bitwidth = (uint32_t)atype->width_bits();
+            key_parameter_name = decl->name + "_key";
         } else {
             error("%1%: Invalid key type as argument 1, only bit types are supported", decl);
         }
         // get size field value
         auto size_param = instance->getParameterValue("size")->to<IR::Constant>();
         // create the MVLUT object
-        MatchValueLookupTable tbl = { decl->controlPlaneName(), key_parameter_bitwidth, {},
-                                  (uint32_t)size_param->value,
-                                  decl->to<IR::IAnnotated>() };
+        MatchValueLookupTable tbl = { decl->controlPlaneName(),
+                                      key_parameter_name,
+                                      key_parameter_bitwidth, {},
+                                      (uint32_t)size_param->value,
+                                      decl->to<IR::IAnnotated>() };
 
         // record the parameter values for MVLUT
         uint32_t param_count = 1;
@@ -989,7 +1002,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         // set fixed match filed
         auto match = emvlt_->add_match_fields();
         match->set_id(1);
-        match->set_name("");
+        match->set_name(emvltInstance.keyName);
         match->set_bitwidth(emvltInstance.keyBitwidth);
         match->set_match_type(p4configv1::MatchField_MatchType_EXACT);
         // set values
