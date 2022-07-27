@@ -536,7 +536,11 @@ struct MatchValueLookupTable {
             key_parameter_bitwidth = fwidth;
         } else if (auto atype = arg1_type->to<IR::Type_Bits>()) {
             key_parameter_bitwidth = (uint32_t)atype->width_bits();
-            key_parameter_name = decl->name + "_key";
+            key_parameter_name = decl->controlPlaneName();
+            const char* key_name_cstr = key_parameter_name.findlast('.');
+            key_name_cstr++;  // eats .
+            key_parameter_name = cstring(key_name_cstr);
+            key_parameter_name = key_parameter_name + "_key";
         } else {
             error("%1%: Invalid key type as argument 1, only bit types are supported", decl);
         }

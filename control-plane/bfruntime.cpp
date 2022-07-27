@@ -836,7 +836,7 @@ BFRuntimeGenerator::addMatchValueLookupTables(Util::JsonArray* tables_json_array
          auto* annotations = transformAnnotations(pre.annotations().begin(),
                                                   pre.annotations().end());
          cstring table_name = IR::P4Program::main + "." + pre.name();
-         cstring table_type = "match_value_lookup_table";
+         cstring table_type = "MatchValueLookupTable";
          auto table_json = this->initTableJson((std::string)table_name, pre.id(), table_type,
                                             emvlt.size(), annotations);
          table_json->emplace("has_const_default_action", false);

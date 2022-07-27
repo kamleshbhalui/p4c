@@ -533,7 +533,11 @@ void DpdkContextGenerator::UpdateMatchKeys(P4MatchLookupTableInfo* emvlut,
                                            cstring instanceName) {
     auto key = new MatchKeyField();
     if (type->is<IR::Type_Bits>()) {
-        key->name = instanceName + "_key";
+        const char* key_name_cstr = instanceName.findlast('.');
+        key_name_cstr++;  // eats .
+        instanceName = cstring(key_name_cstr);
+        instanceName = instanceName + "_key";
+        key->name = instanceName;
         key->bitWidth = type->to<IR::Type_Bits>()->width_bits();
         key->bitWidthFull = type->to<IR::Type_Bits>()->width_bits();
     } else if (auto st = type->to<IR::Type_Struct>()) {
@@ -635,7 +639,7 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     hwblk->resource_id = 0;
     exactMVLut->matchAttributes = new LookupMatchAttributes();
     exactMVLut->matchAttributes->hardware_blocks.push_back(hwblk);
-    UpdateMatchKeys(exactMVLut, type0,  exactMVLut->tblName);
+    UpdateMatchKeys(exactMVLut, type0,  d->externalName());
     UpdateImmediateFields(exactMVLut, type1);
     contextLutTables.push_back(exactMVLut);
 }
