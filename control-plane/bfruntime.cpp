@@ -856,7 +856,7 @@ BFRuntimeGenerator::addMatchValueLookupTables(Util::JsonArray* tables_json_array
                       BUG("Invalid oneof case for the match type of table '%1%'", pre.name());
                       break;
               }
-              addKeyField(keys_json, mf.id(), mf.name(), false /* mandatory */,
+              addKeyField(keys_json, mf.id(), mf.name(), true /* mandatory */,
                      *match_type, makeTypeBytes(mf.bitwidth(), boost::none));
          }
          table_json->emplace("key", keys_json);
@@ -865,7 +865,7 @@ BFRuntimeGenerator::addMatchValueLookupTables(Util::JsonArray* tables_json_array
               auto data_obj = makeCommonDataField(p.id(), p.name(),
                                                   makeTypeBytes(p.bitwidth()),
                                                     false /* repeated */);
-              data_obj->emplace("mandatory", false);
+              data_obj->emplace("mandatory", true);
               data_obj->emplace("read_only", false);
               data_json->append(data_obj);
          }
