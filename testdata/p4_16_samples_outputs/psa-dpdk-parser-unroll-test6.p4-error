@@ -1,0 +1,3 @@
+psa-dpdk-parser-unroll-test6.p4(41): [--Wwarn=parser-transition] warning: f: implicit transition to `reject'
+  state f {
+        ^

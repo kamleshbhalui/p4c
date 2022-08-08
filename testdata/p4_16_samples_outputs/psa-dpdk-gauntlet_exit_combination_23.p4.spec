@@ -1,0 +1,84 @@
+
+struct ethernet_t {
+	bit<48> dst_addr
+	bit<48> src_addr
+	bit<16> eth_type
+}
+
+struct psa_ingress_output_metadata_t {
+	bit<8> class_of_service
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+	bit<8> resubmit
+	bit<32> multicast_group
+	bit<32> egress_port
+}
+
+struct psa_egress_output_metadata_t {
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+}
+
+struct psa_egress_deparser_input_metadata_t {
+	bit<32> egress_port
+}
+
+header eth_hdr instanceof ethernet_t
+
+struct Meta {
+	bit<32> psa_ingress_input_metadata_ingress_port
+	bit<8> psa_ingress_output_metadata_drop
+	bit<32> psa_ingress_output_metadata_egress_port
+	bit<48> Ingress_tmp
+	bit<8> Ingress_hasExited
+}
+metadata instanceof Meta
+
+action NoAction args none {
+	return
+}
+
+action simple_action args none {
+	mov h.eth_hdr.dst_addr 0x1
+	mov m.Ingress_hasExited 1
+	return
+}
+
+table simple_table {
+	key {
+		h.eth_hdr.eth_type exact
+	}
+	actions {
+		simple_action
+		NoAction
+	}
+	default_action NoAction args none 
+	size 0x10000
+}
+
+
+apply {
+	rx m.psa_ingress_input_metadata_ingress_port
+	mov m.psa_ingress_output_metadata_drop 0x0
+	extract h.eth_hdr
+	mov m.Ingress_hasExited 0
+	table simple_table
+	jmpa LABEL_SWITCH simple_action
+	jmp LABEL_ENDSWITCH
+	LABEL_SWITCH :	jmpneq LABEL_FALSE m.Ingress_hasExited 0x1
+	jmp LABEL_ENDSWITCH
+	LABEL_FALSE :	mov m.Ingress_hasExited 1
+	LABEL_ENDSWITCH :	jmpneq LABEL_FALSE_0 m.Ingress_hasExited 0x1
+	jmp LABEL_END_0
+	LABEL_FALSE_0 :	mov m.Ingress_tmp h.eth_hdr.src_addr
+	add m.Ingress_tmp h.eth_hdr.dst_addr
+	mov h.eth_hdr.dst_addr m.Ingress_tmp
+	LABEL_END_0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	emit h.eth_hdr
+	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_DROP :	drop
+}
+
+

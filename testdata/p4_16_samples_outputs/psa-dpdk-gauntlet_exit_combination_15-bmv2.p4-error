@@ -1,0 +1,6 @@
+psa-dpdk-gauntlet_exit_combination_15-bmv2.p4(54): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            48w1: exact @name("Vmhbwk") ;
+            ^^^^
+psa-dpdk-gauntlet_exit_combination_15-bmv2.p4(54): [--Wwarn=mismatch] warning: 48w1: Constant key field
+            48w1: exact @name("Vmhbwk") ;
+            ^^^^

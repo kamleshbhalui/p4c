@@ -1,0 +1,55 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 34411041
+    name: "ingressControlImpl.stub"
+    alias: "stub"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.vlan_tag[meta.depth].vid"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28119643
+  }
+  const_default_action_id: 28119643
+  size: 1000000
+}
+tables {
+  preamble {
+    id: 48274176
+    name: "ingressControlImpl.stub1"
+    alias: "stub1"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.ethernet.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25418768
+  }
+  const_default_action_id: 25418768
+  size: 1000000
+}
+actions {
+  preamble {
+    id: 28119643
+    name: "ingressControlImpl.execute"
+    alias: "execute"
+  }
+}
+actions {
+  preamble {
+    id: 25418768
+    name: "ingressControlImpl.execute_1"
+    alias: "execute_1"
+  }
+}
+type_info {
+}

@@ -1,0 +1,10 @@
+pkg_info {
+  arch: "psa"
+}
+actions {
+  preamble {
+    id: 25324817
+    name: "IngressImpl.update_value"
+    alias: "update_value"
+  }
+}

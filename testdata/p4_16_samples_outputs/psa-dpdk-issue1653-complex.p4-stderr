@@ -1,0 +1,9 @@
+psa-dpdk-issue1653-complex.p4(118): [--Wwarn=invalid_header] warning: accessing a field of an invalid header bh
+        bh.row.alt0.useHash = h.bvh0.row.alt0.useHash;
+        ^^
+psa-dpdk-issue1653-complex.p4(119): [--Wwarn=invalid_header] warning: accessing a field of an invalid header bh
+        bh.row.alt1.type = EthTypes.IPv4;
+        ^^
+psa-dpdk-issue1653-complex.p4(120): [--Wwarn=invalid_header] warning: accessing a field of an invalid header bh
+        h.bvh0.row.alt1.type = bh.row.alt1.type;
+                               ^^

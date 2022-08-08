@@ -1,4 +1,39 @@
 p4c_add_xfail_reason("dpdk"
+  "Unhandled type for varbit<32> Ingress_s"
+    testdata/p4_16_samples/psa-dpdk-issue447-5.p4
+  )
+
+  p4c_add_xfail_reason("dpdk"
+  "Field local_metadata_ipv4_lkp_ipv4_sa is not a member of structure struct M"
+  testdata/p4_16_samples/psa-dpdk-hash.p4
+  )
+
+  p4c_add_xfail_reason("dpdk"
+  "ostd: declaration not found"
+  testdata/p4_16_samples/psa-dpdk-issue1660.p4
+  )
+
+  p4c_add_xfail_reason("dpdk"
+  "not implemented"
+  testdata/p4_16_samples/psa-dpdk-issue1630.p4
+  )
+
+  p4c_add_xfail_reason("dpdk"
+  "Error compiling"
+  testdata/p4_16_samples/psa-dpdk-issue2314.p4
+)
+
+  p4c_add_xfail_reason("dpdk"
+  "Error compiling"
+  testdata/p4_16_samples/psa-dpdk-pred.p4 
+)
+
+p4c_add_xfail_reason("dpdk"
+"Error compiling"
+testdata/p4_16_samples/psa-dpdk-issue1653-complex.p4
+)
+
+p4c_add_xfail_reason("dpdk"
   "Expected packet length argument for count method of indirect counter"
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
