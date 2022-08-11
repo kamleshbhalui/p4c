@@ -2448,4 +2448,111 @@ const IR::Node* ElimHeaderCopy::postorder(IR::Member* m) {
     return m;
 }
 
+int EmitDpdkTableConfig::getTypeWidth(const IR::Type* type,
+                                      P4::TypeMap* typeMap) {
+    /* Treat error type as string */
+    if (type->is<IR::Type_Error>())
+        return 0;
+    return typeMap->widthBits(type, type->getNode(), false);
+}
+
+big_int EmitDpdkTableConfig::convertSimpleKeyExpressionToBigInt(
+            const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap) {
+    if (k->is<IR::Constant>()) {
+        return k->to<IR::Constant>()->value;
+    } else if (k->is<IR::BoolLiteral>()) {
+        return static_cast<big_int>(k->to<IR::BoolLiteral>()->value
+                                    ? 1 : 0);
+    } else if (k->is<IR::Member>()) {  // handle SerEnum members
+            auto mem = k->to<IR::Member>();
+            auto se = mem->type->to<IR::Type_SerEnum>();
+            auto ei = P4::EnumInstance::resolve(mem, typeMap);
+            if (!ei) return -1;
+            if (auto sei = ei->to<P4::SerEnumInstance>()) {
+                auto type = sei->value->to<IR::Constant>();
+                auto w = se->type->width_bits();
+                BUG_CHECK(w == keyWidth, "SerEnum bitwidth mismatch");
+                return type->value;
+            }
+            ::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
+            return -1;
+    } else if (k->is<IR::Cast>()) {
+        return convertSimpleKeyExpressionToBigInt(k->to<IR::Cast>()->expr, keyWidth, typeMap);
+    } else {
+        ::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
+        return -1;
+    }
+}
+
+void EmitDpdkTableConfig::addAction(const IR::Expression* actionRef,
+                P4::ReferenceMap* refMap,
+                P4::TypeMap* typeMap) {
+    auto actionCall = actionRef->to<IR::MethodCallExpression>();
+    auto method = actionCall->method->to<IR::PathExpression>()->path;
+    auto decl = refMap->getDeclaration(method, true);
+    auto actionDecl = decl->to<IR::P4Action>();
+    auto actionName = actionDecl->controlPlaneName();
+    dpdkTableConfigFile<<actionName<<" ";
+    std::vector<cstring> paramNames;
+    std::vector<big_int> argVals;
+    auto parameter = actionDecl->parameters->parameters.at(0);
+    auto type = typeMap->getType(parameter);
+    if (auto actArg = type->to<IR::Type_Struct>()) {
+        for (auto f : actArg->fields)
+            paramNames.push_back(f->name);
+    }
+    for (auto args : *actionCall->arguments) {
+        for (auto arg : args->expression->to<IR::ListExpression>()->components) {
+            auto ei = P4::EnumInstance::resolve(arg, typeMap);
+            if (arg->is<IR::Constant>()) {
+                auto constant = arg->to<IR::Constant>();
+                auto argValue = constant->value;
+                argVals.push_back(argValue);
+            } else if (arg->is<IR::BoolLiteral>()) {
+                auto constant = arg->to<IR::BoolLiteral>();
+                auto argValue = static_cast<big_int>(constant->value ? 1 : 0);
+                argVals.push_back(argValue);
+            } else if (ei != nullptr && ei->is<P4::SerEnumInstance>()) {
+                auto sei = ei->to<P4::SerEnumInstance>();
+                auto argValue = sei->value->to<IR::Constant>();
+                argVals.push_back(argValue->value);
+            } else {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1% unsupported argument expression", arg);
+                continue;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < argVals.size(); i++) {
+        dpdkTableConfigFile<<paramNames[i] << " "<< argVals[i]<<" ";
+    }
+}
+
+void EmitDpdkTableConfig::addMatchKey(const IR::P4Table* table,
+                     const IR::ListExpression* keyset,
+                     P4::TypeMap* typeMap) {
+        int keyIndex = 0;
+        for (auto k : keyset->components) {
+            auto tableKey = table->getKey()->keyElements.at(keyIndex++);
+            auto keyWidth = getTypeWidth(tableKey->expression->type, typeMap);
+            auto keyValue = convertSimpleKeyExpressionToBigInt(k, keyWidth, typeMap);
+            dpdkTableConfigFile<<keyValue<<" ";
+        }
+}
+
+void EmitDpdkTableConfig::postorder(const IR::P4Table* table) {
+    auto entriesList = table->getEntries();
+    if (entriesList == nullptr) return;
+    dpdkTableConfigFile.open(table->externalName()+".txt");
+    for (auto e : entriesList->entries) {
+        dpdkTableConfigFile<<"match ";
+        addMatchKey(table, e->getKeys(), typeMap);
+        dpdkTableConfigFile<<"action ";
+        addAction(e->getAction(), refMap, typeMap);
+        dpdkTableConfigFile<<"\n";
+    }
+    dpdkTableConfigFile.close();
+}
+
 }  // namespace DPDK

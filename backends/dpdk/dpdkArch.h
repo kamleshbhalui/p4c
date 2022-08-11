@@ -16,6 +16,7 @@ limitations under the License.
 
 #ifndef BACKENDS_DPDK_DPDKARCH_H_
 #define BACKENDS_DPDK_DPDKARCH_H_
+#include <fstream>
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -26,6 +27,8 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "dpdkProgramStructure.h"
 #include "constants.h"
+#include "lib/gmputil.h"
+#include "frontends/p4/enumInstance.h"
 
 namespace DPDK {
 
@@ -985,6 +988,26 @@ class ElimHeaderCopy : public Transform {
     const IR::Node* preorder(IR::AssignmentStatement* as) override;
     const IR::Node* preorder(IR::MethodCallStatement *mcs) override;
     const IR::Node* postorder(IR::Member* m) override;
+};
+
+class EmitDpdkTableConfig : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    std::ofstream dpdkTableConfigFile;
+
+    void addMatchKey(const IR::P4Table* table,
+                     const IR::ListExpression* keyset,
+                     P4::TypeMap* typeMap);
+    void addAction(const IR::Expression* actionRef,
+                   P4::ReferenceMap* refMap,
+                   P4::TypeMap* typeMap);
+    int getTypeWidth(const IR::Type* type, P4::TypeMap* typeMap);
+    big_int convertSimpleKeyExpressionToBigInt(
+        const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+ public:
+    EmitDpdkTableConfig(P4::ReferenceMap* refMap,
+                        P4::TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {}
+    void postorder(const IR::P4Table* table) override;
 };
 
 class DpdkArchFirst : public PassManager {

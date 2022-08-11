@@ -104,6 +104,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new InspectDpdkProgram(refMap, typeMap, &structure),
         new CheckExternInvocation(refMap, typeMap, &structure),
         new TypeWidthValidator(),
+        new EmitDpdkTableConfig(refMap, typeMap),
         new DpdkArchLast(),
         new VisitFunctor([this, genContextJson] {
             // Serialize context json object into user specified file
