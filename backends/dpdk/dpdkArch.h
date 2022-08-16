@@ -29,6 +29,9 @@ limitations under the License.
 #include "constants.h"
 #include "lib/gmputil.h"
 #include "frontends/p4/enumInstance.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/fromv1.0/v1model.h"
+
 
 namespace DPDK {
 
@@ -995,6 +998,16 @@ class EmitDpdkTableConfig : public Inspector {
     P4::TypeMap* typeMap;
     std::ofstream dpdkTableConfigFile;
 
+    void addExact(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addLpm(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addTernary(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addRange(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addOptional(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
     void addMatchKey(const IR::P4Table* table,
                      const IR::ListExpression* keyset,
                      P4::TypeMap* typeMap);
@@ -1002,8 +1015,12 @@ class EmitDpdkTableConfig : public Inspector {
                    P4::ReferenceMap* refMap,
                    P4::TypeMap* typeMap);
     int getTypeWidth(const IR::Type* type, P4::TypeMap* typeMap);
+    cstring getKeyMatchType(const IR::KeyElement* ke, P4::ReferenceMap* refMap);
     big_int convertSimpleKeyExpressionToBigInt(
         const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    void print(cstring str, cstring sep="");
+    void print(big_int, cstring sep="");
+
  public:
     EmitDpdkTableConfig(P4::ReferenceMap* refMap,
                         P4::TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {}
