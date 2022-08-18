@@ -2465,7 +2465,11 @@ void EmitDpdkTableConfig::print(cstring str, cstring sep) {
 }
 
 void EmitDpdkTableConfig::print(big_int str, cstring sep) {
-    dpdkTableConfigFile<<"0x"<<std::hex<<str<<sep;
+    try {
+        dpdkTableConfigFile<<"0x"<<std::hex<<str<<sep;
+    } catch(const std::runtime_error& re) {
+        dpdkTableConfigFile<<std::dec<<str<<sep;
+    }
 }
 
 big_int EmitDpdkTableConfig::convertSimpleKeyExpressionToBigInt(
@@ -2539,13 +2543,15 @@ void EmitDpdkTableConfig::addAction(const IR::Expression* actionRef,
 
         for (size_t i = 0; i < argVals.size(); i++) {
             print(paramNames[i], " ");
-            print(argVals[i]);
+            print(argVals[i], " ");
         }
     }
 }
 
 void EmitDpdkTableConfig::addExact(const IR::Expression* k,
                 int keyWidth, P4::TypeMap* typeMap) {
+    if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
+        return;
     auto value = convertSimpleKeyExpressionToBigInt(k, keyWidth, typeMap);
     print(value, " ");
 }
@@ -2659,9 +2665,9 @@ void EmitDpdkTableConfig::addMatchKey(const IR::P4Table* table,
               addLpm(k, keyWidth, typeMap);
             } else if (matchType == P4::P4CoreLibrary::instance.ternaryMatch.name) {
               addTernary(k, keyWidth, typeMap);
-            } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
+            } else if (matchType == "range") {
               addRange(k, keyWidth, typeMap);
-            } else if (matchType == P4V1::V1Model::instance.optionalMatchType.name) {
+            } else if (matchType == "optional") {
               addOptional(k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())

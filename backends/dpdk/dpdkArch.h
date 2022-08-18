@@ -30,8 +30,6 @@ limitations under the License.
 #include "lib/gmputil.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/fromv1.0/v1model.h"
-
 
 namespace DPDK {
 
@@ -993,6 +991,9 @@ class ElimHeaderCopy : public Transform {
     const IR::Node* postorder(IR::Member* m) override;
 };
 
+// This Pass emits Table config consumed by dpdk target in a text file if
+// const entries are present in p4 program.
+// Most of the code taken from control-plane/p4RuntimeSerializer.h/.cpp
 class EmitDpdkTableConfig : public Inspector {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
