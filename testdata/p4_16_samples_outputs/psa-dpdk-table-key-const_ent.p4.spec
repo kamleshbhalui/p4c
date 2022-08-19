@@ -56,14 +56,25 @@ struct execute_1_arg_t {
 	bit<48> x
 }
 
+struct execute_2_arg_t {
+	bit<48> x
+}
+
 struct metadata {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
+	bit<48> local_metadata_key1
+	bit<48> local_metadata_key2
+	bit<48> local_metadata_key3
+	bit<48> local_metadata_key4
 	bit<8> ingress_tbl_ethernet_isValid
 	bit<48> ingress_tbl_ethernet_dstAddr
 	bit<48> ingress_tbl_ethernet_srcAddr
+	bit<8> ingress_tbl1_ethernet_isValid
+	bit<48> ingress_tbl1_ethernet_dstAddr
+	bit<48> ingress_tbl1_ethernet_srcAddr
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -82,15 +93,39 @@ action execute_1 args instanceof execute_1_arg_t {
 	return
 }
 
+action execute_2 args instanceof execute_2_arg_t {
+	mov m.local_metadata_data 0x1
+	return
+}
+
 table tbl {
 	key {
 		m.ingress_tbl_ethernet_isValid exact
 		m.ingress_tbl_ethernet_dstAddr exact
 		m.ingress_tbl_ethernet_srcAddr exact
+		m.local_metadata_key1 wildcard
+		m.local_metadata_key2 wildcard
+		m.local_metadata_key4 wildcard
 	}
 	actions {
 		NoAction
 		execute_1
+	}
+	default_action NoAction args none 
+	size 0x10000
+}
+
+
+table tbl1 {
+	key {
+		m.ingress_tbl1_ethernet_isValid exact
+		m.ingress_tbl1_ethernet_dstAddr exact
+		m.ingress_tbl1_ethernet_srcAddr exact
+		m.local_metadata_key3 lpm
+	}
+	actions {
+		NoAction
+		execute_2
 	}
 	default_action NoAction args none 
 	size 0x10000
@@ -118,6 +153,12 @@ apply {
 	LABEL_END :	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
 	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
+	mov m.ingress_tbl1_ethernet_isValid 1
+	jmpv LABEL_END_0 h.ethernet
+	mov m.ingress_tbl1_ethernet_isValid 0
+	LABEL_END_0 :	mov m.ingress_tbl1_ethernet_dstAddr h.ethernet.dstAddr
+	mov m.ingress_tbl1_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl1
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4

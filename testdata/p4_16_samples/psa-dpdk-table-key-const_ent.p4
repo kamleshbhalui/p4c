@@ -46,6 +46,10 @@ struct empty_metadata_t {
 
 struct metadata {
      bit<16> data;
+     bit<48> key1;
+     bit<48> key2;
+     bit<48> key3;
+     bit<48> key4;
 }
 
 struct headers {
@@ -96,16 +100,37 @@ control ingress(inout headers hdr,
             hdr.ethernet.isValid(): exact;
             hdr.ethernet.dstAddr : exact;
             hdr.ethernet.srcAddr : exact;
+            user_meta.key1 : ternary;
+            user_meta.key2 : range;
+            user_meta.key4: optional;
+
         }
+
         actions = { NoAction; execute; }
         const entries = {
-            (true,48w1,48w2) : execute(48w1);
-            (true,48w1,48w2) : execute(48w1);
-            (true,48w3,48w3) : execute(48w1);
+            (true,48w1,48w2,48w2&&&48w3, 48w2 .. 48w4, 48w10) : execute(48w1);
+            (true,48w1,48w2,48w2&&&48w3, 48w2 .. 48w5, 48w10)  : execute(48w1);
+            (true,48w3,48w3,48w2&&&48w3, 48w2 .. 48w6, 48w10) : execute(48w1);
+            }
+    }
+    table tbl1 {
+        key = {
+            hdr.ethernet.isValid(): exact;
+            hdr.ethernet.dstAddr : exact;
+            hdr.ethernet.srcAddr : exact;
+            user_meta.key3: lpm;
+        }
+
+        actions = { NoAction; execute; }
+        const entries = {
+            (true,48w1,48w2, 48w10) : execute(48w1);
+            (true,48w1,48w2, 48w11)  : execute(48w1);
+            (true,48w3,48w3, 48w12) : execute(48w1);
             }
     }
     apply {
             tbl.apply();
+            tbl1.apply();
     }
 }
 

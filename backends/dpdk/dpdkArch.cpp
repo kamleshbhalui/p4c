@@ -2640,7 +2640,7 @@ void EmitDpdkTableConfig::addRange(const IR::Expression* k, int keyWidth, P4::Ty
         endStr = startStr;
     }
     print(startStr,"/");
-    print(endStr,"");
+    print(endStr," ");
 }
 
 void EmitDpdkTableConfig::addOptional(const IR::Expression* k, int keyWidth,
