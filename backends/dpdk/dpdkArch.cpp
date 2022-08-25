@@ -2507,7 +2507,7 @@ void EmitDpdkTableConfig::addAction(const IR::Expression* actionRef,
     auto method = actionCall->method->to<IR::PathExpression>()->path;
     auto decl = refMap->getDeclaration(method, true);
     auto actionDecl = decl->to<IR::P4Action>();
-    auto actionName = actionDecl->controlPlaneName();
+    auto actionName = actionDecl->name.name;
     print(actionName, " ");
     if (actionDecl->parameters->parameters.size() == 1) {
         std::vector<cstring> paramNames;
@@ -2678,16 +2678,47 @@ void EmitDpdkTableConfig::addMatchKey(const IR::P4Table* table,
     }
 }
 
+/// Checks if the @table entries need to be assigned a priority, i.e. does
+/// the match key for the table includes a ternary, range, or optional match?
+bool EmitDpdkTableConfig::tableNeedsPriority(const IR::P4Table* table, P4::ReferenceMap* refMap) {
+    for (auto e : table->getKey()->keyElements) {
+        auto matchType = getKeyMatchType(e, refMap);
+        // TODO(antonin): remove dependency on v1model.
+        if (matchType == "ternary" ||
+            matchType == "range" ||
+            matchType == "optional") {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool EmitDpdkTableConfig::isAllKeysDefaultExpression(const IR::ListExpression* keyset) {
+    bool allKeyDefaultExp = true;
+    for (auto k : keyset->components) {
+            allKeyDefaultExp = allKeyDefaultExp && k->is<IR::DefaultExpression>();
+    }
+    return allKeyDefaultExp;
+}
+
 void EmitDpdkTableConfig::postorder(const IR::P4Table* table) {
     auto entriesList = table->getEntries();
     if (entriesList == nullptr) return;
     dpdkTableConfigFile.open(table->externalName()+".txt");
+    auto needsPriority = tableNeedsPriority(table, refMap);
+    int entryPriority = entriesList->entries.size();
     for (auto e : entriesList->entries) {
-        print("match"," ");
-        addMatchKey(table, e->getKeys(), typeMap);
-        print("action"," ");
-        addAction(e->getAction(), refMap, typeMap);
-        print("", "\n");
+        if (!isAllKeysDefaultExpression(e->getKeys())) {
+            print("match"," ");
+            addMatchKey(table, e->getKeys(), typeMap);
+            if (needsPriority) {
+                print("priority", " ");
+                print(entryPriority--," ");
+            }
+            print("action"," ");
+            addAction(e->getAction(), refMap, typeMap);
+            print("", "\n");
+        }
     }
     dpdkTableConfigFile.close();
 }

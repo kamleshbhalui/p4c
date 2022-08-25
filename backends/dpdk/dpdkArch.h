@@ -1019,6 +1019,8 @@ class EmitDpdkTableConfig : public Inspector {
     cstring getKeyMatchType(const IR::KeyElement* ke, P4::ReferenceMap* refMap);
     big_int convertSimpleKeyExpressionToBigInt(
         const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    bool tableNeedsPriority(const IR::P4Table* table, P4::ReferenceMap* refMap);
+    bool isAllKeysDefaultExpression(const IR::ListExpression* keyset);
     void print(cstring str, cstring sep="");
     void print(big_int, cstring sep="");
 
