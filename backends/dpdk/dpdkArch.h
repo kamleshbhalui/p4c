@@ -232,7 +232,9 @@ class InjectOutputPortMetadataField : public Transform {
         structure(structure) {}
     const IR::Node *preorder(IR::Type_Struct *s) override;
 };
-
+/// This pass replace unaligned header fields with aligned header fields
+/// by combining few contiguous header fields and replace uses with slices
+/// to preserve the behavior
 class AlignHdrMetaField : public Transform {
     P4::TypeMap* typeMap;
     P4::ReferenceMap *refMap;
