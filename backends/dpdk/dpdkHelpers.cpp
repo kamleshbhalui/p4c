@@ -346,7 +346,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         left, e->object->getName(), intermediate);
                 }
             } else if (e->originalExternType->getName().name == "Meter") {
-                if (e->method->getName().name == "execute") {
+                if (e->method->getName().name == "execute"
+                    || e->method->getName().name == "dpdk_execute") {
                     auto argSize = e->expr->arguments->size();
 
                     // DPDK target needs index and packet length as mandatory parameters
@@ -1027,8 +1028,9 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
-            if (a->method->getName().name != "execute") {
-                BUG("Meter function not implemented.");
+            if (a->method->getName().name != "execute"
+                && a->method->getName().name != "dpdk_execute") {
+                BUG("Meter function %1% not implemented.", a->method->getName());
             }
         } else if (a->originalExternType->getName().name == "Counter") {
             auto di = a->object->to<IR::Declaration_Instance>();
