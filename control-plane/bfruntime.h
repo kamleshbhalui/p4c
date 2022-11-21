@@ -457,6 +457,7 @@ class BFRuntimeGenerator {
     /// default.
     void addRegisterDataFields(Util::JsonArray* dataJson, const Register& register_,
                                P4Id idOffset = 1) const;
+    void addMatchValueLookupTables(Util::JsonArray* tablesJson) const;
 
     const p4configv1::P4Info& p4info;
 };

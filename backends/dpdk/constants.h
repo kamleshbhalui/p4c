@@ -22,7 +22,7 @@ limitations under the License.
 /* Unique handle for action and table */
 const unsigned table_handle_prefix = 0x00010000;
 const unsigned action_handle_prefix = 0x00020000;
-
+const unsigned mvlt_handle_prefix = 0x00030000;
 // Default values
 const unsigned dpdk_default_table_size = 65536;
 #define DPDK_MAX_SHIFT_AMOUNT 64
