@@ -111,7 +111,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
         }
     }
     // for match value lookup tables decls
-    for (auto ed :  structure->externDecls) {
+    for (auto ed : structure->externDecls) {
         if (auto type = ed->type->to<IR::Type_Specialized>()) {
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "MatchValueLookupTable") {
@@ -120,7 +120,6 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
         }
     }
 
-<<<<<<< HEAD
     for (auto ed : structure->externDecls) {
         cstring externTypeName = "";
         if (auto type = ed->type->to<IR::Type_Name>()) {
@@ -528,8 +527,7 @@ void DpdkContextGenerator::addExternInfo(Util::JsonArray* externsJson) {
     }
 }
 
-void DpdkContextGenerator::UpdateMatchKeys(P4MatchLookupTableInfo* emvlut,
-                                           const IR::Type* type,
+void DpdkContextGenerator::UpdateMatchKeys(P4MatchLookupTableInfo* emvlut, const IR::Type* type,
                                            cstring instanceName) {
     auto key = new MatchKeyField();
     if (type->is<IR::Type_Bits>()) {
@@ -546,9 +544,10 @@ void DpdkContextGenerator::UpdateMatchKeys(P4MatchLookupTableInfo* emvlut,
         key->bitWidth = field->type->to<IR::Type_Bits>()->width_bits();
         key->bitWidthFull = field->type->to<IR::Type_Bits>()->width_bits();
     } else {
-        ::error("invalid key type %1% for MatchValueLookupTable"
-                "only Type_Bits and Type_Struct with singled field allowed",
-                type->toString());
+        ::error(
+            "invalid key type %1% for MatchValueLookupTable"
+            "only Type_Bits and Type_Struct with singled field allowed",
+            type->toString());
     }
     key->isInstanceName = true;
     key->instanceName = "meta";
@@ -561,7 +560,7 @@ void DpdkContextGenerator::UpdateMatchKeys(P4MatchLookupTableInfo* emvlut,
 }
 
 void DpdkContextGenerator::UpdateImmediateFields(P4MatchLookupTableInfo* emvlut,
-    const IR::Type* type) {
+                                                 const IR::Type* type) {
     int index = 0;
     int size = 0;
     if (type->is<IR::Type_Struct>()) {
@@ -576,12 +575,12 @@ void DpdkContextGenerator::UpdateImmediateFields(P4MatchLookupTableInfo* emvlut,
                 size += sz >> 3;
                 emvlut->matchAttributes->hardware_blocks.at(0)->immediate_fields.push_back(param);
             }
-       }
+        }
     }
 }
 
 void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_Instance* d) {
-    cstring ctrl_name="";
+    cstring ctrl_name = "";
     auto annotations = d->getAnnotations();
     if (annotations == nullptr) return;
 
@@ -594,23 +593,24 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
 
     /* validate resource name */
     if (resname != "mirror_profile") {
-        ::error("Invalid argument '%1%' for 'mvlt_type' annotation for '%2%'"
-                " it should be '%3%'.",
-                resname, d->externalName(), "mirror_profile");
+        ::error(
+            "Invalid argument '%1%' for 'mvlt_type' annotation for '%2%'"
+            " it should be '%3%'.",
+            resname, d->externalName(), "mirror_profile");
         return;
     }
 
     auto type = typemap->getType(d);
     if (type->is<IR::Type_SpecializedCanonical>() == false) return;
 
-    auto exactMVLut = new  P4MatchLookupTableInfo();
+    auto exactMVLut = new P4MatchLookupTableInfo();
     exactMVLut->handle = getNewTableHandle();
     exactMVLut->ctrlName = ctrl_name;
     exactMVLut->tblName = d->externalName();
     for (auto kv : structure->pipelines) {
         auto control = kv.second->to<IR::P4Control>();
         cstring tableName = control->name.originalName + "." + d->name.originalName;
-        exactMVLut->targetName =  tableName;
+        exactMVLut->targetName = tableName;
     }
     exactMVLut->p4Hidden = false;
     exactMVLut->isP4Hidden = true;
@@ -621,10 +621,12 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     }
     exactMVLut->isSize = true;
     auto typelist = type->to<IR::Type_SpecializedCanonical>()->arguments;
-    auto type0 =  typelist->at(0);
+    auto type0 = typelist->at(0);
     if (!type0->is<IR::Type_Bits>() && !type0->is<IR::Type_Struct>()) {
-        ::error("Invalid key type '%1%' for '%2%' 'Type_Bits' or 'Type_Struct'"
-                "expected.", type0, d->externalName());
+        ::error(
+            "Invalid key type '%1%' for '%2%' 'Type_Bits' or 'Type_Struct'"
+            "expected.",
+            type0, d->externalName());
         return;
     }
     auto type1 = typelist->at(1);
@@ -639,13 +641,13 @@ void DpdkContextGenerator::ProcessMatchValueLookupTable(const IR::Declaration_In
     hwblk->resource_id = 0;
     exactMVLut->matchAttributes = new LookupMatchAttributes();
     exactMVLut->matchAttributes->hardware_blocks.push_back(hwblk);
-    UpdateMatchKeys(exactMVLut, type0,  d->externalName());
+    UpdateMatchKeys(exactMVLut, type0, d->externalName());
     UpdateImmediateFields(exactMVLut, type1);
     contextLutTables.push_back(exactMVLut);
 }
 
 void DpdkContextGenerator::outputImmediateField(Util::JsonArray* immFields,
-        ImmediateFields* immfld) {
+                                                ImmediateFields* immfld) {
     auto* immField = new Util::JsonObject();
     immField->emplace("param_name", immfld->param_name);
     immField->emplace("param_handle", immfld->param_handle);
@@ -655,7 +657,7 @@ void DpdkContextGenerator::outputImmediateField(Util::JsonArray* immFields,
 }
 
 void DpdkContextGenerator::outputKeys(Util::JsonObject* keyJsonObj,
-    std::vector<struct MatchKeyField*> &keylist) {
+                                      std::vector<struct MatchKeyField*>& keylist) {
     auto* keyJsons = new Util::JsonArray();
     keyJsonObj->emplace("match_key_fields", keyJsons);
 
@@ -689,7 +691,7 @@ void DpdkContextGenerator::outputKeys(Util::JsonObject* keyJsonObj,
 }
 
 void DpdkContextGenerator::outputLutMatchAttributes(Util::JsonObject* matchJsons,
-     struct P4MatchLookupTableInfo* tblInfo) {
+                                                    struct P4MatchLookupTableInfo* tblInfo) {
     auto* matchAttr0 = new Util::JsonObject();
     auto* matchAttrs = new Util::JsonArray();
     matchJsons->emplace("match_attributes", matchAttr0);

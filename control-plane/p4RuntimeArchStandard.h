@@ -375,45 +375,34 @@ struct ActionSelectorTraits<Arch::PNA> : public ActionProfileTraits<Arch::PNA> {
 };
 
 // Traits for the MatchValueLookupTable extern
-template<Arch arch> struct MatchValueLookupTableTraits;
+template <Arch arch>
+struct MatchValueLookupTableTraits;
 
-template<> struct MatchValueLookupTableTraits<Arch::PNA> {
+template <>
+struct MatchValueLookupTableTraits<Arch::PNA> {
     static const cstring name() { return "emvlt"; }
-    static const cstring typeName() {
-        return "MatchValueLookupTable";
-    }
-    static const cstring sizeParamName() {
-        return "size";
-    }
+    static const cstring typeName() { return "MatchValueLookupTable"; }
+    static const cstring sizeParamName() { return "size"; }
 };
-template<> struct MatchValueLookupTableTraits<Arch::PSA> {
+template <>
+struct MatchValueLookupTableTraits<Arch::PSA> {
     static const cstring name() { return "emvlt"; }
-    static const cstring typeName() {
-        return "MatchValueLookupTable";
-    }
-    static const cstring sizeParamName() {
-        return "size";
-    }
+    static const cstring typeName() { return "MatchValueLookupTable"; }
+    static const cstring sizeParamName() { return "size"; }
 };
 
-template<> struct MatchValueLookupTableTraits<Arch::V1MODEL2020> {
+template <>
+struct MatchValueLookupTableTraits<Arch::V1MODEL2020> {
     static const cstring name() { return "emvlt"; }
-    static const cstring typeName() {
-        return "MatchValueLookupTable";
-    }
-    static const cstring sizeParamName() {
-        return "size";
-    }
+    static const cstring typeName() { return "MatchValueLookupTable"; }
+    static const cstring sizeParamName() { return "size"; }
 };
 
-template<> struct MatchValueLookupTableTraits<Arch::V1MODEL> {
+template <>
+struct MatchValueLookupTableTraits<Arch::V1MODEL> {
     static const cstring name() { return "emvlt"; }
-    static const cstring typeName() {
-        return "MatchValueLookupTable";
-    }
-    static const cstring sizeParamName() {
-        return "size";
-    }
+    static const cstring typeName() { return "MatchValueLookupTable"; }
+    static const cstring sizeParamName() { return "size"; }
 };
 /// Traits for the register extern, must be specialized for v1model and PSA.
 template <Arch arch>
@@ -488,51 +477,53 @@ struct MatchValueLookupTable {
     const uint32_t size;
     const IR::IAnnotated* annotations;
     MatchValueLookupTable(cstring n, cstring keyname, uint32_t kbw, std::vector<Param> params_list,
-                          uint32_t sz, const IR::IAnnotated* annos = nullptr) :
-        name(n), keyName(keyname), keyBitwidth(kbw), params(params_list),
-        size(sz), annotations(annos) {}
+                          uint32_t sz, const IR::IAnnotated* annos = nullptr)
+        : name(n),
+          keyName(keyname),
+          keyBitwidth(kbw),
+          params(params_list),
+          size(sz),
+          annotations(annos) {}
 
-    static void add_mvlut_param(uint32_t &param_count, std::vector<Param>* params_list,
-                         const IR::Type* type, cstring decl_name, cstring prefix) {
+    static void add_mvlut_param(uint32_t& param_count, std::vector<Param>* params_list,
+                                const IR::Type* type, cstring decl_name, cstring prefix) {
         if (type->is<IR::Type_Struct>()) {
             auto stype = type->to<IR::Type_Struct>();
             cstring newprefix = prefix != "" ? prefix + "_" + decl_name : decl_name;
             for (auto field : stype->fields) {
-                add_mvlut_param(param_count, params_list, field->type,
-                            field->getName().name, newprefix);
+                add_mvlut_param(param_count, params_list, field->type, field->getName().name,
+                                newprefix);
             }
         } else {
-            cstring param_name = prefix == "" ? decl_name :
-                prefix + "_" + decl_name;
-            params_list->emplace_back(Param{param_count++, param_name,
-                                                (uint32_t)type->width_bits()});
+            cstring param_name = prefix == "" ? decl_name : prefix + "_" + decl_name;
+            params_list->emplace_back(
+                Param{param_count++, param_name, (uint32_t)type->width_bits()});
         }
     }
     /// @return the information required to serialize an @instance of register
     /// or boost::none in case of error.
     template <Arch arch>
-    static boost::optional<MatchValueLookupTable>
-    from(const IR::ExternBlock* instance,
-         const ReferenceMap* refMap,
-         P4::TypeMap* typeMap,
-         p4configv1::P4TypeInfo* p4RtTypeInfo) {
+    static boost::optional<MatchValueLookupTable> from(const IR::ExternBlock* instance,
+                                                       const ReferenceMap* refMap,
+                                                       P4::TypeMap* typeMap,
+                                                       p4configv1::P4TypeInfo* p4RtTypeInfo) {
         (void)p4RtTypeInfo;
         CHECK_NULL(instance);
         auto decl = instance->node->to<IR::Declaration_Instance>();
-        BUG_CHECK(decl->type->is<IR::Type_Specialized>(),
-              "%1%: expected Type_Specialized", decl->type);
+        BUG_CHECK(decl->type->is<IR::Type_Specialized>(), "%1%: expected Type_Specialized",
+                  decl->type);
         auto type = decl->type->to<IR::Type_Specialized>();
         BUG_CHECK(type->arguments->size() == 3, "%1%: expected three type arguments ", decl);
         // get key parameter bitwidth
         uint32_t key_parameter_bitwidth = 0;
         auto arg1_type = type->arguments->at(0);
-        cstring key_parameter_name="";
+        cstring key_parameter_name = "";
         if (auto atype = arg1_type->to<IR::Type_Name>()) {
             auto btype = typeMap->getTypeType(atype, true);
             for (auto f : btype->to<IR::Type_Struct>()->fields) {
                 key_parameter_name += f->name;
             }
-            auto  fwidth = (uint32_t)btype->width_bits();
+            auto fwidth = (uint32_t)btype->width_bits();
             key_parameter_bitwidth = fwidth;
         } else if (auto atype = arg1_type->to<IR::Type_Bits>()) {
             key_parameter_bitwidth = (uint32_t)atype->width_bits();
@@ -547,11 +538,9 @@ struct MatchValueLookupTable {
         // get size field value
         auto size_param = instance->getParameterValue("size")->to<IR::Constant>();
         // create the MVLUT object
-        MatchValueLookupTable tbl = { decl->controlPlaneName(),
-                                      key_parameter_name,
-                                      key_parameter_bitwidth, {},
-                                      (uint32_t)size_param->value,
-                                      decl->to<IR::IAnnotated>() };
+        MatchValueLookupTable tbl = {decl->controlPlaneName(),    key_parameter_name,
+                                     key_parameter_bitwidth,      {},
+                                     (uint32_t)size_param->value, decl->to<IR::IAnnotated>()};
 
         // record the parameter values for MVLUT
         uint32_t param_count = 1;
@@ -835,8 +824,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             auto actionProfile = getActionProfile(externBlock);
             if (actionProfile) addActionProfile(symbols, p4info, *actionProfile);
         } else if (externBlock->type->name == MatchValueLookupTableTraits<arch>::typeName()) {
-            auto emvlt_ = MatchValueLookupTable::from<arch>(externBlock, refMap, typeMap,
-                                                                 p4RtTypeInfo);
+            auto emvlt_ =
+                MatchValueLookupTable::from<arch>(externBlock, refMap, typeMap, p4RtTypeInfo);
             if (emvlt_) addMatchValueLookupTable(symbols, p4info, *emvlt_);
         }
     }
@@ -995,14 +984,12 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     }
 
     void addMatchValueLookupTable(const P4RuntimeSymbolTableIface& symbols,
-                     p4configv1::P4Info* p4Info,
-                     const MatchValueLookupTable& emvltInstance) {
+                                  p4configv1::P4Info* p4Info,
+                                  const MatchValueLookupTable& emvltInstance) {
         auto emvlt_ = p4Info->add_emvlts();
-        auto id = symbols.getId(SymbolType::EXACT_MATCH_VALUE_LOOKUP_TABLE(),
-                                emvltInstance.name);
-        setPreamble(emvlt_->mutable_preamble(), id,
-                    emvltInstance.name, symbols.getAlias(emvltInstance.name),
-                    emvltInstance.annotations);
+        auto id = symbols.getId(SymbolType::EXACT_MATCH_VALUE_LOOKUP_TABLE(), emvltInstance.name);
+        setPreamble(emvlt_->mutable_preamble(), id, emvltInstance.name,
+                    symbols.getAlias(emvltInstance.name), emvltInstance.annotations);
         // set fixed match filed
         auto match = emvlt_->add_match_fields();
         match->set_id(1);

@@ -17,8 +17,6 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKCONTEXT_H_
 #define BACKENDS_DPDK_DPDKCONTEXT_H_
 
-#include "dpdkProgramStructure.h"
-#include "options.h"
 #include "constants.h"
 #include "dpdkProgramStructure.h"
 #include "lib/json.h"
@@ -56,17 +54,9 @@ struct TableAttributes {
     std::vector<std::pair<cstring, cstring>> tableKeys;
 };
 
-enum TableTypes {
-    MATCH = 0
-};
+enum TableTypes { MATCH = 0 };
 
-enum MatchType {
-    exact = 0,
-    ternary = 1,
-    lpm = 2,
-    range = 3,
-    selector = 4
-};
+enum MatchType { exact = 0, ternary = 1, lpm = 2, range = 3, selector = 4 };
 
 struct MatchKeyFieldValue {
     cstring fieldName;
@@ -138,18 +128,17 @@ struct LookupHwBlocks {
     cstring resource;
     int resource_id;
     std::vector<ImmediateFields*> immediate_fields;
-        LookupHwBlocks() {
-            resource = "";
-            resource_id = 0;
-        }
+    LookupHwBlocks() {
+        resource = "";
+        resource_id = 0;
+    }
 };
 
 struct LookupMatchAttributes {
     std::vector<LookupHwBlocks*> hardware_blocks;
 };
 
-
-/* This structure hold match value lookup table attributes 
+/* This structure hold match value lookup table attributes
  * collected from declarations */
 struct P4MatchLookupTableInfo {
     TableTypes tableType;
@@ -249,6 +238,7 @@ struct SelectionTable {
 // This pass generates context JSON into user specified file
 class DpdkContextGenerator : public Inspector {
     P4::ReferenceMap* refmap;
+    P4::TypeMap* typemap;
     DpdkProgramStructure* structure;
     DpdkOptions& options;
     // All tables are collected into this vector
@@ -270,9 +260,9 @@ class DpdkContextGenerator : public Inspector {
     static unsigned newMVLTableHandle;
 
  public:
-    DpdkContextGenerator(P4::ReferenceMap* refmap, DpdkProgramStructure* structure,
-                         DpdkOptions& options)
-        : refmap(refmap), structure(structure), options(options) {}
+    DpdkContextGenerator(P4::ReferenceMap* refmap, P4::TypeMap* typemap,
+                         DpdkProgramStructure* structure, DpdkOptions& options)
+        : refmap(refmap), typemap(typemap), structure(structure), options(options) {}
 
     unsigned int getNewTableHandle();
     unsigned int getNewActionHandle();
@@ -289,11 +279,9 @@ class DpdkContextGenerator : public Inspector {
     void ProcessMatchValueLookupTable(const IR::Declaration_Instance* d);
     void outputLutTable(Util::JsonArray* tablesJson);
     void outputLutMatchAttributes(Util::JsonObject* matchJson,
-            struct P4MatchLookupTableInfo* tblInfo);
-    void outputKeys(Util::JsonObject* matchJson,
-            std::vector<struct MatchKeyField*> &keylist);
-    void outputImmediateField(Util::JsonArray* immFieldJson,
-        ImmediateFields* immfld);
+                                  struct P4MatchLookupTableInfo* tblInfo);
+    void outputKeys(Util::JsonObject* matchJson, std::vector<struct MatchKeyField*>& keylist);
+    void outputImmediateField(Util::JsonArray* immFieldJson, ImmediateFields* immfld);
     void addKeyField(Util::JsonArray* keyJson, const cstring name, const cstring annon,
                      const IR::KeyElement* key, int position);
     Util::JsonArray* addActions(const IR::P4Table* table, const cstring ctrlName, bool isMatch);

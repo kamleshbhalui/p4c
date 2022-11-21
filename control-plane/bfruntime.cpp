@@ -576,9 +576,9 @@ Util::JsonArray* BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& ta
                                    false /* read_only */, makeTypeEnum({"RED", "GREEN", "YELLOW"}),
                                    annotations);
             } else {
-                addActionDataField(
-                    dataJson, param.id(), param.name(), true /* mandatory */,
-                    false /* read_only */, makeTypeBytes(param.bitwidth()), annotations);
+                addActionDataField(dataJson, param.id(), param.name(), true /* mandatory */,
+                                   false /* read_only */, makeTypeBytes(param.bitwidth()),
+                                   annotations);
             }
             if (param.id() > maxId) maxId = param.id();
         }
@@ -722,10 +722,8 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
 
             // DRV-3112 - Make key fields not mandatory, this allows user to use a
             // driver initialized default value (0).
-            addKeyField(keyJson, mf.id(), keyName,
-                        false /* mandatory */, *matchType,
-                        makeTypeBytes(mf.bitwidth(), boost::none),
-                        annotations);
+            addKeyField(keyJson, mf.id(), keyName, false /* mandatory */, *matchType,
+                        makeTypeBytes(mf.bitwidth(), boost::none), annotations);
         }
         if (needsPriority) {
             // DRV-3112 - Make key fields not mandatory, this allows user to use a
@@ -829,53 +827,49 @@ void BFRuntimeGenerator::addMeters(Util::JsonArray* tablesJson) const {
     }
 }
 
-void
-BFRuntimeGenerator::addMatchValueLookupTables(Util::JsonArray* tables_json_array) const {
+void BFRuntimeGenerator::addMatchValueLookupTables(Util::JsonArray* tables_json_array) const {
     for (const auto& emvlt : p4info.emvlts()) {
-         const auto pre = emvlt.preamble();
-         auto* annotations = transformAnnotations(pre.annotations().begin(),
-                                                  pre.annotations().end());
-         cstring table_name = IR::P4Program::main + "." + pre.name();
-         cstring table_type = "MatchValueLookupTable";
-         auto table_json = this->initTableJson((std::string)table_name, pre.id(), table_type,
-                                            emvlt.size(), annotations);
-         table_json->emplace("has_const_default_action", false);
+        const auto pre = emvlt.preamble();
+        auto* annotations =
+            transformAnnotations(pre.annotations().begin(), pre.annotations().end());
+        cstring table_name = IR::P4Program::main + "." + pre.name();
+        cstring table_type = "MatchValueLookupTable";
+        auto table_json = this->initTableJson((std::string)table_name, pre.id(), table_type,
+                                              emvlt.size(), annotations);
+        table_json->emplace("has_const_default_action", false);
 
-         auto* keys_json = new Util::JsonArray();
-         for (const auto& mf : emvlt.match_fields()) {
-              boost::optional<cstring> match_type = boost::none;
-              switch (mf.match_case()) {
-                  case p4configv1::MatchField::kMatchType:
-                      if (mf.match_type() != p4configv1::MatchField_MatchType_EXACT) {
-                          BUG("Invalid match type for table %1%, expected Exact",
-                              table_name);
-                      }
-                      match_type = cstring("Exact");
-                      break;
-                  default:
-                      BUG("Invalid oneof case for the match type of table '%1%'", pre.name());
-                      break;
-              }
-              addKeyField(keys_json, mf.id(), mf.name(), true /* mandatory */,
-                     *match_type, makeTypeBytes(mf.bitwidth(), boost::none));
-         }
-         table_json->emplace("key", keys_json);
-         auto* data_json = new Util::JsonArray();
-         for (const auto& p : emvlt.params()) {
-              auto data_obj = makeCommonDataField(p.id(), p.name(),
-                                                  makeTypeBytes(p.bitwidth()),
-                                                    false /* repeated */);
-              data_obj->emplace("mandatory", true);
-              data_obj->emplace("read_only", false);
-              data_json->append(data_obj);
-         }
-         table_json->emplace("data", data_json);
-         tables_json_array->append(table_json);
+        auto* keys_json = new Util::JsonArray();
+        for (const auto& mf : emvlt.match_fields()) {
+            boost::optional<cstring> match_type = boost::none;
+            switch (mf.match_case()) {
+                case p4configv1::MatchField::kMatchType:
+                    if (mf.match_type() != p4configv1::MatchField_MatchType_EXACT) {
+                        BUG("Invalid match type for table %1%, expected Exact", table_name);
+                    }
+                    match_type = cstring("Exact");
+                    break;
+                default:
+                    BUG("Invalid oneof case for the match type of table '%1%'", pre.name());
+                    break;
+            }
+            addKeyField(keys_json, mf.id(), mf.name(), true /* mandatory */, *match_type,
+                        makeTypeBytes(mf.bitwidth(), boost::none));
+        }
+        table_json->emplace("key", keys_json);
+        auto* data_json = new Util::JsonArray();
+        for (const auto& p : emvlt.params()) {
+            auto data_obj = makeCommonDataField(p.id(), p.name(), makeTypeBytes(p.bitwidth()),
+                                                false /* repeated */);
+            data_obj->emplace("mandatory", true);
+            data_obj->emplace("read_only", false);
+            data_json->append(data_obj);
+        }
+        table_json->emplace("data", data_json);
+        tables_json_array->append(table_json);
     }
 }
 
-const Util::JsonObject*
-BFRuntimeGenerator::genSchema() const {
+const Util::JsonObject* BFRuntimeGenerator::genSchema() const {
     auto* json = new Util::JsonObject();
 
     json->emplace("schema_version", cstring("1.0.0"));
