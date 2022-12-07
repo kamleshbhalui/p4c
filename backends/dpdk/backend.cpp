@@ -52,10 +52,12 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
 
     PassManager simplify = {
         new DpdkArchFirst(),
+        new ByteAlignment(typeMap, refMap, &structure),
+        new P4::ClearTypeMap(typeMap),
+        new P4::TypeChecking(refMap, typeMap),
         new P4::EliminateTypedef(refMap, typeMap),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap),
-        new ByteAlignment(typeMap, refMap, &structure),
         new P4::SimplifyKey(refMap, typeMap,
                             new P4::OrPolicy(new P4::IsValid(refMap, typeMap), new P4::IsMask())),
         new P4::TypeChecking(refMap, typeMap),
@@ -105,6 +107,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
         new CheckExternInvocation(refMap, typeMap, &structure),
+        new DpdkAddPseudoHeader(refMap, typeMap),
         new TypeWidthValidator(),
         new DpdkArchLast(),
         new VisitFunctor([this, genContextJson] {

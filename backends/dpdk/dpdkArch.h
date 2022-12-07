@@ -1135,6 +1135,80 @@ class ElimHeaderCopy : public Transform {
     const IR::Node* postorder(IR::Member* m) override;
 };
 
+/// @brief This pass add a pseudo header declaration, it will be used as
+/// container of operands where dpdk instructions require it's operand to be in
+/// a header.
+class DpdkAddPseudoHeaderDecl : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    IR::Vector<IR::Node> allTypeDecls;
+
+ public:
+    static cstring headerInstanceName;
+    static cstring headerTypeName;
+    static cstring headersDeclName;
+    DpdkAddPseudoHeaderDecl(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {
+        headerInstanceName = refMap->newName("dpdk_pseudo_header");
+        headerTypeName = refMap->newName("dpdk_pseudo_header_t");
+        headersDeclName = "";
+    }
+
+    const IR::Node* preorder(IR::P4Program* program) override;
+    // for header instances
+    const IR::Node* preorder(IR::Type_Struct* st) override;
+    bool isHeadersStruct(const IR::Type_Struct* st);
+    const IR::Node* preorder(IR::P4Control* c) override;
+};
+
+/// @brief This pass identify and collect statements which requires it's operand to be
+/// in a header and also initialize added header fields with original operand.
+class MoveNonHeaderFieldsToPseudoHeader : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    cstring headerTypeName;
+    cstring headerInstanceName;
+
+ public:
+    static std::vector<std::pair<cstring, const IR::Type*>> pseudoFieldNameType;
+    MoveNonHeaderFieldsToPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {
+        headerInstanceName = DpdkAddPseudoHeaderDecl::headerInstanceName;
+        headerTypeName = DpdkAddPseudoHeaderDecl::headerTypeName;
+    }
+    std::pair<IR::AssignmentStatement*, IR::Member*> addAssignmentStmt(
+        const IR::NamedExpression* ne);
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
+};
+
+/// @brief This pass finally adds all the collected fields to pseudo header
+class AddFieldsToPseudoHeader : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+
+ public:
+    AddFieldsToPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {}
+    const IR::Node* preorder(IR::Type_Header* h) override;
+};
+
+struct DpdkAddPseudoHeader : public PassManager {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+
+ public:
+    DpdkAddPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {
+        passes.push_back(new DpdkAddPseudoHeaderDecl(refMap, typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+        passes.push_back(new MoveNonHeaderFieldsToPseudoHeader(refMap, typeMap));
+        passes.push_back(new AddFieldsToPseudoHeader(refMap, typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+    }
+};
+
 class DpdkArchFirst : public PassManager {
  public:
     DpdkArchFirst() { setName("DpdkArchFirst"); }
@@ -1165,6 +1239,5 @@ class CollectProgramStructure : public PassManager {
         }));
     }
 };
-
 };     // namespace DPDK
 #endif /* BACKENDS_DPDK_DPDKARCH_H_ */
