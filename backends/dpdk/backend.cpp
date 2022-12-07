@@ -53,8 +53,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
     PassManager simplify = {
         new DpdkArchFirst(),
         new ByteAlignment(typeMap, refMap, &structure),
-        new P4::ClearTypeMap(typeMap),
-        new P4::TypeChecking(refMap, typeMap),
         new P4::EliminateTypedef(refMap, typeMap),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap),
