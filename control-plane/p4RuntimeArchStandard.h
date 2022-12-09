@@ -51,6 +51,17 @@ struct CounterExtern {};
 template <Arch arch>
 struct MeterExtern {};
 
+struct MatchValueLookupTableExtern {
+    static const cstring name() { return "MatchValueLookupTable"; }
+    static const cstring directPropertyName() { return "MatchValueLookupTable"; }
+    static const cstring typeName() { return "MatchValueLookupTable"; }
+    static const cstring directTypeName() { return "MatchValueLookupTable"; }
+    static const cstring sizeParamName() { return ""; }
+    // the index of the type parameter for the counter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+};
+
 }  // namespace Standard
 
 namespace Helpers {
@@ -243,10 +254,43 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PNA> > {
     static boost::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
+/// @ref CounterlikeTraits<> specialization for @ref MatchValueLookupTableExtern
+template <>
+struct CounterlikeTraits<Standard::MatchValueLookupTableExtern> {};
+
 }  // namespace Helpers
 
 /// Declarations specific to standard architectures (v1model & PSA).
 namespace Standard {
+
+// MatchValueLookupTable
+struct MatchValueLookupTable {
+    const cstring name;
+    const cstring key_name;
+    uint32_t key_bitwidth;
+    struct param_t {
+        uint32_t id;
+        cstring name;
+        uint32_t bitwidth;
+    };
+    std::vector<param_t> params;
+    const uint32_t size;
+    const IR::IAnnotated* annotations;
+
+    MatchValueLookupTable(cstring n, cstring kn, uint32_t kbw, std::vector<param_t> params_list,
+                          uint32_t sz, const IR::IAnnotated* annos = nullptr)
+        : name(n),
+          key_name(kn),
+          key_bitwidth(kbw),
+          params(params_list),
+          size(sz),
+          annotations(annos) {}
+
+    MatchValueLookupTable(cstring n, uint32_t kbw, std::vector<param_t> params_list, uint32_t sz,
+                          const IR::IAnnotated* annos = nullptr)
+        : name(n), key_bitwidth(kbw), params(params_list), size(sz), annotations(annos) {}
+};
+typedef MatchValueLookupTable::param_t mvlut_param_t;
 
 /// The architecture handler builder implementation for v1model.
 struct V1ModelArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
@@ -298,6 +342,9 @@ class SymbolType : public P4RuntimeSymbolType {
     }
     static P4RuntimeSymbolType REGISTER() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::REGISTER);
+    }
+    static P4RuntimeSymbolType MATCH_VALUE_LOOKUP_TABLE() {
+        return P4RuntimeSymbolType::make(p4configv1::P4Ids::MATCH_VALUE_LOOKUP_TABLE);
     }
 };
 
@@ -917,7 +964,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         }
         return boost::none;
     }
-
+    const cstring EXACT_MVLUT_NAME = "MatchValueLookupTable";
     ReferenceMap* refMap;
     TypeMap* typeMap;
     const IR::ToplevelBlock* evaluatedProgram;

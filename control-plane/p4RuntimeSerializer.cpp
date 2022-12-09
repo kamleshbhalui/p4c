@@ -1317,6 +1317,291 @@ class P4RuntimeEntriesConverter {
         return mt->name.name;
     }
 
+    /// Appends the 'const entries' for the extern table to the WriteRequest message.
+    void addExternEntries(const IR::ExternBlock* externBlock, ReferenceMap* refMap,
+                          TypeMap* typeMap) {
+        auto rtEntries = entries;
+        CHECK_NULL(externBlock);
+        auto decl = externBlock->node->to<IR::Declaration_Instance>();
+        // skip if decl is empty or decl is not specialized type (extern template)
+        if (decl == nullptr) return;
+        if (!decl->type->is<IR::Type_Specialized>()) return;
+        auto mvlut_type = decl->type->to<IR::Type_Specialized>();
+        // skip if the table is not Exact/ Ternary MVLUT
+        auto mvlut_type_name = decl->type->to<IR::Type_Specialized>()->baseType->path->name;
+        if (!((mvlut_type_name == EXACT_MVLUT_NAME))) {
+            return;
+        }
+        P4RuntimeSymbolType sym_type = Standard::SymbolType::MATCH_VALUE_LOOKUP_TABLE();
+        auto sym_id = symbols.getId(sym_type, decl->controlPlaneName());
+        uint32_t entries_arg_idx = UINT32_MAX;
+        uint32_t default_arg_idx = UINT32_MAX;
+        uint32_t size_arg_idx = UINT32_MAX;
+        for (uint32_t idx = 0; idx < decl->arguments->size(); idx++) {
+            auto arg_name = decl->arguments->at(idx)->name.originalName;
+            if (arg_name == ENTRIES_ARG_NAME)
+                entries_arg_idx = idx;
+            else if (arg_name == DEFAULT_ARG_NAME)
+                default_arg_idx = idx;
+            else if (arg_name == SIZE_ARG_NAME)
+                size_arg_idx = idx;
+        }
+        BUG_CHECK(size_arg_idx != UINT32_MAX, "Mandatory parameter size is missing");
+        auto size_arg_exp = decl->arguments->at(size_arg_idx)->expression;
+        // size value is checked for negative while validating the declaration
+        size_t size_val = (size_t)size_arg_exp->to<IR::Constant>()->asInt();
+
+        auto key_type = mvlut_type->arguments->at(0);
+        const IR::Type* param_type = mvlut_type->arguments->at(1);
+        // handle const_entries
+        if (entries_arg_idx != UINT32_MAX) {
+            const IR::Argument* arg = decl->arguments->at(entries_arg_idx);
+            auto arg_name = arg->name.originalName;
+            if (arg->expression->is<IR::ListExpression>() == false) {
+                ::error(ErrorType::ERR_UNEXPECTED,
+                        "Unexpected expression for %1% in %2%, "
+                        "expected ListExpression",
+                        arg_name, decl);
+                return;
+            }
+            auto entries_list = arg->expression->to<IR::ListExpression>();
+            size_t n_entries = entries_list->size();
+            if (n_entries > size_val) {
+                ::error(ErrorType::ERR_INVALID,
+                        "%1%: number of entries (%2%) in const_entries should "
+                        "not exceed the size defined (%3%).",
+                        arg, n_entries, size_val);
+                return;
+            }
+            uint32_t e_cnt = 1;
+            for (auto e : entries_list->components) {
+                if (e->is<IR::ListExpression>() == false) {
+                    ::error(ErrorType::ERR_UNEXPECTED,
+                            "Unexpected expression for entry "
+                            "%1% of %2%",
+                            e_cnt, arg_name);
+                    return;
+                }
+                auto entry_exp = e->to<IR::ListExpression>();
+                if (entry_exp->components.size() != 2) {
+                    ::error(ErrorType::ERR_UNEXPECTED,
+                            "Unexpected expression for entry "
+                            "%1% of %2%",
+                            e_cnt, arg_name);
+                    return;
+                }
+                // create mvlut entry to attach to entries file
+                p4::v1::MVLUTEntry p4info_mvlut_entry;
+                auto key_exp = entry_exp->components.at(0);
+                // set id of the MVLUT instance
+                p4info_mvlut_entry.set_mvlut_id(sym_id);
+                // add the match field
+                uint8_t field_count = 1;
+                add_mvlut_match(p4info_mvlut_entry, mvlut_type_name, key_exp, key_type, field_count,
+                                refMap, typeMap);
+                // add the config parameters
+                auto param_exp = entry_exp->components.at(1);
+                uint8_t param_id = 1;
+                auto proto_param = p4info_mvlut_entry.mutable_param();
+                add_mvlut_param(proto_param, param_exp, param_type, param_id, refMap, typeMap);
+
+                CHECK_NULL(rtEntries);
+                auto protoUpdate = const_cast<p4::v1::WriteRequest*>(rtEntries)->add_updates();
+                protoUpdate->set_type(p4::v1::Update::INSERT);
+                auto protoEntity = protoUpdate->mutable_entity();
+                auto protoEntry = protoEntity->mutable_extern_entry();
+                // set exact/ternary specific fields
+                // extern type id: 0x81 for Exact, 0x82 for Ternary
+                protoEntry->set_extern_type_id((sym_id & 0xff000000) >> 24);
+
+                // now attach the entry created to entries file
+                auto any_type_entry = protoEntry->mutable_entry();
+                any_type_entry->PackFrom(p4info_mvlut_entry);
+            }
+        }
+
+        // handle default_value
+        if (default_arg_idx != UINT32_MAX) {
+            auto default_arg_expr = decl->arguments->at(default_arg_idx)->expression;
+
+            // create mvlut entry for default value to attach to entries file
+            p4::v1::MVLUTEntry p4info_mvlut_entry;
+            p4info_mvlut_entry.set_mvlut_id(sym_id);
+            // donot set the match entry for default_value
+            // add the config parameters for default_value
+            uint8_t param_id = 1;
+            auto proto_param = p4info_mvlut_entry.mutable_param();
+            add_mvlut_param(proto_param, default_arg_expr, param_type, param_id, refMap, typeMap);
+
+            CHECK_NULL(rtEntries);
+            auto protoUpdate = const_cast<p4::v1::WriteRequest*>(rtEntries)->add_updates();
+            protoUpdate->set_type(p4::v1::Update::INSERT);
+            auto protoEntity = protoUpdate->mutable_entity();
+            auto protoEntry = protoEntity->mutable_extern_entry();
+            // set exact/ternary specific fields
+            // extern type id: 0x81 for Exact, 0x82 for Ternary
+            protoEntry->set_extern_type_id((sym_id & 0xff000000) >> 24);
+
+            // now attach the entry created to entries file
+            auto any_type_entry = protoEntry->mutable_entry();
+            any_type_entry->PackFrom(p4info_mvlut_entry);
+        }
+    }
+
+    bool add_mvlut_match(::p4::v1::MVLUTEntry& p4info_mvlut_entry, cstring type_name,
+                         const IR::Expression* init_expr, const IR::Type* init_type,
+                         uint8_t& field_count, ReferenceMap* refMap, TypeMap* typeMap) {
+        if (init_type->is<IR::Type_Bits>()) {
+            if (init_expr->is<IR::Constant>() == false) {
+                ::error(ErrorType::ERR_INVALID, "%1%: Invalid initializer for %2%.", init_expr,
+                        init_type);
+                return false;
+            }
+            int width = init_type->to<IR::Type_Bits>()->width_bits();
+            uint64_t val = init_expr->to<IR::Constant>()->asUint64();
+            uint64_t max_val = (width == 64) ? UINT64_MAX : ((1ull << width) - 1);
+            if (val > max_val) {
+                ::warning(ErrorType::WARN_MISMATCH,
+                          "%1%: value does not fit in %2% bits, will be truncated", init_expr,
+                          width);
+            }
+            val = val & max_val;
+            p4::v1::FieldMatch* proto_match = p4info_mvlut_entry.add_match();
+            if (type_name == EXACT_MVLUT_NAME) {
+                proto_match->set_field_id(field_count++);
+                auto proto_exact = proto_match->mutable_exact();
+                proto_exact->set_value(std::to_string(val));
+            }
+            return true;
+        }
+        const IR::Type* unwrapped_type = init_type;
+        if (init_type->is<IR::Type_Name>()) {
+            auto type_decl = refMap->getDeclaration(init_type->to<IR::Type_Name>()->path, true);
+            CHECK_NULL(type_decl);
+            unwrapped_type = typeMap->getType(type_decl->getNode())->getP4Type();
+            CHECK_NULL(unwrapped_type);
+        }
+        if (unwrapped_type->is<IR::Type_Struct>()) {
+            auto st = unwrapped_type->to<IR::Type_Struct>();
+            if (init_expr->is<IR::ListExpression>() == false) {
+                ::error(ErrorType::ERR_INVALID,
+                        "%1%: Invalid initializer expression. "
+                        "Expected list expression for struct type.",
+                        init_expr);
+                return false;
+            }
+            auto lst_expr = init_expr->to<IR::ListExpression>();
+            if (st->fields.size() == lst_expr->size()) {
+                for (size_t i = 0; i < st->fields.size(); i++) {
+                    auto field_type = st->fields.at(i)->type;
+                    auto expr_type = lst_expr->components.at(i);
+                    if (add_mvlut_match(p4info_mvlut_entry, type_name, expr_type, field_type,
+                                        field_count, refMap, typeMap) == false)
+                        return false;
+                }
+            } else {
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: destination type expects %2% fields, "
+                        "but source has %3%",
+                        lst_expr, st->fields.size(), lst_expr->size());
+                return false;
+            }
+            return true;
+        }
+
+        ::error(ErrorType::ERR_TYPE_ERROR, "%1%: Invalid expression to initialize type %2% ",
+                init_expr, init_type);
+        return false;
+    }
+
+    bool add_mvlut_param(p4::v1::MVLUTEntry_ConfigParam* proto_mvlut_param,
+                         const IR::Expression* init_expr, const IR::Type* init_type,
+                         uint8_t& param_count, ReferenceMap* refMap, TypeMap* typeMap) {
+        if (init_type->is<IR::Type_Bits>()) {
+            if (init_expr->is<IR::Constant>() == false) {
+                ::error(ErrorType::ERR_INVALID, "%1%: Invalid initializer for %2%.", init_expr,
+                        init_type);
+                return false;
+            }
+            int width = init_type->to<IR::Type_Bits>()->width_bits();
+            uint64_t val = init_expr->to<IR::Constant>()->fitsUint64()
+                               ? init_expr->to<IR::Constant>()->asUint64()
+                               : init_expr->to<IR::Constant>()->asInt64();
+            uint64_t max_val = (width == 64) ? UINT64_MAX : ((1ull << width) - 1);
+            if (val > max_val) {
+                ::warning(ErrorType::WARN_MISMATCH,
+                          "%1%: value does not fit in %2% bits, will be truncated", init_expr,
+                          width);
+            }
+            val = val & max_val;
+            auto proto_param = proto_mvlut_param->add_params();
+            proto_param->set_param_id(param_count++);
+            proto_param->set_param_value(val);
+            return true;
+        }
+        const IR::Type* unwrapped_type = init_type;
+        if (init_type->is<IR::Type_Name>()) {
+            auto type_decl = refMap->getDeclaration(init_type->to<IR::Type_Name>()->path, true);
+            CHECK_NULL(type_decl);
+            unwrapped_type = typeMap->getType(type_decl->getNode())->getP4Type();
+            CHECK_NULL(unwrapped_type);
+        }
+        if (unwrapped_type->is<IR::Type_Struct>()) {
+            auto st = unwrapped_type->to<IR::Type_Struct>();
+            if (init_expr->to<IR::ListExpression>()) {
+                auto lst_expr = init_expr->to<IR::ListExpression>();
+
+                if (st->fields.size() == lst_expr->size()) {
+                    for (size_t i = 0; i < st->fields.size(); i++) {
+                        auto field_type = st->fields.at(i)->type;
+                        auto expr_type = lst_expr->components.at(i);
+                        if (add_mvlut_param(proto_mvlut_param, expr_type, field_type, param_count,
+                                            refMap, typeMap) == false)
+                            return false;
+                    }
+                } else {
+                    ::error(ErrorType::ERR_TYPE_ERROR,
+                            "%1%: destination type expects %2% fields, "
+                            "but source has %3%",
+                            lst_expr, st->fields.size(), lst_expr->size());
+                    return false;
+                }
+            } else if (init_expr->is<IR::StructExpression>()) {
+                auto strct_expr = init_expr->to<IR::StructExpression>();
+                if (st->fields.size() == strct_expr->components.size()) {
+                    for (size_t i = 0; i < st->fields.size(); i++) {
+                        auto field_type = st->fields.at(i)->type;
+                        auto expr_type = strct_expr->components.at(i)->expression;
+                        if (add_mvlut_param(proto_mvlut_param, expr_type, field_type, param_count,
+                                            refMap, typeMap) == false)
+                            return false;
+                    }
+                } else {
+                    ::error(ErrorType::ERR_TYPE_ERROR,
+                            "%1%: destination type expects %2% fields, "
+                            "but source has %3%",
+                            strct_expr, st->fields.size(), strct_expr->components.size());
+                    return false;
+                }
+            } else {
+                ::error(ErrorType::ERR_INVALID,
+                        "%1%: Invalid initializer expression. "
+                        "Expected list expression or StructExpression for struct type.",
+                        init_expr);
+                return false;
+            }
+            return true;
+        }
+        ::error(ErrorType::ERR_TYPE_ERROR, "%1%: Invalid expression to initialize type %2% ",
+                init_expr, init_type);
+        return false;
+    }
+
+    const cstring EXACT_MVLUT_NAME = "MatchValueLookupTable";
+    const cstring ENTRIES_ARG_NAME = "const_entries";
+    const cstring DEFAULT_ARG_NAME = "default_value";
+    const cstring SIZE_ARG_NAME = "size";
+
     /// We represent all static table entries as one P4Runtime WriteRequest object
     p4v1::WriteRequest* entries;
     /// The symbols used in the API and their ids.
@@ -1377,6 +1662,9 @@ class P4RuntimeEntriesConverter {
         if (block->is<IR::TableBlock>())
             entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap, typeMap,
                                              archHandler);
+        else if (block->is<IR::ExternBlock>()) {
+            entriesConverter.addExternEntries(block->to<IR::ExternBlock>(), refMap, typeMap);
+        }
     });
 
     auto* p4Info = analyzer.getP4Info();

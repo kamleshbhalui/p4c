@@ -56,6 +56,84 @@ struct BFRuntimeSchemaGenerator::ActionSelector {
     };
 };
 
+Util::JsonObject* BFRuntimeSchemaGenerator::makeTypeInt(cstring type) {
+    auto* typeObj = new Util::JsonObject();
+    typeObj->emplace("type", type);
+    return typeObj;
+}
+
+void BFRuntimeSchemaGenerator::addMatchValueLookupTables(Util::JsonArray* tables_json_array) const {
+    for (const auto& extrn : p4info.externs()) {
+        switch (extrn.extern_type_id()) {
+            case p4configv1::P4Ids::MATCH_VALUE_LOOKUP_TABLE:
+                break;
+            default:
+                // not interested in any other externs
+                continue;
+        }
+        for (const auto& inst : extrn.instances()) {
+            BUG_CHECK(inst.info().Is<p4configv1::MatchValueLookupTable>(),
+                      "Unexpected message with P4Id MATCH_VALUE_LOOKUP_TABLE (%1%)",
+                      p4configv1::P4Ids::MATCH_VALUE_LOOKUP_TABLE);
+            p4configv1::MatchValueLookupTable mvlut;
+            inst.info().UnpackTo(&mvlut);
+            const auto pre = inst.preamble();
+            auto* annotations =
+                transformAnnotations(pre.annotations().begin(), pre.annotations().end());
+            cstring table_name = IR::P4Program::main + "." + pre.name();
+            cstring table_type = extrn.extern_type_name();
+            auto table_json =
+                initTableJson(table_name.c_str(), pre.id(), table_type, mvlut.size(), annotations);
+            table_json->emplace("has_const_default_action", false);
+
+            bool need_priority_key = false;
+            uint32_t last_key_id = 0;
+            auto* keys_json = new Util::JsonArray();
+            for (const auto& mf : mvlut.match_fields()) {
+                boost::optional<cstring> match_type = boost::none;
+                switch (mf.match_case()) {
+                    case p4configv1::MatchField::kMatchType:
+                        switch (mf.match_type()) {
+                            case p4configv1::MatchField_MatchType_TERNARY:
+                                match_type = cstring("Ternary");
+                                need_priority_key = true;
+                                break;
+                            case p4configv1::MatchField_MatchType_EXACT:
+                                match_type = cstring("Exact");
+                                break;
+                            default:
+                                BUG("Invalid match type for table %1%, expected Exact or Ternary",
+                                    table_name);
+                        }
+                        break;
+                    default:
+                        BUG("Invalid oneof case for the match type of table '%1%'", pre.name());
+                        break;
+                }
+                addKeyField(keys_json, mf.id(), mf.name(), false /* mandatory */, *match_type,
+                            makeTypeBytes(mf.bitwidth(), boost::none));
+                last_key_id = last_key_id < mf.id() ? mf.id() : last_key_id;
+            }
+            if (need_priority_key == true) {
+                addKeyField(keys_json, last_key_id + 1, "$MATCH_PRIORITY", false, "Exact",
+                            makeTypeInt("uint32"));
+            }
+            table_json->emplace("key", keys_json);
+
+            auto* data_json = new Util::JsonArray();
+            for (const auto& p : mvlut.params()) {
+                auto data_obj = makeCommonDataField(p.id(), p.name(), makeTypeBytes(p.bitwidth()),
+                                                    false /* repeated */);
+                data_obj->emplace("mandatory", false);
+                data_obj->emplace("read_only", false);
+                data_json->append(data_obj);
+            }
+            table_json->emplace("data", data_json);
+            tables_json_array->append(table_json);
+        }
+    }
+}
+
 void BFRuntimeSchemaGenerator::addMatchActionData(const p4configv1::Table& table,
                                                   Util::JsonObject* tableJson,
                                                   Util::JsonArray* dataJson,
@@ -229,6 +307,7 @@ const Util::JsonObject* BFRuntimeSchemaGenerator::genSchema() const {
     json->emplace("tables", tablesJson);
 
     addMatchTables(tablesJson);
+    addMatchValueLookupTables(tablesJson);
     addActionProfs(tablesJson);
     addCounters(tablesJson);
     addMeters(tablesJson);

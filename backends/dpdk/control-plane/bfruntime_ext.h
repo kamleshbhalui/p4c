@@ -71,7 +71,8 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
                           Util::JsonObject* tableJson) const override;
     void addMatchActionData(const p4configv1::Table& table, Util::JsonObject* tableJson,
                             Util::JsonArray* dataJson, P4Id maxActionParamId) const;
-
+    static Util::JsonObject* makeTypeInt(cstring type);
+    void addMatchValueLookupTables(Util::JsonArray* tablesJson) const;
     boost::optional<bool> actProfHasSelector(P4Id actProfId) const override;
 
     static boost::optional<ActionProf> fromDPDKActionProfile(

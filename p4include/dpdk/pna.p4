@@ -581,6 +581,49 @@ struct pna_main_output_metadata_t {
 // END:Metadata_main_output
 // END:Metadata_types
 
+// BEGIN:MatchValueLookupTable
+extern MatchValueLookupTable<K, V, E> {
+    /**
+     * Create a table with match kinds all 'exact' and the specified
+     * size (number of entries).  The default value returned when a
+     * lookup experiences a miss is given by default_value.
+     */
+    MatchValueLookupTable(int size, V default_value);
+
+    /**
+     * The same as the constructor with an explicit default_value,
+     * except the default_value is the default value for the type V as
+     * defined in the section "Default values" of the P4_16 language
+     * specification.
+     */
+    MatchValueLookupTable(int size);
+
+    /**
+     * Create a table with match kinds all 'exact' and the specified
+     * size (number of entries).  The default value returned when a
+     * lookup experiences a miss is given by default_value.
+     * const_entries is a list of entries, similar to the 'const
+     * entries' table property for tables.
+     *
+     * Example where key and value types are bit<W>:
+     *     MatchValueLookupTable<bit<8>, bit<16>, _>(
+     *         size = 1024,
+     *         const_entries = {
+     *             {5, 10},  // key 5, value 10
+     *             {6, 27},  // key 6, value 27
+     *             {10, 2}   // key 10, value 2
+     *         },
+     *         default_value = 42)  // default value returned for all other keys
+     *     values;
+     */
+    MatchValueLookupTable(int size, V default_value, E const_entries);
+    /**
+     * Look up the key in the table.  Always hits, so always returns a
+     * value of type V.
+     */
+    V lookup(in K key);
+}
+// END:MatchValueLookupTable
 
 // The following extern functions are "forwarding" functions -- they
 // all set the destination of the packet.  Calling one of them
