@@ -1136,7 +1136,7 @@ class ElimHeaderCopy : public Transform {
 };
 
 /// @brief This pass add a pseudo header declaration, it will be used as
-/// container of operands where dpdk instructions require it's operand to be in
+/// container of operands where dpdk instructions require it's operand to be ind
 /// a header.
 class DpdkAddPseudoHeaderDecl : public Transform {
     P4::ReferenceMap* refMap;
@@ -1152,6 +1152,7 @@ class DpdkAddPseudoHeaderDecl : public Transform {
         headerInstanceName = refMap->newName("dpdk_pseudo_header");
         headerTypeName = refMap->newName("dpdk_pseudo_header_t");
         headersDeclName = "";
+
     }
 
     const IR::Node* preorder(IR::P4Program* program) override;

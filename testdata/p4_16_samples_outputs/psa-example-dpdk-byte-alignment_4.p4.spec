@@ -1,4 +1,5 @@
 
+
 struct ethernet_t {
 	bit<48> dstAddr
 	bit<48> srcAddr
@@ -72,6 +73,16 @@ struct metadata {
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<32> local_metadata__fwd_metadata_old_srcAddr0
+	bit<8> IngressDeparser_deparser_tmp
+	bit<8> IngressDeparser_deparser_tmp_0
+	bit<8> IngressDeparser_deparser_tmp_1
+	bit<8> IngressDeparser_deparser_tmp_2
+	bit<8> IngressDeparser_deparser_tmp_3
+	bit<16> IngressDeparser_deparser_tmp_4
+	bit<16> IngressDeparser_deparser_tmp_5
+	bit<16> IngressDeparser_deparser_tmp_6
+	bit<16> IngressDeparser_deparser_tmp_7
+	bit<16> IngressDeparser_deparser_tmp_8
 }
 metadata instanceof metadata
 
@@ -126,6 +137,49 @@ apply {
 	INGRESSPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	table route
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	mov h.cksum_state.state_0 0x0
+	mov m.IngressDeparser_deparser_tmp h.ipv4.version_ihl
+	and m.IngressDeparser_deparser_tmp 0xF
+	mov m.IngressDeparser_deparser_tmp_0 m.IngressDeparser_deparser_tmp
+	and m.IngressDeparser_deparser_tmp_0 0xF
+	mov h.dpdk_pseudo_header.pseudo m.IngressDeparser_deparser_tmp_0
+	mov m.IngressDeparser_deparser_tmp_1 h.ipv4.version_ihl
+	shr m.IngressDeparser_deparser_tmp_1 0x4
+	mov m.IngressDeparser_deparser_tmp_2 m.IngressDeparser_deparser_tmp_1
+	and m.IngressDeparser_deparser_tmp_2 0xF
+	mov m.IngressDeparser_deparser_tmp_3 m.IngressDeparser_deparser_tmp_2
+	and m.IngressDeparser_deparser_tmp_3 0xF
+	mov h.dpdk_pseudo_header.pseudo_0 m.IngressDeparser_deparser_tmp_3
+	mov m.IngressDeparser_deparser_tmp_4 h.ipv4.flags_fragOffset
+	and m.IngressDeparser_deparser_tmp_4 0x7
+	mov m.IngressDeparser_deparser_tmp_5 m.IngressDeparser_deparser_tmp_4
+	and m.IngressDeparser_deparser_tmp_5 0x7
+	mov h.dpdk_pseudo_header.pseudo_1 m.IngressDeparser_deparser_tmp_5
+	mov m.IngressDeparser_deparser_tmp_6 h.ipv4.flags_fragOffset
+	shr m.IngressDeparser_deparser_tmp_6 0x3
+	mov m.IngressDeparser_deparser_tmp_7 m.IngressDeparser_deparser_tmp_6
+	and m.IngressDeparser_deparser_tmp_7 0x1FFF
+	mov m.IngressDeparser_deparser_tmp_8 m.IngressDeparser_deparser_tmp_7
+	and m.IngressDeparser_deparser_tmp_8 0x1FFF
+	mov h.dpdk_pseudo_header.pseudo_2 m.IngressDeparser_deparser_tmp_8
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_0
+	ckadd h.cksum_state.state_0 h.ipv4.diffserv
+	ckadd h.cksum_state.state_0 h.ipv4.totalLen
+	ckadd h.cksum_state.state_0 h.ipv4.identification
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_1
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_2
+	ckadd h.cksum_state.state_0 h.ipv4.ttl
+	ckadd h.cksum_state.state_0 h.ipv4.protocol
+	ckadd h.cksum_state.state_0 h.ipv4.srcAddr
+	ckadd h.cksum_state.state_0 h.ipv4.dstAddr
+	mov h.ipv4.hdrChecksum h.cksum_state.state_0
+	mov h.cksum_state.state_0 0x0
+	cksub h.cksum_state.state_0 h.tcp.checksum
+	mov h.dpdk_pseudo_header.pseudo_3 m.local_metadata__fwd_metadata_old_srcAddr0
+	cksub h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_3
+	ckadd h.cksum_state.state_0 h.ipv4.srcAddr
+	mov h.tcp.checksum h.cksum_state.state_0
 	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp

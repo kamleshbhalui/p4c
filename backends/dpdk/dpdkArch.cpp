@@ -80,25 +80,29 @@ const IR::Type_Control* ConvertToDpdkArch::rewriteControlType(const IR::Type_Con
 
 const IR::Type_Control* ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Control* c,
                                                                cstring name) {
+    // Dpdk requires all local variables to be collected in a structure called
+    // metadata, and we perform read/write on this struct fields, so here we unify
+    // direction of this metadata decl to always be inout
     auto applyParams = new IR::ParameterList();
     if (name == "IngressDeparser") {
         applyParams->push_back(c->applyParams->parameters.at(0));
         auto header = c->applyParams->parameters.at(4);
         applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
         auto meta = c->applyParams->parameters.at(5);
-        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
+        applyParams->push_back(
+            new IR::Parameter(IR::ID("m"), /*meta->direction*/ IR::Direction::InOut, meta->type));
     } else if (name == "EgressDeparser") {
         applyParams->push_back(c->applyParams->parameters.at(0));
         auto header = c->applyParams->parameters.at(3);
         applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
         auto meta = c->applyParams->parameters.at(4);
-        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), /*meta->direction*/  IR::Direction::InOut, meta->type));
     } else if (name == "MainDeparserT") {
         applyParams->push_back(c->applyParams->parameters.at(0));
         auto header = c->applyParams->parameters.at(1);
         applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
         auto meta = c->applyParams->parameters.at(2);
-        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), /*meta->direction*/  IR::Direction::InOut, meta->type));
     }
     auto tc = new IR::Type_Control(c->name, c->annotations, c->typeParameters, applyParams);
     return tc;
@@ -2908,10 +2912,23 @@ const IR::Node* DpdkAddPseudoHeaderDecl::preorder(IR::Type_Struct* st) {
 bool DpdkAddPseudoHeaderDecl::isHeadersStruct(const IR::Type_Struct* st) {
     if (!st) return false;
     auto annon = st->getAnnotation("__packet_data__");
-    if (annon == nullptr)
+    if (annon == nullptr) {
+        for (auto f : st->fields) {
+            cstring fname = f->name.name;
+            // field name "f0" is for detecting automatically generated struct, used for 
+            // initializing with structexpression
+            if (f->type->is<IR::Type_Header>() && fname != "f0")
+                return true;
+            else if (auto tn = f->type->to<IR::Type_Name>()) {
+                auto type0 = typeMap->getTypeType(tn, true);
+                return type0->is<IR::Type_Header>() && fname != "f0";
+            } else {
+                return false;
+            }
+        }
         return false;
-    else
-        return true;
+    }
+    return true;
 }
 
 const IR::Node* DpdkAddPseudoHeaderDecl::preorder(IR::P4Control* c) {
@@ -2999,6 +3016,7 @@ const IR::Node* AddFieldsToPseudoHeader::preorder(IR::Type_Header* h) {
         auto field = new IR::StructField(p.first, p.second);
         fields.push_back(field);
     }
+    MoveNonHeaderFieldsToPseudoHeader::pseudoFieldNameType.clear();
     return new IR::Type_Header(h->srcInfo, h->name, h->annotations, h->typeParameters, fields);
 }
 

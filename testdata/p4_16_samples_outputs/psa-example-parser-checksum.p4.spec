@@ -31,6 +31,24 @@ struct tcp_t {
 	bit<16> urgentPtr
 }
 
+struct dpdk_pseudo_header_t {
+	bit<4> pseudo
+	bit<4> pseudo_0
+	bit<8> pseudo_1
+	bit<16> pseudo_2
+	bit<16> pseudo_3
+	bit<3> pseudo_4
+	bit<13> pseudo_5
+	bit<8> pseudo_6
+	bit<8> pseudo_7
+	bit<32> pseudo_8
+	bit<32> pseudo_9
+	bit<4> pseudo_10
+	bit<4> pseudo_11
+	bit<3> pseudo_12
+	bit<13> pseudo_13
+}
+
 struct cksum_state_t {
 	bit<16> state_0
 	bit<16> state_1
@@ -99,6 +117,7 @@ metadata instanceof metadata
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
+header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 header cksum_state instanceof cksum_state_t
 
 regarray parser_error_counts_0 size 0x10001 initval 0x0
@@ -173,17 +192,28 @@ apply {
 	mov m.IngressParser_parser_tmp_23 h.ipv4.protocol
 	mov m.IngressParser_parser_tmp_24 h.ipv4.srcAddr
 	mov m.IngressParser_parser_tmp_25 h.ipv4.dstAddr
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_15
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_16
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_17
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_18
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_19
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_20
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_21
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_22
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_23
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_24
-	ckadd h.cksum_state.state_0 m.IngressParser_parser_tmp_25
+	mov h.dpdk_pseudo_header.pseudo m.IngressParser_parser_tmp_15
+	mov h.dpdk_pseudo_header.pseudo_0 m.IngressParser_parser_tmp_16
+	mov h.dpdk_pseudo_header.pseudo_1 m.IngressParser_parser_tmp_17
+	mov h.dpdk_pseudo_header.pseudo_2 m.IngressParser_parser_tmp_18
+	mov h.dpdk_pseudo_header.pseudo_3 m.IngressParser_parser_tmp_19
+	mov h.dpdk_pseudo_header.pseudo_4 m.IngressParser_parser_tmp_20
+	mov h.dpdk_pseudo_header.pseudo_5 m.IngressParser_parser_tmp_21
+	mov h.dpdk_pseudo_header.pseudo_6 m.IngressParser_parser_tmp_22
+	mov h.dpdk_pseudo_header.pseudo_7 m.IngressParser_parser_tmp_23
+	mov h.dpdk_pseudo_header.pseudo_8 m.IngressParser_parser_tmp_24
+	mov h.dpdk_pseudo_header.pseudo_9 m.IngressParser_parser_tmp_25
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_0
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_1
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_2
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_3
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_4
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_5
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_6
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_7
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_8
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_9
 	mov m.IngressParser_parser_tmp_13 h.cksum_state.state_0
 	jmpeq LABEL_TRUE_0 m.IngressParser_parser_tmp_13 h.ipv4.hdrChecksum
 	mov m.IngressParser_parser_tmp_26 0x0
