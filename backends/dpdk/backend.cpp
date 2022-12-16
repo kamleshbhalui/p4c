@@ -52,6 +52,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
 
     PassManager simplify = {
         new DpdkArchFirst(),
+        new DpdkAddPseudoHeader(refMap, typeMap),
         new ByteAlignment(typeMap, refMap, &structure),
         new P4::EliminateTypedef(refMap, typeMap),
         new P4::ClearTypeMap(typeMap),
@@ -64,7 +65,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::RemoveComplexExpressions(refMap, typeMap,
                                          new DPDK::ProcessControls(&structure.pipeline_controls)),
         new DismantleMuxExpressions(typeMap, refMap),
-        new DpdkAddPseudoHeader(refMap, typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new ElimHeaderCopy(typeMap),
         new P4::TypeChecking(refMap, typeMap),

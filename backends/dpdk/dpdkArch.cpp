@@ -96,13 +96,15 @@ const IR::Type_Control* ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Co
         auto header = c->applyParams->parameters.at(3);
         applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
         auto meta = c->applyParams->parameters.at(4);
-        applyParams->push_back(new IR::Parameter(IR::ID("m"), /*meta->direction*/  IR::Direction::InOut, meta->type));
+        applyParams->push_back(
+            new IR::Parameter(IR::ID("m"), /*meta->direction*/ IR::Direction::InOut, meta->type));
     } else if (name == "MainDeparserT") {
         applyParams->push_back(c->applyParams->parameters.at(0));
         auto header = c->applyParams->parameters.at(1);
         applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
         auto meta = c->applyParams->parameters.at(2);
-        applyParams->push_back(new IR::Parameter(IR::ID("m"), /*meta->direction*/  IR::Direction::InOut, meta->type));
+        applyParams->push_back(
+            new IR::Parameter(IR::ID("m"), /*meta->direction*/ IR::Direction::InOut, meta->type));
     }
     auto tc = new IR::Type_Control(c->name, c->annotations, c->typeParameters, applyParams);
     return tc;
@@ -2915,7 +2917,7 @@ bool DpdkAddPseudoHeaderDecl::isHeadersStruct(const IR::Type_Struct* st) {
     if (annon == nullptr) {
         for (auto f : st->fields) {
             cstring fname = f->name.name;
-            // field name "f0" is for detecting automatically generated struct, used for 
+            // field name "f0" is for detecting automatically generated struct, used for
             // initializing with structexpression
             if (f->type->is<IR::Type_Header>() && fname != "f0")
                 return true;

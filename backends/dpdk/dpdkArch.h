@@ -1152,7 +1152,6 @@ class DpdkAddPseudoHeaderDecl : public Transform {
         headerInstanceName = refMap->newName("dpdk_pseudo_header");
         headerTypeName = refMap->newName("dpdk_pseudo_header_t");
         headersDeclName = "";
-
     }
 
     const IR::Node* preorder(IR::P4Program* program) override;
