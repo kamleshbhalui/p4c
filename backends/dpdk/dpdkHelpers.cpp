@@ -1143,6 +1143,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
                 auto reg = a->object->getName();
                 add_instr(new IR::DpdkRegisterWriteStatement(reg, index, src));
             }
+        } else if (a->originalExternType->getName().name == "MatchValueLookupTable") {
+            // No instructions emitted for MatchValueLookupTable in .spec file.
         } else {
             ::error(ErrorType::ERR_UNKNOWN, "%1%: Unknown extern function.", s);
         }

@@ -48,6 +48,8 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
 
         // @match has an expression argument
         PARSE(IR::Annotation::matchAnnotation, Expression),
+        //@match has a string argument
+        PARSE(IR::Annotation::matchValueLookupTableAnnotation, StringLiteral),
     };
 }
 

@@ -211,6 +211,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             auto profName = decl->controlPlaneName();
             symbols->add(SymbolTypeDPDK::ACTION_SELECTOR(), selName);
             symbols->add(SymbolType::ACTION_PROFILE(), profName);
+        } else if (externBlock->type->name == MatchValueLookupTableExtern::typeName()) {
+            symbols->add(SymbolType::MATCH_VALUE_LOOKUP_TABLE(), decl->controlPlaneName());
         }
     }
 
@@ -290,7 +292,143 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     break;
                 }
             }
+        } else if (externBlock->type->name == MatchValueLookupTableExtern::typeName()) {
+            auto mvl_table = getMatchValueLookupTable(externBlock);
+            if (mvl_table) addMatchValueLookupTable(symbols, p4info, *mvl_table);
         }
+    }
+
+    void addMatchValueLookupTable(const P4RuntimeSymbolTableIface& symbols,
+                                  p4configv1::P4Info* p4Info, const MatchValueLookupTable& mvltbl,
+                                  cstring pipeName = "") {
+        p4configv1::MatchValueLookupTable p4info_mvlut;
+        // set fixed match filed
+        p4configv1::MatchField* match = p4info_mvlut.add_match_fields();
+        match->set_id(1);
+        match->set_name(mvltbl.key_name);
+        match->set_bitwidth(mvltbl.key_bitwidth);
+        match->set_match_type(p4configv1::MatchField_MatchType_EXACT);
+
+        // set values
+        for (auto p : mvltbl.params) {
+            auto param = p4info_mvlut.add_params();
+            param->set_id(p.id);
+            param->set_name(p.name.c_str());
+            param->set_bitwidth(p.bitwidth);
+        }
+
+        // set size field
+        p4info_mvlut.set_size(mvltbl.size);
+
+        // add the MVLUT instance into p4info
+        addP4InfoExternInstance(symbols, SymbolType::MATCH_VALUE_LOOKUP_TABLE(),
+                                MatchValueLookupTableExtern::directTypeName(), mvltbl.name,
+                                mvltbl.annotations, p4info_mvlut, p4Info, pipeName);
+    }
+
+    void add_mvlut_param(uint32_t& param_count, std::vector<mvlut_param_t>* params_list,
+                         const IR::Type* type, cstring decl_name, cstring prefix) {
+        if (type->is<IR::Type_Struct>()) {
+            auto stype = type->to<IR::Type_Struct>();
+            cstring newprefix = prefix != "" ? prefix + "_" + decl_name : decl_name;
+            for (auto field : stype->fields) {
+                add_mvlut_param(param_count, params_list, field->type, field->getName().name,
+                                newprefix);
+            }
+        } else {
+            cstring param_name = prefix == "" ? decl_name : prefix + "_" + decl_name;
+            params_list->emplace_back(
+                mvlut_param_t{param_count++, param_name, (uint32_t)type->width_bits()});
+        }
+    }
+
+    boost::optional<MatchValueLookupTable> getMatchValueLookupTable(
+        const IR::ExternBlock* instance) {
+        auto decl = instance->node->to<IR::Declaration_Instance>();
+        // to be deleted, used to support deprecated ActionSelector constructor.
+        BUG_CHECK(decl->type->is<IR::Type_Specialized>(), "%1%: expected Type_Specialized",
+                  decl->type);
+
+        auto type = decl->type->to<IR::Type_Specialized>();
+        BUG_CHECK(type->arguments->size() == 3, "%1%: expected three type arguments ", decl);
+        cstring inst_name = decl->controlPlaneName();
+        // get key parameter bitwidth
+        uint32_t key_parameter_bitwidth = 0;
+        auto key_type = type->arguments->at(0);
+        cstring key_name;
+        if (auto atype = key_type->to<IR::Type_Bits>()) {
+            cstring key_prefix = inst_name + "_key";
+            // Remove the control block name prefix if exists
+            cstring str_token = key_prefix.findlast('.');
+            if (str_token != nullptr) {
+                key_prefix = str_token.trim(".\t\n\r");
+            }
+            key_name = this->refMap->newName(key_prefix);
+            key_parameter_bitwidth = (uint32_t)atype->width_bits();
+        } else if (key_type->is<IR::Type_Name>()) {
+            auto type_decl =
+                this->refMap->getDeclaration(key_type->to<IR::Type_Name>()->path, true);
+            CHECK_NULL(type_decl);
+            const IR::Type* ty = this->typeMap->getType(type_decl->getNode())->getP4Type();
+            CHECK_NULL(ty);
+            if (ty->is<IR::Type_Struct>()) {
+                auto st_type = ty->to<IR::Type_Struct>();
+                if (st_type->fields.size() != 1) {
+                    ::error(ErrorType::ERR_INVALID,
+                            "%1%: struct type for key shall have only "
+                            "one field in %2%",
+                            key_type, decl);
+                    return boost::none;
+                }
+                auto field_it = st_type->fields.begin();
+                key_name = (*field_it)->name;
+                // assign the unwrapped struct type as key type for later processing
+                key_type = st_type;
+                key_parameter_bitwidth = (uint32_t)key_type->width_bits();
+            }
+        } else {
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: Invalid key type in %2%. Expected bit "
+                    "type or struct type with one bit type member",
+                    key_type, decl);
+            return boost::none;
+        }
+
+        // get size field value
+        auto size_param = instance->getParameterValue("size");
+        BUG_CHECK(size_param->is<IR::Constant>(),
+                  "Unexpected non constant expression as size argument %1%.", size_param);
+        int val = size_param->to<IR::Constant>()->asInt();
+        if (val < 0) {
+            ::error(ErrorType::ERR_INVALID, "%1%: Invalid value for size argument", size_param);
+            return boost::none;
+        }
+        size_t size_val = (unsigned int)val;
+
+        // create the MVLUT object
+        MatchValueLookupTable tbl(inst_name, key_name, key_parameter_bitwidth, {}, size_val,
+                                  decl->to<IR::IAnnotated>());
+
+        // record the parameter values for MVLUT
+        uint32_t param_count = 1;
+        auto arg_type = type->arguments->at(1);
+        if (auto* type_name = arg_type->to<IR::Type_Name>()) {
+            auto* decl = this->refMap->getDeclaration(type_name->path, true);
+            CHECK_NULL(decl);
+            const IR::Type* type = this->typeMap->getType(decl->getNode());
+            type = type->is<IR::Type_Type>() ? type->to<IR::Type_Type>()->type : type;
+            add_mvlut_param(param_count, &tbl.params, type, "", "");
+        } else if (auto atype = arg_type->to<IR::Type_Bits>()) {
+            add_mvlut_param(param_count, &tbl.params, atype, "", "");
+        } else {
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: Invalid type for config parameter in %2% "
+                    "instance.",
+                    arg_type, this->EXACT_MVLUT_NAME);
+            return boost::none;
+        }
+
+        return tbl;
     }
 
     /// @return serialization information for the Digest extern instacne @decl

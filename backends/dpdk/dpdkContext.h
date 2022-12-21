@@ -121,14 +121,131 @@ struct SelectionTable {
     }
 };
 
+enum TableTypes { MATCH = 0 };
+
+enum MatchType { exact = 0, ternary = 1, lpm = 2, range = 3, selector = 4 };
+
+struct MatchKeyFieldValue {
+    cstring fieldName;
+    cstring value;
+    bool isValue;
+    cstring mask;
+    bool isMask;
+    cstring rangeStart;
+    cstring rangeEnd;
+    bool isRange;
+    unsigned int prefixLength;
+    bool isPrefixLength;
+
+    MatchKeyFieldValue() {
+        fieldName = "";
+        value = "";
+        isValue = false;
+        mask = "";
+        isMask = false;
+        rangeStart = "";
+        rangeEnd = "";
+        isRange = false;
+        prefixLength = 0;
+        isPrefixLength = false;
+    }
+};
+
+struct MatchKeyField {
+    cstring name;
+    bool isInstanceName;
+    cstring instanceName;
+    bool isFieldName;
+    cstring fieldName;
+    MatchType matchType;
+    unsigned int startBit;
+    unsigned int bitWidth;
+    unsigned int bitWidthFull;
+    unsigned int index;
+    unsigned int position;
+    MatchKeyField() {
+        name = "";
+        instanceName = "";
+        isInstanceName = false;
+        fieldName = "";
+        isFieldName = false;
+        matchType = exact;
+        startBit = 0;
+        bitWidth = 0;
+        bitWidthFull = 0;
+        index = 0;
+        position = 0;
+    }
+};
+
+struct ImmediateFields {
+    cstring param_name;
+    int param_handle;
+    int dest_start;
+    int dest_width;
+    ImmediateFields() {
+        param_name = "";
+        param_handle = -1;
+        dest_start = -1;
+        dest_width = 0;
+    }
+};
+
+struct LookupHwBlocks {
+    cstring resource;
+    int resource_id;
+    std::vector<ImmediateFields*> immediate_fields;
+    LookupHwBlocks() {
+        resource = "";
+        resource_id = 0;
+    }
+};
+
+struct LookupMatchAttributes {
+    std::vector<LookupHwBlocks*> hardware_blocks;
+};
+
+/* This structure hold match value lookup table attributes
+ * collected from declarations */
+struct P4MatchLookupTableInfo {
+    TableTypes tableType;
+    unsigned int handle;
+    cstring name;
+    cstring ctrlName;
+    cstring tblName;
+    cstring targetName;
+    unsigned int size;
+    bool isSize;
+    bool p4Hidden;
+    bool isP4Hidden;
+    std::vector<MatchKeyField*> keyList;
+    LookupMatchAttributes* matchAttributes;
+
+    P4MatchLookupTableInfo() {
+        tableType = MATCH;
+        handle = 0;
+        name = "";
+        ctrlName = "";
+        tblName = "";
+        size = 0;
+        isSize = false;
+        p4Hidden = false;
+        isP4Hidden = false;
+        matchAttributes = nullptr;
+    }
+};
 // This pass generates context JSON into user specified file
 class DpdkContextGenerator : public Inspector {
     P4::ReferenceMap* refmap;
+    P4::TypeMap* typemap;
     DpdkProgramStructure* structure;
     DpdkOptions& options;
     // All tables are collected into this vector
     IR::IndexedVector<IR::Declaration> tables;
     std::vector<const IR::Declaration_Instance*> externs;
+    // All match value lookup tables collected into this vector
+    std::vector<const IR::Declaration_Instance*> mvlTables;
+    std::vector<P4MatchLookupTableInfo*> contextLutTables;
 
     // Maps holding table, extern and action attributes needed for context JSON
     std::map<const cstring, struct TableAttributes> tableAttrmap;
@@ -140,9 +257,9 @@ class DpdkContextGenerator : public Inspector {
     static unsigned newActionHandle;
 
  public:
-    DpdkContextGenerator(P4::ReferenceMap* refmap, DpdkProgramStructure* structure,
-                         DpdkOptions& options)
-        : refmap(refmap), structure(structure), options(options) {}
+    DpdkContextGenerator(P4::ReferenceMap* refmap, P4::TypeMap* typemap,
+                         DpdkProgramStructure* structure, DpdkOptions& options)
+        : refmap(refmap), typemap(typemap), structure(structure), options(options) {}
 
     unsigned int getNewTableHandle();
     unsigned int getNewActionHandle();
@@ -151,6 +268,16 @@ class DpdkContextGenerator : public Inspector {
     void addMatchTables(Util::JsonArray* tablesJson);
     void addExternInfo(Util::JsonArray* externsJson);
     Util::JsonObject* initTableCommonJson(const cstring name, const struct TableAttributes& attr);
+    void addMatchValueLookupTables(Util::JsonArray* tablesJson);
+    void UpdateImmediateFields(P4MatchLookupTableInfo* emvlut, const IR::Type* type);
+    void UpdateMatchKeys(P4MatchLookupTableInfo* emvlut, const IR::Type* type,
+                         cstring instanceName);
+    void ProcessMatchValueLookupTable(const IR::Declaration_Instance* d);
+    void outputLutTable(Util::JsonArray* tablesJson);
+    void outputLutMatchAttributes(Util::JsonObject* matchJson,
+                                  struct P4MatchLookupTableInfo* tblInfo);
+    void outputKeys(Util::JsonObject* matchJson, std::vector<struct MatchKeyField*>& keylist);
+    void outputImmediateField(Util::JsonArray* immFieldJson, ImmediateFields* immfld);
     void addKeyField(Util::JsonArray* keyJson, const cstring name, const cstring annon,
                      const IR::KeyElement* key, int position);
     Util::JsonArray* addActions(const IR::P4Table* table, const cstring ctrlName, bool isMatch);
