@@ -32,7 +32,6 @@ limitations under the License.
 #include "midend/eliminateTypedefs.h"
 #include "midend/removeComplexExpressions.h"
 #include "midend/simplifyKey.h"
-
 namespace DPDK {
 
 void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
@@ -49,10 +48,9 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
     std::set<const IR::P4Table*> invokedInKey;
     auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
     auto genContextJson = new DpdkContextGenerator(refMap, &structure, options);
-
+    bool is_all_args_header_fields = true;
     PassManager simplify = {
         new DpdkArchFirst(),
-        new DpdkAddPseudoHeader(refMap, typeMap),
         new ByteAlignment(typeMap, refMap, &structure),
         new P4::EliminateTypedef(refMap, typeMap),
         new P4::ClearTypeMap(typeMap),
@@ -120,6 +118,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
                 out->flush();
             }
         }),
+        new DpdkAddPseudoHeader(refMap, typeMap, &structure, is_all_args_header_fields),
         new ReplaceHdrMetaField(),
         // convert to assembly program
         convertToDpdk,

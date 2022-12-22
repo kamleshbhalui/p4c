@@ -33,12 +33,6 @@ struct udp_t {
 	bit<16> checksum
 }
 
-struct dpdk_pseudo_header_t {
-	bit<4> pseudo
-	bit<32> pseudo_0
-	bit<32> pseudo_1
-}
-
 struct cksum_state_t {
 	bit<16> state_0
 }
@@ -94,8 +88,8 @@ header outer_ethernet instanceof ethernet_t
 header outer_ipv4 instanceof ipv4_t
 header outer_udp instanceof udp_t
 header outer_vxlan instanceof vxlan_t
-header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 header cksum_state instanceof cksum_state_t
+header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 struct local_metadata_t {
 	bit<32> psa_ingress_input_metadata_ingress_port
@@ -104,6 +98,7 @@ struct local_metadata_t {
 	bit<32> local_metadata_mem1
 	bit<8> Ingress_tmp
 	bit<8> Ingress_tmp_0
+	bit<32> Ingress_tmp_4
 }
 metadata instanceof local_metadata_t
 
@@ -133,14 +128,12 @@ action vxlan_encap args instanceof vxlan_encap_arg_t {
 	and m.Ingress_tmp 0xF
 	mov m.Ingress_tmp_0 m.Ingress_tmp
 	and m.Ingress_tmp_0 0xF
-	mov h.dpdk_pseudo_header.pseudo m.Ingress_tmp_0
-	mov h.dpdk_pseudo_header.pseudo_0 0x6
-	mov h.dpdk_pseudo_header.pseudo_1 m.local_metadata_mem1
+	mov m.Ingress_tmp_4 0x6
 	ckadd h.cksum_state.state_0 h.outer_ipv4.hdr_checksum
 	ckadd h.cksum_state.state_0 h.ipv4.total_len
-	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo
-	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_0
-	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_1
+	ckadd h.cksum_state.state_0 m.Ingress_tmp_0
+	ckadd h.cksum_state.state_0 m.Ingress_tmp_4
+	ckadd h.cksum_state.state_0 m.local_metadata_mem1
 	mov h.outer_ipv4.hdr_checksum h.cksum_state.state_0
 	mov h.outer_ipv4.total_len t.ipv4_total_len
 	add h.outer_ipv4.total_len h.ipv4.total_len

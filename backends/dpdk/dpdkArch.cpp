@@ -658,6 +658,24 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct* st) {
     return st;
 }
 
+/* This function processes the psuedo header and modify the field width
+   to nearest 8-bit aligned */
+const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Header* st) {
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    auto annon = st->getAnnotation("__pseudo_header__");
+    if (annon) {
+        for (auto field : st->fields) {
+            BUG_CHECK(field->type->is<IR::Type_Bits>(), "Unexpected field type");
+            auto t = field->type->to<IR::Type_Bits>();
+            auto width = (t->width_bits() + 7) & (~7);
+            ;
+            fields->push_back(new IR::StructField(IR::ID(field->name), IR::Type_Bits::get(width)));
+        }
+        return new IR::Type_Struct(IR::ID(st->name), st->annotations, *fields);
+    }
+    return st;
+}
+
 // This function collects the match key information of a table. This is later used for
 // generating context JSON.
 bool CollectTableInfo::preorder(const IR::Key* keys) {
@@ -1129,7 +1147,6 @@ const IR::Node* CollectLocalVariables::preorder(IR::P4Program* p) {
     for (auto kv : localsMap) {
         LOG4(" " << dbp(kv.first) << ": " << kv.second);
     }
-
     return p;
 }
 
@@ -2884,6 +2901,7 @@ const IR::Node* ElimHeaderCopy::postorder(IR::Member* m) {
 }
 
 const IR::Node* DpdkAddPseudoHeaderDecl::preorder(IR::P4Program* program) {
+    if (is_all_args_header) return program;
     auto* annotations = new IR::Annotations({new IR::Annotation(IR::ID("__pseudo_header__"), {})});
     const IR::Type_Header* pseudo_hdr = new IR::Type_Header(headerTypeName, annotations);
     allTypeDecls.push_back(pseudo_hdr);
@@ -2892,8 +2910,9 @@ const IR::Node* DpdkAddPseudoHeaderDecl::preorder(IR::P4Program* program) {
     return program;
 }
 
-// for header instances
+// add pseudo header field to the headers struct for it be instantiated
 const IR::Node* DpdkAddPseudoHeaderDecl::preorder(IR::Type_Struct* st) {
+    if (is_all_args_header) return st;
     bool header_found = isHeadersStruct(st);
     if (header_found) {
         IR::IndexedVector<IR::StructField> fields;
@@ -2915,25 +2934,13 @@ bool DpdkAddPseudoHeaderDecl::isHeadersStruct(const IR::Type_Struct* st) {
     if (!st) return false;
     auto annon = st->getAnnotation("__packet_data__");
     if (annon == nullptr) {
-        for (auto f : st->fields) {
-            cstring fname = f->name.name;
-            // field name "f0" is for detecting automatically generated struct, used for
-            // initializing with structexpression
-            if (f->type->is<IR::Type_Header>() && fname != "f0")
-                return true;
-            else if (auto tn = f->type->to<IR::Type_Name>()) {
-                auto type0 = typeMap->getTypeType(tn, true);
-                return type0->is<IR::Type_Header>() && fname != "f0";
-            } else {
-                return false;
-            }
-        }
-        return false;
+        return structure->header_type == st->name.name;
     }
     return true;
 }
 
 const IR::Node* DpdkAddPseudoHeaderDecl::preorder(IR::P4Control* c) {
+    if (is_all_args_header) return c;
     auto ctrl = getOriginal<IR::P4Control>();
     for (auto p : ctrl->type->applyParams->parameters) {
         if (auto tn = p->type->to<IR::Type_Name>()) {
@@ -2958,7 +2965,8 @@ MoveNonHeaderFieldsToPseudoHeader::addAssignmentStmt(const IR::NamedExpression* 
 }
 
 const IR::Node* MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallStatement* statement) {
-    auto mce = getOriginal<IR::MethodCallStatement>()->methodCall;
+    if (is_all_args_header) return statement;
+    auto mce = statement->methodCall;
     bool added_copy = false;
     IR::Vector<IR::Argument> arguments;
     IR::StructExpression* struct_exp = nullptr;
@@ -2969,32 +2977,29 @@ const IR::Node* MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
                 if (m->member == "add" || m->member == "subtract") {
                     auto components = new IR::IndexedVector<IR::NamedExpression>();
                     for (auto arg : *mce->arguments) {
+                        BUG_CHECK(arg->expression->is<IR::StructExpression>(),
+                                  "Expected a StructExpression");
                         const IR::StructExpression* tmp =
                             arg->expression->to<IR::StructExpression>();
-                        if (tmp) {
-                            for (auto c : arg->expression->to<IR::StructExpression>()->components) {
-                                if (auto m = c->expression->to<IR::Member>()) {
-                                    // is it coming from metadata, move it to the pseudo header
-                                    if (!typeMap->getType(m->expr, true)->is<IR::Type_Header>()) {
-                                        added_copy = true;
-                                        auto stm = addAssignmentStmt(c);
-                                        result->push_back(stm.first);
-                                        components->push_back(new IR::NamedExpression(
-                                            c->srcInfo, c->name, stm.second));
-                                    } else
-                                        components->push_back(c);
-                                } else {
-                                    // is it constant? move it also to the pseduo header
-                                    added_copy = true;
-                                    auto stm = addAssignmentStmt(c);
-                                    result->push_back(stm.first);
-                                    components->push_back(
-                                        new IR::NamedExpression(c->srcInfo, c->name, stm.second));
-                                }
+                        for (auto c : arg->expression->to<IR::StructExpression>()->components) {
+                            bool is_header_field = false;
+                            if (auto m = c->expression->to<IR::Member>()) {
+                                if ((is_header_field =
+                                         typeMap->getType(m->expr, true)->is<IR::Type_Header>()))
+                                    components->push_back(c);
                             }
-                            struct_exp = new IR::StructExpression(tmp->srcInfo, tmp->structType,
-                                                                  *components);
+                            if (!is_header_field) {
+                                // replace non header expression with pseudo header field,
+                                // after initializing it with existing expression
+                                added_copy = true;
+                                auto stm = addAssignmentStmt(c);
+                                result->push_back(stm.first);
+                                components->push_back(
+                                    new IR::NamedExpression(c->srcInfo, c->name, stm.second));
+                            }
                         }
+                        struct_exp =
+                            new IR::StructExpression(tmp->srcInfo, tmp->structType, *components);
                     }
                 }
             }
@@ -3011,6 +3016,7 @@ const IR::Node* MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
 }
 
 const IR::Node* AddFieldsToPseudoHeader::preorder(IR::Type_Header* h) {
+    if (is_all_args_header) return h;
     auto annon = h->getAnnotation("__pseudo_header__");
     if (annon == nullptr) return h;
     IR::IndexedVector<IR::StructField> fields = h->fields;

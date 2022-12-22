@@ -29,14 +29,6 @@ struct tcp_t {
 	bit<16> urgentPtr
 }
 
-struct dpdk_pseudo_header_t {
-	bit<4> pseudo
-	bit<4> pseudo_0
-	bit<3> pseudo_1
-	bit<13> pseudo_2
-	bit<32> pseudo_3
-}
-
 struct cksum_state_t {
 	bit<16> state_0
 }
@@ -78,8 +70,8 @@ metadata instanceof metadata
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
-header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 header cksum_state instanceof cksum_state_t
+header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 action NoAction args none {
 	return

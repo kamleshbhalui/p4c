@@ -6,9 +6,6 @@ struct ethernet_t {
 	bit<16> etherType
 }
 
-struct dpdk_pseudo_header_t {
-}
-
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -41,7 +38,6 @@ struct metadata_t {
 metadata instanceof metadata_t
 
 header ethernet instanceof ethernet_t
-header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 regarray counter_0 size 0x400 initval 0x0
 

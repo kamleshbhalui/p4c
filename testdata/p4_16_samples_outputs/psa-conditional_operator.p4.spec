@@ -5,9 +5,6 @@ struct ethernet_t {
 	bit<16> etherType
 }
 
-struct dpdk_pseudo_header_t {
-}
-
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -39,7 +36,6 @@ struct user_meta_t {
 metadata instanceof user_meta_t
 
 header ethernet instanceof ethernet_t
-header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 action NoAction args none {
 	return

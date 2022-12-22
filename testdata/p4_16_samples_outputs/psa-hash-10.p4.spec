@@ -19,9 +19,6 @@ struct ipv4_t {
 	bit<32> dstAddr
 }
 
-struct dpdk_pseudo_header_t {
-}
-
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -65,7 +62,6 @@ metadata instanceof user_meta_t
 
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
-header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 header Ingress_tmp instanceof ethernet_t
 header Ingress_tmp_0 instanceof ipv4_t
 
