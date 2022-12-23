@@ -3011,9 +3011,10 @@ const IR::Node* MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
                         }
                         auto newName = refMap->newName(tmps0->name);
                         newTname = new IR::Type_Name(newName);
-                        newStructType =
+                        auto newStructType =
                             new IR::Type_Struct(tmps0->srcInfo, newName, tmps0->annotations,
                                                 tmps0->typeParameters, fields);
+                        newStructTypes.push_back(newStructType);
                         struct_exp = new IR::StructExpression(tmp->srcInfo, newStructType, newTname,
                                                               *components);
                     }

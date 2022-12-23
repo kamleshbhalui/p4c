@@ -33,6 +33,14 @@ struct cksum_state_t {
 	bit<16> state_0
 }
 
+struct dpdk_pseudo_header_t {
+	bit<8> pseudo
+	bit<8> pseudo_0
+	bit<8> pseudo_1
+	bit<16> pseudo_2
+	bit<32> pseudo_3
+}
+
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone

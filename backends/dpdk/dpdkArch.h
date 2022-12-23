@@ -1211,7 +1211,7 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     bool& is_all_args_header;
-    IR::Type_Struct* newStructType;
+    IR::Vector<IR::Node> newStructTypes;
     cstring headerTypeName;
     cstring headerInstanceName;
 
@@ -1222,15 +1222,14 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
         : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {
         headerInstanceName = DpdkAddPseudoHeaderDecl::headerInstanceName;
         headerTypeName = DpdkAddPseudoHeaderDecl::headerTypeName;
-        newStructType = nullptr;
     }
     std::pair<IR::AssignmentStatement*, IR::Member*> addAssignmentStmt(
         const IR::NamedExpression* ne);
 
     const IR::Node* postorder(IR::P4Program* p) {
-        if (newStructType) {
+        if (newStructTypes.size() > 0) {
             IR::Vector<IR::Node> allTypeDecls;
-            allTypeDecls.push_back(newStructType);
+            allTypeDecls.append(newStructTypes);
             allTypeDecls.append(p->objects);
             p->objects = allTypeDecls;
         }
