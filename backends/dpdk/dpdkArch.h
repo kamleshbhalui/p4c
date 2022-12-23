@@ -1174,7 +1174,7 @@ class HaveNonHeaderChecksumArgs : public Inspector {
 };
 
 /// @brief This pass add a pseudo header declaration, it will be used as
-/// container of operands where dpdk instructions require it's operand to be ind
+/// container of operands where dpdk instructions require it's operand to be in
 /// a header.
 class DpdkAddPseudoHeaderDecl : public Transform {
     P4::ReferenceMap* refMap;
