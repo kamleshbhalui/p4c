@@ -269,7 +269,6 @@ struct ByteAlignment : public PassManager {
 class ReplaceHdrMetaField : public Transform {
  public:
     const IR::Node* postorder(IR::Type_Struct* st) override;
-    const IR::Node* postorder(IR::Type_Header* st) override;
 };
 
 struct fieldInfo {
@@ -1146,6 +1145,7 @@ class HaveNonHeaderChecksumArgs : public Inspector {
     HaveNonHeaderChecksumArgs(P4::TypeMap* typeMap, bool& is_all_arg_header_fields)
         : typeMap(typeMap), is_all_arg_header_fields(is_all_arg_header_fields) {}
     bool preorder(const IR::MethodCallExpression* mce) override {
+        if (!is_all_arg_header_fields) return false;
         if (auto* m = mce->method->to<IR::Member>()) {
             if (auto* type = typeMap->getType(m->expr)->to<IR::Type_Extern>()) {
                 if (type->name == "InternetChecksum") {
@@ -1211,6 +1211,7 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     bool& is_all_args_header;
+    IR::Type_Struct* newStructType;
     cstring headerTypeName;
     cstring headerInstanceName;
 
@@ -1221,9 +1222,20 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
         : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {
         headerInstanceName = DpdkAddPseudoHeaderDecl::headerInstanceName;
         headerTypeName = DpdkAddPseudoHeaderDecl::headerTypeName;
+        newStructType = nullptr;
     }
     std::pair<IR::AssignmentStatement*, IR::Member*> addAssignmentStmt(
         const IR::NamedExpression* ne);
+
+    const IR::Node* postorder(IR::P4Program* p) {
+        if (newStructType) {
+            IR::Vector<IR::Node> allTypeDecls;
+            allTypeDecls.push_back(newStructType);
+            allTypeDecls.append(p->objects);
+            p->objects = allTypeDecls;
+        }
+        return p;
+    }
     const IR::Node* postorder(IR::MethodCallStatement* statement) override;
 };
 
@@ -1231,12 +1243,16 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
 class AddFieldsToPseudoHeader : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
     bool& is_all_args_header;
 
  public:
     AddFieldsToPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                            bool& is_all_args_header)
-        : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {}
+                            DpdkProgramStructure* structure, bool& is_all_args_header)
+        : refMap(refMap),
+          typeMap(typeMap),
+          structure(structure),
+          is_all_args_header(is_all_args_header) {}
     const IR::Node* preorder(IR::Type_Header* h) override;
 };
 
@@ -1260,7 +1276,8 @@ struct DpdkAddPseudoHeader : public PassManager {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(
             new MoveNonHeaderFieldsToPseudoHeader(refMap, typeMap, is_all_args_header));
-        passes.push_back(new AddFieldsToPseudoHeader(refMap, typeMap, is_all_args_header));
+        passes.push_back(
+            new AddFieldsToPseudoHeader(refMap, typeMap, structure, is_all_args_header));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
     }

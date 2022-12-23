@@ -658,24 +658,6 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct* st) {
     return st;
 }
 
-/* This function processes the psuedo header and modify the field width
-   to nearest 8-bit aligned */
-const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Header* st) {
-    auto fields = new IR::IndexedVector<IR::StructField>;
-    auto annon = st->getAnnotation("__pseudo_header__");
-    if (annon) {
-        for (auto field : st->fields) {
-            BUG_CHECK(field->type->is<IR::Type_Bits>(), "Unexpected field type");
-            auto t = field->type->to<IR::Type_Bits>();
-            auto width = (t->width_bits() + 7) & (~7);
-            ;
-            fields->push_back(new IR::StructField(IR::ID(field->name), IR::Type_Bits::get(width)));
-        }
-        return new IR::Type_Struct(IR::ID(st->name), st->annotations, *fields);
-    }
-    return st;
-}
-
 // This function collects the match key information of a table. This is later used for
 // generating context JSON.
 bool CollectTableInfo::preorder(const IR::Key* keys) {
@@ -2934,7 +2916,23 @@ bool DpdkAddPseudoHeaderDecl::isHeadersStruct(const IR::Type_Struct* st) {
     if (!st) return false;
     auto annon = st->getAnnotation("__packet_data__");
     if (annon == nullptr) {
-        return structure->header_type == st->name.name;
+        if (structure->header_type == st->name.name)
+            return true;
+        else {
+            for (auto f : st->fields) {
+                cstring fname = f->name.name;
+                // field name "f0" is for detecting automatically generated struct, used for
+                // initializing with structexpression
+                if (f->type->is<IR::Type_Header>() && fname != "f0")
+                    return true;
+                else if (auto tn = f->type->to<IR::Type_Name>()) {
+                    auto type0 = typeMap->getTypeType(tn, true);
+                    return type0->is<IR::Type_Header>() && fname != "f0";
+                } else {
+                    return false;
+                }
+            }
+        }
     }
     return true;
 }
@@ -2956,19 +2954,23 @@ const IR::Node* DpdkAddPseudoHeaderDecl::preorder(IR::P4Control* c) {
 std::pair<IR::AssignmentStatement*, IR::Member*>
 MoveNonHeaderFieldsToPseudoHeader::addAssignmentStmt(const IR::NamedExpression* ne) {
     auto name = refMap->newName("pseudo");
-    pseudoFieldNameType.push_back(std::pair(name, typeMap->getType(ne->expression, true)));
+    BUG_CHECK(typeMap->getType(ne->expression, true)->is<IR::Type_Bits>(), "Unexpected type");
+    auto type = typeMap->getType(ne->expression, true)->to<IR::Type_Bits>();
+    auto width = (type->width_bits() + 7) & (~7);
+    pseudoFieldNameType.push_back(std::pair(name, IR::Type_Bits::get(width)));
     auto mem0 =
         new IR::Member(new IR::PathExpression(IR::ID(DpdkAddPseudoHeaderDecl::headersDeclName)),
                        IR::ID(headerInstanceName));
     auto mem1 = new IR::Member(mem0, IR::ID(name));
-    return {new IR::AssignmentStatement(mem1, ne->expression), mem1};
+    auto cast1 = new IR::Cast(IR::Type_Bits::get(width), ne->expression);
+    return {new IR::AssignmentStatement(mem1, cast1), mem1};
 }
 
 const IR::Node* MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallStatement* statement) {
     if (is_all_args_header) return statement;
     auto mce = statement->methodCall;
     bool added_copy = false;
-    IR::Vector<IR::Argument> arguments;
+    IR::Type_Name* newTname = nullptr;
     IR::StructExpression* struct_exp = nullptr;
     auto result = new IR::IndexedVector<IR::StatOrDecl>();
     if (auto* m = mce->method->to<IR::Member>()) {
@@ -2998,16 +3000,32 @@ const IR::Node* MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
                                     new IR::NamedExpression(c->srcInfo, c->name, stm.second));
                             }
                         }
-                        struct_exp =
-                            new IR::StructExpression(tmp->srcInfo, tmp->structType, *components);
+                        IR::IndexedVector<IR::StructField> fields;
+                        auto tmps0 = tmp->type->to<IR::Type_Struct>();
+                        for (auto f : tmps0->fields) {
+                            BUG_CHECK(f->type->is<IR::Type_Bits>(), "Unexpected type");
+                            auto type = f->type->to<IR::Type_Bits>();
+                            auto width = (type->width_bits() + 7) & (~7);
+                            fields.push_back(
+                                new IR::StructField(f->name, IR::Type_Bits::get(width)));
+                        }
+                        auto newName = refMap->newName(tmps0->name);
+                        newTname = new IR::Type_Name(newName);
+                        newStructType =
+                            new IR::Type_Struct(tmps0->srcInfo, newName, tmps0->annotations,
+                                                tmps0->typeParameters, fields);
+                        struct_exp = new IR::StructExpression(tmp->srcInfo, newStructType, newTname,
+                                                              *components);
                     }
                 }
             }
         }
     }
     if (added_copy) {
+        auto targ = new IR::Vector<IR::Type>;
+        targ->push_back(newTname);
         auto expression = new IR::MethodCallExpression(
-            mce->srcInfo, mce->method, mce->typeArguments,
+            mce->srcInfo, mce->type, mce->method, targ,
             new IR::Vector<IR::Argument>(new IR::Argument(struct_exp)));
         result->push_back(new IR::MethodCallStatement(expression));
         return result;
@@ -3021,10 +3039,8 @@ const IR::Node* AddFieldsToPseudoHeader::preorder(IR::Type_Header* h) {
     if (annon == nullptr) return h;
     IR::IndexedVector<IR::StructField> fields = h->fields;
     for (auto& p : MoveNonHeaderFieldsToPseudoHeader::pseudoFieldNameType) {
-        auto field = new IR::StructField(p.first, p.second);
-        fields.push_back(field);
+        fields.push_back(new IR::StructField(p.first, p.second));
     }
-    MoveNonHeaderFieldsToPseudoHeader::pseudoFieldNameType.clear();
     return new IR::Type_Header(h->srcInfo, h->name, h->annotations, h->typeParameters, fields);
 }
 
