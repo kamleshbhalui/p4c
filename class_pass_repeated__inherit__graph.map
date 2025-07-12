@@ -1,9 +1,0 @@
-<map id="PassRepeated" name="PassRepeated">
-<area shape="rect" id="node5" href="$class_p4_1_1_copy_structures.html" title="P4::CopyStructures" alt="" coords="582,5,719,31"/>
-<area shape="rect" id="node6" href="$class_p4_1_1_remove_parser_control_flow.html" title="P4::RemoveParserControlFlow" alt="" coords="548,55,753,80"/>
-<area shape="rect" id="node7" href="$class_p4_1_1_simplify_control_flow.html" title="P4::SimplifyControlFlow" alt="" coords="569,104,732,129"/>
-<area shape="rect" id="node8" href="$class_p4_1_1_specialize_all.html" title="P4::SpecializeAll" alt="" coords="590,153,711,179"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title="PassManager" alt="" coords="239,80,343,105"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title="Visitor" alt="" coords="5,80,63,105"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title="Backtrack" alt="" coords="111,105,191,131"/>
-</map>

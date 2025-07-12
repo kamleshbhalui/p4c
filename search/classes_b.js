@@ -1,18 +1,15 @@
 var searchData=
 [
-  ['land',['LAnd',['../group__irdefs.html#class_i_r_1_1_l_and',1,'IR']]],
-  ['leq',['Leq',['../group__irdefs.html#class_i_r_1_1_leq',1,'IR']]],
-  ['listexpression',['ListExpression',['../group__irdefs.html#class_i_r_1_1_list_expression',1,'IR']]],
-  ['literal',['Literal',['../group__irdefs.html#class_i_r_1_1_literal',1,'IR']]],
-  ['lnot',['LNot',['../group__irdefs.html#class_i_r_1_1_l_not',1,'IR']]],
-  ['localcopypropagation',['LocalCopyPropagation',['../class_p4_1_1_local_copy_propagation.html',1,'P4']]],
-  ['localizeactions',['LocalizeActions',['../class_p4_1_1_localize_actions.html',1,'P4']]],
-  ['localizeallactions',['LocalizeAllActions',['../class_p4_1_1_localize_all_actions.html',1,'P4']]],
-  ['locationset',['LocationSet',['../class_p4_1_1_location_set.html',1,'P4']]],
-  ['loop',['Loop',['../class_p4_1_1_call_graph_1_1_loop.html',1,'P4::CallGraph']]],
-  ['loops',['Loops',['../struct_p4_1_1_call_graph_1_1_loops.html',1,'P4::CallGraph']]],
-  ['lor',['LOr',['../group__irdefs.html#class_i_r_1_1_l_or',1,'IR']]],
-  ['lowerexpressions',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2']]],
-  ['lss',['Lss',['../group__irdefs.html#class_i_r_1_1_lss',1,'IR']]],
-  ['ltbitmatrix',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]]
+  ['kernelsamplestarget_0',['KernelSamplesTarget',['../class_p4_1_1_e_b_p_f_1_1_kernel_samples_target.html',1,'P4::EBPF']]],
+  ['key_5fequal_1',['key_equal',['../struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__equal.html',1,'P4::InlineSummary::PerCaller']]],
+  ['key_5fhash_2',['key_hash',['../struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__hash.html',1,'P4::InlineSummary::PerCaller']]],
+  ['keyelementinfo_3',['keyElementInfo',['../namespace_p4_1_1_d_p_d_k.html#struct_p4_1_1_d_p_d_k_1_1key_element_info',1,'P4::DPDK']]],
+  ['keyfieldattributes_4',['KeyFieldAttributes',['../struct_p4_1_1_t_c_1_1_key_field_attributes.html',1,'P4::TC']]],
+  ['keyinfo_5',['KeyInfo',['../struct_i_x_bar_1_1_key_info.html',1,'IXBar']]],
+  ['keyinfo_6',['keyInfo',['../namespace_p4_1_1_d_p_d_k.html#struct_p4_1_1_d_p_d_k_1_1key_info',1,'P4::DPDK']]],
+  ['keyissimple_7',['KeyIsSimple',['../class_b_f_n_1_1_key_is_simple.html',1,'BFN::KeyIsSimple'],['../class_p4_1_1_key_is_simple.html',1,'P4::KeyIsSimple']]],
+  ['keynamegenerator_8',['KeyNameGenerator',['../class_p4_1_1_key_name_generator.html',1,'P4']]],
+  ['keyproperties_9',['KeyProperties',['../struct_p4_1_1_p4_tools_1_1_table_utils_1_1_key_properties.html',1,'P4::P4Tools::TableUtils']]],
+  ['keysideeffect_10',['KeySideEffect',['../class_p4_1_1_key_side_effect.html',1,'P4']]],
+  ['kindsizeindexedmap_11',['KindSizeIndexedMap',['../struct_p_h_v_1_1v2_1_1_kind_size_indexed_map.html',1,'PHV::v2']]]
 ];

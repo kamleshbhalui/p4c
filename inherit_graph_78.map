@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$struct_p4_1_1_control_plane_a_p_i_1_1_header_field_path.html" title="P4::ControlPlaneAPI\l::HeaderFieldPath" alt="" coords="5,5,149,44"/>
+<area shape="rect" id="Node000000" href="$class_b_f_n_1_1_alloc2_dbase.html" title=" " alt="" coords="5,5,181,31"/>
+<area shape="rect" id="Node000001" href="$class_b_f_n_1_1_alloc2_d.html" title=" " alt="" coords="229,5,408,31"/>
+<area shape="poly" id="edge66_Node000000_Node000001" title=" " alt="" coords="195,15,229,15,229,21,195,21"/>
 </map>

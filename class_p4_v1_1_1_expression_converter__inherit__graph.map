@@ -1,6 +1,0 @@
-<map id="P4V1::ExpressionConverter" name="P4V1::ExpressionConverter">
-<area shape="rect" id="node4" href="$class_p4_v1_1_1_statement_converter.html" title="P4V1::StatementConverter" alt="" coords="5,225,186,251"/>
-<area shape="rect" id="node5" href="$class_p4_v1_1_1_type_converter.html" title="P4V1::TypeConverter" alt="" coords="211,225,359,251"/>
-<area shape="rect" id="node2" href="$class_transform.html" title="Transform" alt="" coords="150,79,231,104"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title="Visitor" alt="" coords="161,5,219,31"/>
-</map>

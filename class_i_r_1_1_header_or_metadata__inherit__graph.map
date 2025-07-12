@@ -1,9 +1,0 @@
-<map id="IR::HeaderOrMetadata" name="IR::HeaderOrMetadata">
-<area shape="rect" id="node6" href="$group__irdefs.html#class_i_r_1_1_header" title="IR::Header" alt="" coords="5,299,91,324"/>
-<area shape="rect" id="node7" href="$group__irdefs.html#class_i_r_1_1_header_stack" title="IR::HeaderStack" alt="" coords="115,299,234,324"/>
-<area shape="rect" id="node8" href="$group__irdefs.html#class_i_r_1_1_metadata" title="IR::Metadata" alt="" coords="258,299,356,324"/>
-<area shape="rect" id="node2" href="$class_i_r_1_1_node.html" title="IR::Node" alt="" coords="138,152,212,177"/>
-<area shape="rect" id="node3" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="136,79,214,104"/>
-<area shape="rect" id="node4" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="36,5,176,31"/>
-<area shape="rect" id="node5" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="199,5,292,31"/>
-</map>

@@ -1,19 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$class_p4_1_1_symbolic_value.html" title="P4::SymbolicValue" alt="" coords="5,301,138,327"/>
-<area shape="rect" id="node2" href="$class_p4_1_1_scalar_value.html" title="P4::ScalarValue" alt="" coords="196,104,312,129"/>
-<area shape="rect" id="node7" href="$class_p4_1_1_symbolic_array.html" title="P4::SymbolicArray" alt="" coords="189,203,320,228"/>
-<area shape="rect" id="node8" href="$class_p4_1_1_symbolic_error.html" title="P4::SymbolicError" alt="" coords="190,252,319,277"/>
-<area shape="rect" id="node11" href="$class_p4_1_1_symbolic_extern.html" title="P4::SymbolicExtern" alt="" coords="186,301,323,327"/>
-<area shape="rect" id="node13" href="$class_p4_1_1_symbolic_struct.html" title="P4::SymbolicStruct" alt="" coords="187,351,321,376"/>
-<area shape="rect" id="node16" href="$class_p4_1_1_symbolic_tuple.html" title="P4::SymbolicTuple" alt="" coords="188,400,320,425"/>
-<area shape="rect" id="node17" href="$class_p4_1_1_symbolic_void.html" title="P4::SymbolicVoid" alt="" coords="192,449,317,475"/>
-<area shape="rect" id="node3" href="$class_p4_1_1_symbolic_bool.html" title="P4::SymbolicBool" alt="" coords="389,5,515,31"/>
-<area shape="rect" id="node4" href="$class_p4_1_1_symbolic_enum.html" title="P4::SymbolicEnum" alt="" coords="385,55,519,80"/>
-<area shape="rect" id="node5" href="$class_p4_1_1_symbolic_integer.html" title="P4::SymbolicInteger" alt="" coords="382,104,523,129"/>
-<area shape="rect" id="node6" href="$class_p4_1_1_symbolic_varbit.html" title="P4::SymbolicVarbit" alt="" coords="386,153,519,179"/>
-<area shape="rect" id="node9" href="$class_p4_1_1_symbolic_exception.html" title="P4::SymbolicException" alt="" coords="373,203,531,228"/>
-<area shape="rect" id="node10" href="$class_p4_1_1_symbolic_static_error.html" title="P4::SymbolicStaticError" alt="" coords="371,252,533,277"/>
-<area shape="rect" id="node12" href="$class_p4_1_1_symbolic_packet_in.html" title="P4::SymbolicPacketIn" alt="" coords="377,301,528,327"/>
-<area shape="rect" id="node14" href="$class_p4_1_1_symbolic_header.html" title="P4::SymbolicHeader" alt="" coords="381,351,524,376"/>
-<area shape="rect" id="node15" href="$class_p4_1_1_any_element.html" title="P4::AnyElement" alt="" coords="581,351,698,376"/>
+<area shape="rect" id="Node000000" href="$namespace_b_f_n.html#struct_b_f_n_1_1_counter_extern" title=" " alt="" coords="5,5,156,45"/>
 </map>

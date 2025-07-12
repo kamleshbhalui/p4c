@@ -1,9 +1,0 @@
-<map id="IR::Attribute" name="IR::Attribute">
-<area shape="rect" id="node2" href="$class_i_r_1_1_declaration.html" title="That&#39;s why declid is used to distinguish them. " alt="" coords="105,299,214,324"/>
-<area shape="rect" id="node3" href="$class_i_r_1_1_stat_or_decl.html" title="A statement or a declaration. " alt="" coords="39,225,146,251"/>
-<area shape="rect" id="node4" href="$class_i_r_1_1_node.html" title="IR::Node" alt="" coords="70,152,144,177"/>
-<area shape="rect" id="node5" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="106,79,183,104"/>
-<area shape="rect" id="node8" href="$class_i_r_1_1_i_declaration.html" title="IR::IDeclaration" alt="" coords="171,225,284,251"/>
-<area shape="rect" id="node6" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="5,5,145,31"/>
-<area shape="rect" id="node7" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="169,5,262,31"/>
-</map>

@@ -1,9 +1,0 @@
-<map id="IR::ExternBlock" name="IR::ExternBlock">
-<area shape="rect" id="node2" href="$group__irdefs.html#class_i_r_1_1_instantiated_block" title="IR::InstantiatedBlock" alt="" coords="73,299,216,324"/>
-<area shape="rect" id="node3" href="$group__irdefs.html#class_i_r_1_1_block" title="IR::Block" alt="" coords="107,225,182,251"/>
-<area shape="rect" id="node4" href="$class_i_r_1_1_node.html" title="IR::Node" alt="" coords="40,152,114,177"/>
-<area shape="rect" id="node5" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="106,79,183,104"/>
-<area shape="rect" id="node8" href="$class_i_r_1_1_compile_time_value.html" title="a value that can be evaluated at compile&#45;time " alt="" coords="137,152,291,177"/>
-<area shape="rect" id="node6" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="5,5,145,31"/>
-<area shape="rect" id="node7" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="169,5,262,31"/>
-</map>

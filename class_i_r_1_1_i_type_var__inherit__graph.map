@@ -1,7 +1,0 @@
-<map id="IR::ITypeVar" name="IR::ITypeVar">
-<area shape="rect" id="node5" href="$class_i_r_1_1_type___inf_int.html" title="in some contexts. " alt="" coords="28,225,136,251"/>
-<area shape="rect" id="node6" href="$class_i_r_1_1_type___var.html" title="Represents a type variable written by the user. " alt="" coords="160,225,258,251"/>
-<area shape="rect" id="node2" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="106,79,183,104"/>
-<area shape="rect" id="node3" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="5,5,145,31"/>
-<area shape="rect" id="node4" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="169,5,262,31"/>
-</map>

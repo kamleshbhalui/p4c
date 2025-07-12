@@ -1,6 +1,0 @@
-<map id="IR::SwitchCase" name="IR::SwitchCase">
-<area shape="rect" id="node2" href="$class_i_r_1_1_node.html" title="IR::Node" alt="" coords="108,152,182,177"/>
-<area shape="rect" id="node3" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="106,79,183,104"/>
-<area shape="rect" id="node4" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="5,5,145,31"/>
-<area shape="rect" id="node5" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="169,5,262,31"/>
-</map>

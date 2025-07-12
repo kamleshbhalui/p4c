@@ -1,7 +1,0 @@
-<map id="IR::Type_Tuple" name="IR::Type_Tuple">
-<area shape="rect" id="node2" href="$class_i_r_1_1_type.html" title="Base class for P4 types. " alt="" coords="109,225,180,251"/>
-<area shape="rect" id="node3" href="$class_i_r_1_1_node.html" title="IR::Node" alt="" coords="108,152,182,177"/>
-<area shape="rect" id="node4" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="106,79,183,104"/>
-<area shape="rect" id="node5" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="5,5,145,31"/>
-<area shape="rect" id="node6" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="169,5,262,31"/>
-</map>

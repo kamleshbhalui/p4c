@@ -1,8 +1,0 @@
-<map id="JsonData" name="JsonData">
-<area shape="rect" id="node2" href="$class_json_boolean.html" title="JsonBoolean" alt="" coords="5,79,104,104"/>
-<area shape="rect" id="node3" href="$class_json_null.html" title="JsonNull" alt="" coords="128,79,200,104"/>
-<area shape="rect" id="node4" href="$class_json_number.html" title="JsonNumber" alt="" coords="225,79,322,104"/>
-<area shape="rect" id="node5" href="$class_json_object.html" title="JsonObject" alt="" coords="345,79,433,104"/>
-<area shape="rect" id="node6" href="$class_json_string.html" title="JsonString" alt="" coords="458,79,542,104"/>
-<area shape="rect" id="node7" href="$class_json_vector.html" title="JsonVector" alt="" coords="566,79,653,104"/>
-</map>

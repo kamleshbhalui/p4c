@@ -1,9 +1,0 @@
-<map id="IR::Register" name="IR::Register">
-<area shape="rect" id="node2" href="$group__irdefs.html#class_i_r_1_1_stateful" title="IR::Stateful" alt="" coords="101,299,188,324"/>
-<area shape="rect" id="node3" href="$group__irdefs.html#class_i_r_1_1_attached" title="IR::Attached" alt="" coords="97,225,192,251"/>
-<area shape="rect" id="node4" href="$class_i_r_1_1_node.html" title="IR::Node" alt="" coords="53,152,127,177"/>
-<area shape="rect" id="node5" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="106,79,183,104"/>
-<area shape="rect" id="node8" href="$class_i_r_1_1_i_instance.html" title="IR::IInstance" alt="" coords="151,152,247,177"/>
-<area shape="rect" id="node6" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="5,5,145,31"/>
-<area shape="rect" id="node7" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="169,5,262,31"/>
-</map>

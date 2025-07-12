@@ -1,22 +1,59 @@
+/*
+ @licstart  The following is the entire license notice for the JavaScript code in this file.
+
+ The MIT License (MIT)
+
+ Copyright (C) 1997-2020 by Dimitri van Heesch
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ and associated documentation files (the "Software"), to deal in the Software without restriction,
+ including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all copies or
+ substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+ @licend  The above is the entire license notice for the JavaScript code in this file
+*/
 var NAVTREE =
 [
-  [ "P4C", "index.html", [
-    [ "Revision History", "md___users_cascaval__barefoot__projects__p4_src_p4c_docs_doxygen_00_revision_history.html", null ],
-    [ "Overview", "md___users_cascaval__barefoot__projects__p4_src_p4c_docs_doxygen_01_overview.html", null ],
-    [ "LICENSE", "md___users_cascaval__barefoot__projects__p4_src_p4c__l_i_c_e_n_s_e.html", null ],
-    [ "Repository", "md___users_cascaval__barefoot__projects__p4_src_p4c_docs__r_e_a_d_m_e.html", null ],
-    [ "P4 Compiler Intermediate representation", "md___users_cascaval__barefoot__projects__p4_src_p4c_docs__i_r.html", null ],
-    [ "Intermediate Representation (IR) Classes", "md___users_cascaval__barefoot__projects__p4_src_p4c_ir__r_e_a_d_m_e.html", null ],
-    [ "Behavioral Model Backend", "md___users_cascaval__barefoot__projects__p4_src_p4c_backends_bmv2__r_e_a_d_m_e.html", null ],
-    [ "EBPF Backend", "md___users_cascaval__barefoot__projects__p4_src_p4c_backends_ebpf__r_e_a_d_m_e.html", null ],
-    [ "P4test Backend", "md___users_cascaval__barefoot__projects__p4_src_p4c_backends_p4test__r_e_a_d_m_e.html", null ],
-    [ "Common Utilities", "md___users_cascaval__barefoot__projects__p4_src_p4c_lib__r_e_a_d_m_e.html", null ],
-    [ "Modules", "modules.html", "modules" ],
-    [ "Namespaces", null, [
-      [ "Namespace List", "namespaces.html", "namespaces" ],
+  [ "P4 Compiler Documentation (P4C)", "index.html", [
+    [ "P4C Repository Organization", "repository_structure.html", null ],
+    [ "Getting Started", "getting_started.html", null ],
+    [ "P4C Intermediate Representation (IR)", "intermediate_representation_ir.html", null ],
+    [ "Frontend", "frontend.html", null ],
+    [ "Midend", "midend.html", null ],
+    [ "Backends", "usergroup0.html", [
+      [ "Behavioral Model Backend", "behavioral_model_backend.html", null ],
+      [ "DPDK Backend", "dpdk_backend.html", null ],
+      [ "eBPF Backend", "ebpf_backend.html", null ],
+      [ "TC Backend", "tc_backend.html", null ],
+      [ "uBPF Backend", "ubpf_backend.html", null ],
+      [ "P4test Backend", "p4test_backend.html", null ],
+      [ "Graphs Backend", "graphs_backend.html", null ]
+    ] ],
+    [ "p4fmt (P4 Formatter)", "p4fmt.html", null ],
+    [ "P4Tools", "p4tools.html", null ],
+    [ "P4Smith", "p4smith.html", null ],
+    [ "P4Testgen", "p4testgen.html", null ],
+    [ "Contribute to the P4 Compiler Project", "contribute.html", null ],
+    [ "Releases", "changelog.html", null ],
+    [ "Namespaces", "namespaces.html", [
+      [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
-        [ "All", "namespacemembers.html", null ],
-        [ "Enumerations", "namespacemembers_enum.html", null ]
+        [ "All", "namespacemembers.html", "namespacemembers_dup" ],
+        [ "Functions", "namespacemembers_func.html", "namespacemembers_func" ],
+        [ "Variables", "namespacemembers_vars.html", null ],
+        [ "Typedefs", "namespacemembers_type.html", null ],
+        [ "Enumerations", "namespacemembers_enum.html", null ],
+        [ "Enumerator", "namespacemembers_eval.html", null ]
       ] ]
     ] ],
     [ "Classes", "annotated.html", [
@@ -24,9 +61,13 @@ var NAVTREE =
       [ "Class Index", "classes.html", null ],
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
-        [ "All", "functions.html", null ],
-        [ "Functions", "functions_func.html", null ],
-        [ "Variables", "functions_vars.html", null ]
+        [ "All", "functions.html", "functions_dup" ],
+        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Variables", "functions_vars.html", "functions_vars" ],
+        [ "Typedefs", "functions_type.html", null ],
+        [ "Enumerations", "functions_enum.html", null ],
+        [ "Enumerator", "functions_eval.html", null ],
+        [ "Related Symbols", "functions_rela.html", null ]
       ] ]
     ] ]
   ] ]
@@ -34,36 +75,48 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-".html",
-"class_b_m_v2_1_1_simple_controls_inliner.html#aba1336a53ba966fa5125a8b291811160",
-"class_e_b_p_f_1_1_e_b_p_f_scalar_type.html#acd72624bc6a3f048f126191ec32122ef",
-"class_i_r_1_1_i_node.html#aa0d95ddf36776cfa7a5c66024989fd3e",
-"class_i_r_1_1_parameter_list.html#ae3dc569b777eb0a7b2d8618edc37443f",
-"class_i_r_1_1_type___header.html#a023811711e0b004effa6b36a0d50698a",
-"class_i_r_1_1_type___struct.html#a287538cb570724263540c9b8d4deef1f",
-"class_i_r_1_1_vector_base.html#acfa41c305e431d3eacbbad520434c5cc",
-"class_p4_1_1_clear_type_map.html#a27aeddd10e600ee829ab1b59225b0954",
-"class_p4_1_1_do_remove_returns.html#a7423312af4cbe483b03a6e99fd475c85",
-"class_p4_1_1_location_set.html#a8897204dfdc03c2f483e8b481e9abc0c",
-"class_p4_1_1_resolve_references.html#a3d779141dcb84da5131bf3e2413007a8",
-"class_p4_1_1_symbolic_tuple.html#a1da6abcb7190a479a30ee9a31ec788ff",
-"class_p4_1_1_type_inference.html#aa5a396c6c16cbf04e6dbaaf924f1a5f2",
-"class_p4_v1_1_1_program_structure.html#ae8291486ce05a6683f539993b2311fb7",
-"class_util_1_1_json_array.html#af9c13bfc823848f99c805aa4d9a9157e",
-"class_visitor.html#aa103f50ff4901cf88a393ef11440f262",
-"classordered__map_1_1value__compare.html#ac132fd84380253338efaad8f1fee5f5c",
-"group__irdefs.html#ga07d2aca92ba39437bde6b067c691aac5",
-"group__irdefs.html#ga25fe09defd05a8e1d19a7360ad43662b",
-"group__irdefs.html#ga424f7c09da2ba5426783e0a3aae83649",
-"group__irdefs.html#ga6085d4cd0518324931e179ece1cc2aa3",
-"group__irdefs.html#ga7e4e1cfc383a6182c5d7301b7e0e1929",
-"group__irdefs.html#ga9bd69812abe1771e977c968273a62ccb",
-"group__irdefs.html#gabbcad148af4992ae3d81e3154f339617",
-"group__irdefs.html#gadaffe82394851036c9285106fc022260",
-"group__irdefs.html#gaf6b1ce06b6df75545dd638bb538c5bb3",
-"struct_p4_1_1_control_plane_a_p_i_1_1_header_field_path.html",
-"structmatch__t.html#ab52d2dabf458b98c8954d098674dba73"
+"annotated.html",
+"class_b_f_n_1_1_b_f_r_t_1_1_b_f_runtime_generator.html#afa58d93eafd2ca7ccfd8ccf3bf6220f0",
+"class_b_f_n_1_1_resolve_size_of_operator.html",
+"class_constraints_1_1_alignment_constraint.html",
+"class_header_name_mau_inspector.html#ac8de9ac8ecf93ee6e469c880e5bca3a0",
+"class_mau_power_1_1_mpr_settings.html#afd19b502c29d0bea3bb4dd0d3b5a0496",
+"class_p4_1_1_b_m_v2_1_1_json_objects.html#a395d9d3366a662b0344dab45a15f34b3",
+"class_p4_1_1_compute_write_set.html#a0f1f0ef207ccf9849813aedcb1384c94",
+"class_p4_1_1_d_p_d_k_1_1_collect_internet_checksum_instance.html",
+"class_p4_1_1_default_p4_c_configuration.html",
+"class_p4_1_1_e_b_p_f_1_1_e_b_p_f_checksum_p_s_a.html",
+"class_p4_1_1_e_b_p_f_1_1_internet_checksum_algorithm.html#a8831546cf7cfd9f29889f18dcb48655e",
+"class_p4_1_1_find_type_specializations.html",
+"class_p4_1_1_nesting_depth_metric_pass.html",
+"class_p4_1_1_p4_tools_1_1_namespace_context.html#a7ad34518222d149b4c4c53cf1689005b",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_register_value.html",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_exact.html#a01e3029bcbda82c53880fce621383163",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_optional.html#af7e228d8d612d08ac40ca40469ee31c6",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_config.html#a23f8eebd0455fe124640a5c71a45307b",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_index_map.html",
+"class_p4_1_1_p4_tools_1_1_trace_event.html",
+"class_p4_1_1_p4_v1_1_1_modify_parser_for_checksum.html",
+"class_p4_1_1_reassociation.html",
+"class_p4_1_1_string_ref_1_1_split.html",
+"class_p4_1_1_test_1_1_no_co_pack.html",
+"class_p4_1_1_u_b_p_f_1_1_mid_end.html",
+"class_p4_1_1bitvec_1_1const__bitref.html",
+"class_p_h_v_1_1_allocation.html#af0e7021614988fd7456cd5c9c9833970",
+"class_p_h_v_1_1_field_slice.html#a91c6ada5d99000487ef72d0301a393ed",
+"class_p_h_v_1_1v2_1_1_allocator_base.html#a0fa39be8a2bcdc418e990e4c8009b420",
+"class_pragma_no_pack.html",
+"classbinout_1_1byte4.html",
+"namespace_p4.html#a3c2e2f11dfe961c9962e8758745eaa1d",
+"namespace_p4_1_1_test.html#aa3a7bffd732967cbf9723182c4c50799",
+"struct_action_data_bus.html#a29fa84308562f37a3e6a416a58546de5a81651a99fc0bec5d68aa98222913bdec",
+"struct_b_f_n_1_1_resources_1_1_hash_dist_resource.html",
+"struct_p4_1_1_b_m_v2_1_1_conversion_context.html#ab28d12e44b6033a4f8ce54d3ad0019f4",
+"struct_p4_1_1_egress___model.html",
+"struct_p4_1_1_p4_v1_1_1_switch___model.html",
+"struct_p_h_v_1_1_slicing_1_1_iterator_config.html#a1e71c601ea27520ee1cf0e717e34e7ca",
+"struct_tofino_1_1_action_data_bus_1_1_use.html"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';

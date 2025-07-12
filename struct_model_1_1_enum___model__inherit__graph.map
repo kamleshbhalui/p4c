@@ -1,8 +1,0 @@
-<map id="Model::Enum_Model" name="Model::Enum_Model">
-<area shape="rect" id="node4" href="$struct_p4_v1_1_1_algorithm___model.html" title="P4V1::Algorithm_Model" alt="" coords="536,5,698,31"/>
-<area shape="rect" id="node5" href="$struct_p4_v1_1_1_clone_type___model.html" title="P4V1::CloneType_Model" alt="" coords="532,55,701,80"/>
-<area shape="rect" id="node6" href="$struct_p4_v1_1_1_counter_type___model.html" title="P4V1::CounterType_Model" alt="" coords="526,104,708,129"/>
-<area shape="rect" id="node7" href="$struct_p4_v1_1_1_meter_type___model.html" title="P4V1::MeterType_Model" alt="" coords="533,153,701,179"/>
-<area shape="rect" id="node2" href="$struct_model_1_1_type___model.html" title="Model::Type_Model" alt="" coords="149,80,286,105"/>
-<area shape="rect" id="node3" href="$struct_model_1_1_elem.html" title="Model::Elem" alt="" coords="5,80,101,105"/>
-</map>

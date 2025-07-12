@@ -1,25 +1,8 @@
 var class_p4_1_1_type_map =
 [
-    [ "TypeMap", "class_p4_1_1_type_map.html#a61f59a515ff5eadfa12ccc8710925e1c", null ],
-    [ "addSubstitutions", "class_p4_1_1_type_map.html#a6072dd55843cd6d3c5bc766bfe1affee", null ],
-    [ "checkPrecondition", "class_p4_1_1_type_map.html#aca8e3972ced6a6ddd9b35e33a5902323", null ],
-    [ "clear", "class_p4_1_1_type_map.html#a1c880d5f7ff0cdef75529d3bf9b60fc4", null ],
-    [ "contains", "class_p4_1_1_type_map.html#ac492ecd0eb5205ea0fb6071bb9f72ce8", null ],
-    [ "dbprint", "class_p4_1_1_type_map.html#a45e5be0bc488864e17624b72a498288b", null ],
-    [ "getCanonical", "class_p4_1_1_type_map.html#afe80b78c0cc47a7ebd350336804a806c", null ],
-    [ "getSubstitution", "class_p4_1_1_type_map.html#a5d3212ae51873863f15aae8b65645a1d", null ],
-    [ "getType", "class_p4_1_1_type_map.html#ad7783742e59d7f644bb5bdbda591be61", null ],
-    [ "getTypeType", "class_p4_1_1_type_map.html#a4ebcde1e6bdf3bd4399102553bc80b0c", null ],
-    [ "isCompileTimeConstant", "class_p4_1_1_type_map.html#a72e8d0bd0a796d1ad6c5a1d9f642bb01", null ],
-    [ "isLeftValue", "class_p4_1_1_type_map.html#a06139909f13f965765fa04649af9b40a", null ],
-    [ "setCompileTimeConstant", "class_p4_1_1_type_map.html#ae4c8c3c38be69f189bb9ee327407dd8b", null ],
-    [ "setLeftValue", "class_p4_1_1_type_map.html#ad9447f560630155f5f708bc1819e807b", null ],
-    [ "setType", "class_p4_1_1_type_map.html#ac6166954387f5b52635744e3acf1df08", null ],
-    [ "size", "class_p4_1_1_type_map.html#a07b4d97790be5576977de7c4e73bea87", null ],
-    [ "allTypeVariables", "class_p4_1_1_type_map.html#adff3419dc8a8a8de36282d535674bd2d", null ],
-    [ "canonicalStacks", "class_p4_1_1_type_map.html#a5917ac8947b1fb555060eaf5731514e6", null ],
-    [ "canonicalTuples", "class_p4_1_1_type_map.html#ad13e10c0428bf9a9b46917f8883e9cfc", null ],
-    [ "constants", "class_p4_1_1_type_map.html#ae674c7121edbf1b049b05b9d2bd6f7e1", null ],
-    [ "leftValues", "class_p4_1_1_type_map.html#ae73c8c9a016c004a894b296660f9f924", null ],
-    [ "typeMap", "class_p4_1_1_type_map.html#a0719dca637512f0850f61a8abbabc56e", null ]
+    [ "equivalent", "class_p4_1_1_type_map.html#a0e8c0a2a8e29bd9d9599731ddf6bea30", null ],
+    [ "implicitlyConvertibleTo", "class_p4_1_1_type_map.html#a5490f44545e21ef41f39992fb3c8c48a", null ],
+    [ "typeIsEmpty", "class_p4_1_1_type_map.html#a9029f57640cee4c92cc7a4e3edb7c29c", null ],
+    [ "widthBits", "class_p4_1_1_type_map.html#a4747693124c9e53b8f28dea75410a37b", null ],
+    [ "strictStruct", "class_p4_1_1_type_map.html#af4acc926aaca8de78a3ec1edc90626f4", null ]
 ];

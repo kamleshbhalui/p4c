@@ -1,6 +1,0 @@
-<map id="P4::AbstractActionInliner" name="P4::AbstractActionInliner">
-<area shape="rect" id="node4" href="$class_b_m_v2_1_1_simple_actions_inliner.html" title="BMV2::SimpleActionsInliner" alt="" coords="5,225,191,251"/>
-<area shape="rect" id="node5" href="$class_p4_1_1_actions_inliner.html" title="P4::ActionsInliner" alt="" coords="216,225,341,251"/>
-<area shape="rect" id="node2" href="$class_transform.html" title="Transform" alt="" coords="147,79,228,104"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title="Visitor" alt="" coords="159,5,217,31"/>
-</map>

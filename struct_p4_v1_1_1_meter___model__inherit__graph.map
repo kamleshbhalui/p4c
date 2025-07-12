@@ -1,6 +1,0 @@
-<map id="P4V1::Meter_Model" name="P4V1::Meter_Model">
-<area shape="rect" id="node2" href="$struct_p4_v1_1_1_counter_or_meter___model.html" title="P4V1::CounterOrMeter\l_Model" alt="" coords="5,225,163,264"/>
-<area shape="rect" id="node3" href="$struct_model_1_1_extern___model.html" title="Model::Extern_Model" alt="" coords="11,152,158,177"/>
-<area shape="rect" id="node4" href="$struct_model_1_1_type___model.html" title="Model::Type_Model" alt="" coords="15,79,153,104"/>
-<area shape="rect" id="node5" href="$struct_model_1_1_elem.html" title="Model::Elem" alt="" coords="36,5,132,31"/>
-</map>

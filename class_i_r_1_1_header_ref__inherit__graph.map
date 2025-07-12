@@ -1,9 +1,0 @@
-<map id="IR::HeaderRef" name="IR::HeaderRef">
-<area shape="rect" id="node7" href="$group__irdefs.html#class_i_r_1_1_concrete_header_ref" title="IR::ConcreteHeaderRef" alt="" coords="5,372,166,397"/>
-<area shape="rect" id="node8" href="$group__irdefs.html#class_i_r_1_1_header_stack_item_ref" title="IR::HeaderStackItemRef" alt="" coords="189,372,355,397"/>
-<area shape="rect" id="node2" href="$class_i_r_1_1_expression.html" title="IR::Expression" alt="" coords="125,225,233,251"/>
-<area shape="rect" id="node3" href="$class_i_r_1_1_node.html" title="IR::Node" alt="" coords="142,152,216,177"/>
-<area shape="rect" id="node4" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="140,79,218,104"/>
-<area shape="rect" id="node5" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="40,5,180,31"/>
-<area shape="rect" id="node6" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="203,5,296,31"/>
-</map>

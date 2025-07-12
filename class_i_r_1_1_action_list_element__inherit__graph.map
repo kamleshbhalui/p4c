@@ -1,8 +1,0 @@
-<map id="IR::ActionListElement" name="IR::ActionListElement">
-<area shape="rect" id="node2" href="$class_i_r_1_1_node.html" title="IR::Node" alt="" coords="5,152,79,177"/>
-<area shape="rect" id="node3" href="$class_i_r_1_1_i_node.html" title="IR::INode" alt="" coords="118,79,196,104"/>
-<area shape="rect" id="node6" href="$class_i_r_1_1_i_annotated.html" title="Implemented by all objects that can have annotations. " alt="" coords="104,152,210,177"/>
-<area shape="rect" id="node7" href="$class_i_r_1_1_i_declaration.html" title="IR::IDeclaration" alt="" coords="234,152,347,177"/>
-<area shape="rect" id="node4" href="$class_util_1_1_i_has_source_info.html" title="Util::IHasSourceInfo" alt="" coords="18,5,158,31"/>
-<area shape="rect" id="node5" href="$class_i_has_db_print.html" title="IHasDbPrint" alt="" coords="181,5,274,31"/>
-</map>
