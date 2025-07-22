@@ -37,6 +37,7 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/convertErrors.h"
 #include "midend/copyStructures.h"
+#include "midend/dumpParserJson.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
@@ -226,6 +227,9 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::MidEndLast(),
             evaluator,
             new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+            options.dumpParserFile.empty()
+                ? nullptr
+                : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
         });
         if (options.listMidendPasses) {
             listPasses(*outStream, cstring::newline);
@@ -244,6 +248,9 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new VisitFunctor([this, fillEnumMap]() { enumMap = fillEnumMap->repr; }),
             evaluator,
             new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+            options.dumpParserFile.empty()
+                ? nullptr
+                : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
         });
     }
 }

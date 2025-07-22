@@ -60,6 +60,13 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
         },
         "Dump the compiler IR after the midend as JSON in the specified file.");
     registerOption(
+        "--dump-parser", "file",
+        [this](const char *arg) {
+            dumpParserFile = arg;
+            return true;
+        },
+        "Dump parser layout after the midend to the specified JSON file.");
+    registerOption(
         "--ndebug", nullptr,
         [this](const char *) {
             ndebug = true;

@@ -35,6 +35,7 @@ limitations under the License.
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/def_use.h"
+#include "midend/dumpParserJson.h"
 #include "midend/eliminateActionRun.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
@@ -173,6 +174,9 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
+         options.dumpParserFile.empty()
+             ? nullptr
+             : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
          new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),
          new P4::SimplifyControlFlow(&typeMap, true),
          new P4::MidEndLast(),
