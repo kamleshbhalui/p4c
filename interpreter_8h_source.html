@@ -648,7 +648,7 @@ $(function(){initNavTree('interpreter_8h_source.html',''); initResizable(true); 
 <div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span> </div>
 <div class="foldopen" id="foldopen00485" data-start="{" data-end="};">
 <div class="line"><a id="l00485" name="l00485"></a><span class="lineno"><a class="line" href="class_p4_1_1_symbolic_array.html">  485</a></span><span class="keyword">class </span>SymbolicArray final : <span class="keyword">public</span> SymbolicValue {</div>
-<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>    std::vector&lt;SymbolicStruct *&gt; values;</div>
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>    std::vector&lt;SymbolicValue *&gt; values;</div>
 <div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>    <span class="keyword">friend</span> <span class="keyword">class </span>AnyElement;</div>
 <div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>    <span class="keyword">explicit</span> SymbolicArray(<span class="keyword">const</span> IR::Type_Array *type)</div>
 <div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>        : SymbolicValue(type),</div>
@@ -804,8 +804,8 @@ $(function(){initNavTree('interpreter_8h_source.html',''); initResizable(true); 
 <div class="ttc" id="aclass_p4_1_1_i_castable_html"><div class="ttname"><a href="class_p4_1_1_i_castable.html">P4::ICastable</a></div><div class="ttdef"><b>Definition</b> castable.h:36</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_has_db_print_html"><div class="ttname"><a href="class_p4_1_1_i_has_db_print.html">P4::IHasDbPrint</a></div><div class="ttdef"><b>Definition</b> stringify.h:33</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_i_declaration_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_i_declaration.html">P4::IR::IDeclaration</a></div><div class="ttdoc">The Declaration interface, representing objects with names.</div><div class="ttdef"><b>Definition</b> declaration.h:26</div></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
-<div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:413</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:53</div></div>
+<div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:418</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:67</div></div>
 <div class="ttc" id="aclass_p4_1_1_symbolic_array_html"><div class="ttname"><a href="class_p4_1_1_symbolic_array.html">P4::SymbolicArray</a></div><div class="ttdef"><b>Definition</b> interpreter.h:485</div></div>
 <div class="ttc" id="aclass_p4_1_1_symbolic_bool_html"><div class="ttname"><a href="class_p4_1_1_symbolic_bool.html">P4::SymbolicBool</a></div><div class="ttdef"><b>Definition</b> interpreter.h:289</div></div>

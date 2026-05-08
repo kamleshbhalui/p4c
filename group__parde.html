@@ -317,7 +317,7 @@ General information</h1>
 <li>BaseAsmParser</li>
 </ul>
 <p>The parde can also be affected at the beginning of <a class="el" href="midend.html">Midend</a> by architecture translation, see <a class="el" href="group___arch_translation.html">BFN::ArchTranslation</a> for more information.</p>
-<h1><a class="anchor" id="parser"></a>
+<h1><a class="anchor" id="parser-1"></a>
 Parser</h1>
 <p>In frontend and midend, the IR::P4Parser IR node is used to represent a parser. During architecture translation, i.e. within the BFN::ArchTranslation midend pass, the Tofino parser becomes represented with the IR::BFN::TnaParser IR node.</p>
 <p>In backend, after transformation within the BFN::BackendConverter post-midend pass, the Tofino parser is represented with the IR::BFN::Parser IR node. Within the LowerParser pass, the parser is transformed (lowered) into the representation that is closer to how HW works. For Tofino 1/2, IR::BFN::LoweredParser is produced,</p>
@@ -497,7 +497,7 @@ Write mode downgrading</h3>
 Tofino 2 considerations</h3>
 <p>All containers within the parser are 16b. Parser containers are combined or split to form 32b and 8b MAU containers. Different write modes <em>can</em> be used for the two adjacent 16b parser containers that form a 32b MAU container. A single write most applies to the 16b parser container that is split to form two 8b MAU containers, so both 8b containers must have the same write mode.</p>
 <p>Tofino 2 extractors can write a full 16b to a parser container, or they can write 8b to either the upper or lower half of a container. The container write mode is applied to any write to the container. An 8b extract to a SINGLE_WRITE marks the whole container as having been written, so a subsequent extract to the other 8b half will trigger a container multi-write error. Similarly, an 8b extract to a CLEAR_ON_WRITE container clears the whole container before writing the new data: an 8b extract to one half followed by an 8b extract to the other half of a CLEAR_ON_WRITE container results in only the second write being present. Except for very rare circumstances, containers should be set to BITWISE_OR if the upper and lower halves are expected to be written independently for any packet.</p>
-<h1><a class="anchor" id="deparser"></a>
+<h1><a class="anchor" id="deparser-1"></a>
 Deparser</h1>
 <p>The deparser reassembles packets prior to storage in TM (Tofino 1/2) and prior to transmission via the MAC (all chips).</p>
 <h2><a class="anchor" id="target-constants"></a>
@@ -615,6 +615,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>revisit</b> (
 <tr class="memitem:aad4d91e5e14b48408c6b080c177f9fa6 inherit pub_methods_class_p4_1_1_transform" id="r_aad4d91e5e14b48408c6b080c177f9fa6"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>revisit_visited</b> ()</td></tr>
 <tr class="separator:aad4d91e5e14b48408c6b080c177f9fa6 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c1b2267b8d792234793c1c529ca6a7e inherit pub_methods_class_p4_1_1_transform" id="r_a2c1b2267b8d792234793c1c529ca6a7e"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setOnNodeTransformedHook</b> (const std::function&lt; void(const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *from, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *to)&gt; &amp;hook)</td></tr>
+<tr class="separator:a2c1b2267b8d792234793c1c529ca6a7e inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb019e816097ba57ed33a11358c07d5e inherit pub_methods_class_p4_1_1_transform" id="r_afb019e816097ba57ed33a11358c07d5e"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>visit_in_progress</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *) const</td></tr>
 <tr class="separator:afb019e816097ba57ed33a11358c07d5e inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1024,6 +1027,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>addPasses</b> (const 
 <tr class="memitem:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a0785ef49ac996a6e72c6ffb28e071469"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>early_exit</b> ()</td></tr>
 <tr class="separator:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa1f53aba5f1e75fe59f23d03b07db4e3"><td class="memItemLeft" align="right" valign="top">
+auto&#160;</td><td class="memItemRight" valign="bottom"><b>getPasses</b> ()</td></tr>
+<tr class="separator:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa763d71c06378439201b4ee45a76faac"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>listPasses</b> (std::ostream &amp;, <a class="el" href="class_p4_1_1cstring.html">cstring</a> sep) const</td></tr>
 <tr class="separator:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1326,6 +1332,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>addPasses</b> (const 
 <tr class="memitem:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a0785ef49ac996a6e72c6ffb28e071469"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>early_exit</b> ()</td></tr>
 <tr class="separator:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa1f53aba5f1e75fe59f23d03b07db4e3"><td class="memItemLeft" align="right" valign="top">
+auto&#160;</td><td class="memItemRight" valign="bottom"><b>getPasses</b> ()</td></tr>
+<tr class="separator:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa763d71c06378439201b4ee45a76faac"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>listPasses</b> (std::ostream &amp;, <a class="el" href="class_p4_1_1cstring.html">cstring</a> sep) const</td></tr>
 <tr class="separator:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2013,6 +2022,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>addPasses</b> (const 
 <tr class="memitem:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a0785ef49ac996a6e72c6ffb28e071469"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>early_exit</b> ()</td></tr>
 <tr class="separator:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa1f53aba5f1e75fe59f23d03b07db4e3"><td class="memItemLeft" align="right" valign="top">
+auto&#160;</td><td class="memItemRight" valign="bottom"><b>getPasses</b> ()</td></tr>
+<tr class="separator:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa763d71c06378439201b4ee45a76faac"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>listPasses</b> (std::ostream &amp;, <a class="el" href="class_p4_1_1cstring.html">cstring</a> sep) const</td></tr>
 <tr class="separator:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -4780,6 +4792,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>addPasses</b> (const 
 <tr class="memitem:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a0785ef49ac996a6e72c6ffb28e071469"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>early_exit</b> ()</td></tr>
 <tr class="separator:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa1f53aba5f1e75fe59f23d03b07db4e3"><td class="memItemLeft" align="right" valign="top">
+auto&#160;</td><td class="memItemRight" valign="bottom"><b>getPasses</b> ()</td></tr>
+<tr class="separator:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa763d71c06378439201b4ee45a76faac"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>listPasses</b> (std::ostream &amp;, <a class="el" href="class_p4_1_1cstring.html">cstring</a> sep) const</td></tr>
 <tr class="separator:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -6566,6 +6581,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>addPasses</b> (const 
 <tr class="memitem:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a0785ef49ac996a6e72c6ffb28e071469"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>early_exit</b> ()</td></tr>
 <tr class="separator:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa1f53aba5f1e75fe59f23d03b07db4e3"><td class="memItemLeft" align="right" valign="top">
+auto&#160;</td><td class="memItemRight" valign="bottom"><b>getPasses</b> ()</td></tr>
+<tr class="separator:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa763d71c06378439201b4ee45a76faac"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>listPasses</b> (std::ostream &amp;, <a class="el" href="class_p4_1_1cstring.html">cstring</a> sep) const</td></tr>
 <tr class="separator:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -6920,6 +6938,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>addPasses</b> (const 
 <tr class="memitem:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a0785ef49ac996a6e72c6ffb28e071469"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>early_exit</b> ()</td></tr>
 <tr class="separator:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa1f53aba5f1e75fe59f23d03b07db4e3"><td class="memItemLeft" align="right" valign="top">
+auto&#160;</td><td class="memItemRight" valign="bottom"><b>getPasses</b> ()</td></tr>
+<tr class="separator:aa1f53aba5f1e75fe59f23d03b07db4e3 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager" id="r_aa763d71c06378439201b4ee45a76faac"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>listPasses</b> (std::ostream &amp;, <a class="el" href="class_p4_1_1cstring.html">cstring</a> sep) const</td></tr>
 <tr class="separator:aa763d71c06378439201b4ee45a76faac inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
