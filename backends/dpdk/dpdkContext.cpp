@@ -24,8 +24,10 @@ namespace P4::DPDK {
 
 cstring DpdkContextGenerator::removePipePrefix(cstring tableName) {
     if (!options.bfRtSchema.empty() || !options.tdiFile.empty()) {
-        cstring tablename = cstring(tableName.find('.'));
-        return tablename.trim(".\t\n\r");
+        if (auto dot = tableName.find('.')) {
+            cstring tablename = cstring(dot);
+            return tablename.trim(".\t\n\r");
+        }
     }
     return tableName;
 }
