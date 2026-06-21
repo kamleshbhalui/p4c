@@ -37,6 +37,7 @@ limitations under the License.
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
+#include "midend/dumpParserJson.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
@@ -139,6 +140,9 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              {options.loopsUnrolling ? new P4::ParsersUnroll(config, &refMap, &typeMap) : nullptr},
              evaluator,
              [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
+             options.dumpParserFile.empty()
+                 ? nullptr
+                 : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
              new P4::MidEndLast()});
         if (options.listMidendPasses) {
             listPasses(*outStream, cstring::newline);
@@ -157,6 +161,9 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
             [this, fillEnumMap]() { enumMap = fillEnumMap->repr; },
             evaluator,
             [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
+            options.dumpParserFile.empty()
+                ? nullptr
+                : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
         });
     }
 }

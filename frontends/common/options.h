@@ -57,6 +57,8 @@ class CompilerOptions : public ParserOptions {
     std::vector<cstring> passesToExcludeBackend;
     // Dump a JSON representation of the IR in the file.
     std::filesystem::path dumpJsonFile;
+    // Dump parser layout in the specified file.
+    std::filesystem::path dumpParserFile;
     // Dump and undump the IR tree.
     bool debugJson = false;
     // if this flag is true, compile program in non-debug mode.

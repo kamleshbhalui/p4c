@@ -412,6 +412,7 @@ endif()
 
 # The order of adding subdirectories matters because of target dependencies.
 add_subdirectory (tools/driver)
+add_subdirectory (tools/parser_dump)
 add_subdirectory (lib)
 add_subdirectory (tools/ir-generator)
 add_subdirectory (ir)

@@ -61,6 +61,7 @@ set (MIDEND_SRCS
   simplifySelectList.cpp
   singleArgumentSelect.cpp
   tableHit.cpp
+  dumpParserJson.cpp
   unrollLoops.cpp
   validateProperties.cpp
   )
@@ -118,12 +119,13 @@ set (MIDEND_HDRS
   simplifySelectList.h
   singleArgumentSelect.h
   tableHit.h
+  dumpParserJson.h
   unrollLoops.h
   validateProperties.h
   )
 
-
 add_library (midend STATIC ${MIDEND_SRCS})
+
 target_link_libraries(midend
   # For TypeMap / RefMap
   PRIVATE frontend

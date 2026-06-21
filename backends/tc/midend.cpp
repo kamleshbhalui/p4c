@@ -16,6 +16,8 @@ and limitations under the License.
 
 #include "midend.h"
 
+#include "midend/dumpParserJson.h"
+
 namespace P4::TC {
 
 IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
@@ -62,6 +64,9 @@ IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
         new EBPF::Lower(&refMap, &typeMap, std::nullopt),
         new P4::ParsersUnroll({true, true}, &refMap, &typeMap),
         evaluator,
+        options.dumpParserFile.empty()
+            ? nullptr
+            : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
         new P4::MidEndLast(),
     });
     if (options.listMidendPasses) {
