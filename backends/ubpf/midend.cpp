@@ -22,6 +22,7 @@
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
+#include "midend/dumpParserJson.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateTuples.h"
@@ -93,6 +94,9 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
             new P4::RemoveLeftSlices(&typeMap),
             new EBPF::Lower(&refMap, &typeMap, std::optional<const int>{5}),
             evaluator,
+            options.dumpParserFile.empty()
+                ? nullptr
+                : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
             new P4::MidEndLast(),
         });
         if (options.listMidendPasses) {
@@ -108,6 +112,9 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),
             evaluator,
+            options.dumpParserFile.empty()
+                ? nullptr
+                : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
         });
     }
     midEnd.setName("MidEnd");

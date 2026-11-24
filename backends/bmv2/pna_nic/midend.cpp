@@ -24,6 +24,7 @@
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
+#include "midend/dumpParserJson.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
@@ -153,6 +154,9 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
             new P4::MidEndLast(),
             evaluator,
             [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
+            options.dumpParserFile.empty()
+                ? nullptr
+                : new P4::DumpParserJson(&refMap, &typeMap, options.dumpParserFile),
         });
         if (options.listMidendPasses) {
             listPasses(*outStream, cstring::newline);
