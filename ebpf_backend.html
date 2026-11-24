@@ -382,7 +382,9 @@ $(function(){initNavTree('ebpf_backend.html',''); initResizable(true); });
   </li>
 </ul>
 </div>
-<div class="textblock"><p>The back-end accepts only P4_16 code written for the <code>ebpf_model.p4</code> or <code>xdp_model.p4</code> filter models. It generates C code that can be afterwards compiled into <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF (extended Berkeley Packet Filters)</a> using clang/llvm or <a href="https://github.com/iovisor/bcc.git">bcc</a>.</p>
+<div class="textblock"><p><br  />
+</p>
+<p>The back-end accepts only P4_16 code written for the <code>ebpf_model.p4</code> or <code>xdp_model.p4</code> filter models. It generates C code that can be afterwards compiled into <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF (extended Berkeley Packet Filters)</a> using clang/llvm or <a href="https://github.com/iovisor/bcc.git">bcc</a>.</p>
 <p>An older version of this compiler for compiling P4_14 is available <a href="https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4">here</a> (historical reference only).</p>
 <p>Identifiers starting with ebpf_ are reserved in P4 programs, including for structure field names.</p>
 <h2><a class="anchor" id="target-architectures"></a>
@@ -759,7 +761,9 @@ ternary</h3>
 <div class="line">        __u32 *mask = ((__u32 *) &amp;next);</div>
 <div class="line"><span class="preprocessor">        #pragma clang loop unroll(disable)</span></div>
 <div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <span class="keyword">sizeof</span>(<span class="keyword">struct </span>ingress_tbl_ternary_1_key_mask) / 4; i++) {</div>
-<div class="line">            chunk[i] = ((__u32 *) &amp;key)[i] &amp; mask[i];</div>
+<div class="line">            __u32 key_chunk;</div>
+<div class="line">            __builtin_memcpy(&amp;key_chunk, ((__u8 *) &amp;key) + i * 4, <span class="keyword">sizeof</span>(key_chunk));</div>
+<div class="line">            chunk[i] = key_chunk &amp; mask[i];</div>
 <div class="line">        }</div>
 <div class="line">        __u32 tuple_id = v-&gt;tuple_id;</div>
 <div class="line">        next = v-&gt;next_tuple_mask;</div>
@@ -1002,6 +1006,10 @@ Support</h2>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

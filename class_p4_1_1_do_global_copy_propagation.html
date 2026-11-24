@@ -137,7 +137,7 @@ $(function(){initNavTree('class_p4_1_1_do_global_copy_propagation.html',''); ini
 <div class="dynheader">
 Inheritance diagram for P4::DoGlobalCopyPropagation:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_do_global_copy_propagation__inherit__graph.svg" width="228" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_do_global_copy_propagation__inherit__graph.svg" width="227" height="190"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -148,9 +148,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5cce53124e2fc04e00fdf01428b8a6a7" id="r_a5cce53124e2fc04e00fdf01428b8a6a7"><td class="memItemLeft" align="right" valign="top"><a id="a5cce53124e2fc04e00fdf01428b8a6a7" name="a5cce53124e2fc04e00fdf01428b8a6a7"></a>
 const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>copyprop_name</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> name)</td></tr>
 <tr class="separator:a5cce53124e2fc04e00fdf01428b8a6a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2527712b87d6dfb6efdb705b075d36c7" id="r_a2527712b87d6dfb6efdb705b075d36c7"><td class="memItemLeft" align="right" valign="top"><a id="a2527712b87d6dfb6efdb705b075d36c7" name="a2527712b87d6dfb6efdb705b075d36c7"></a>
-IR::MethodCallExpression *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::MethodCallExpression *) override</td></tr>
-<tr class="separator:a2527712b87d6dfb6efdb705b075d36c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab57d345631bdb3d3f6156de7ebe5813d" id="r_ab57d345631bdb3d3f6156de7ebe5813d"><td class="memItemLeft" align="right" valign="top"><a id="ab57d345631bdb3d3f6156de7ebe5813d" name="ab57d345631bdb3d3f6156de7ebe5813d"></a>
 const IR::P4Action *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::P4Action *) override</td></tr>
 <tr class="separator:ab57d345631bdb3d3f6156de7ebe5813d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -178,6 +175,9 @@ IR::IfStatement *&#160;</td><td class="memItemRight" valign="bottom"><b>preorder
 <tr class="memitem:a58153eac6103f6fb6cd2857d123456fb" id="r_a58153eac6103f6fb6cd2857d123456fb"><td class="memItemLeft" align="right" valign="top"><a id="a58153eac6103f6fb6cd2857d123456fb" name="a58153eac6103f6fb6cd2857d123456fb"></a>
 const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (IR::Member *) override</td></tr>
 <tr class="separator:a58153eac6103f6fb6cd2857d123456fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e3f54ef28c28f9a6ab5b7f59392a3cb" id="r_a5e3f54ef28c28f9a6ab5b7f59392a3cb"><td class="memItemLeft" align="right" valign="top"><a id="a5e3f54ef28c28f9a6ab5b7f59392a3cb" name="a5e3f54ef28c28f9a6ab5b7f59392a3cb"></a>
+IR::MethodCallExpression *&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (IR::MethodCallExpression *) override</td></tr>
+<tr class="separator:a5e3f54ef28c28f9a6ab5b7f59392a3cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e9f1b488a036a7725092c83f171ec4c" id="r_a3e9f1b488a036a7725092c83f171ec4c"><td class="memItemLeft" align="right" valign="top"><a id="a3e9f1b488a036a7725092c83f171ec4c" name="a3e9f1b488a036a7725092c83f171ec4c"></a>
 const IR::P4Action *&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (IR::P4Action *) override</td></tr>
 <tr class="separator:a3e9f1b488a036a7725092c83f171ec4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -434,6 +434,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <div class="textblock"><p>This pass operates on action bodies and is ran right after the Inspector pass. It propagates the values for variables that got their values assigned to them before the action call. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

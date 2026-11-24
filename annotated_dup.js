@@ -640,10 +640,6 @@ var annotated_dup =
         [ "setflags_helper", "class_p4_1_1_d_b_print_1_1setflags__helper.html", null ],
         [ "setprec", "struct_p4_1_1_d_b_print_1_1setprec.html", null ]
       ] ],
-      [ "detail", null, [
-        [ "DbprintDispatchPtr", "struct_p4_1_1detail_1_1_dbprint_dispatch_ptr.html", null ],
-        [ "DbprintDispatchRef", "struct_p4_1_1detail_1_1_dbprint_dispatch_ref.html", null ]
-      ] ],
       [ "DPDK", "namespace_p4_1_1_d_p_d_k.html", [
         [ "actionAttributes", "namespace_p4_1_1_d_p_d_k.html#struct_p4_1_1_d_p_d_k_1_1action_attributes", null ],
         [ "AddFieldsToPseudoHeader", "class_p4_1_1_d_p_d_k_1_1_add_fields_to_pseudo_header.html", null ],
@@ -852,6 +848,9 @@ var annotated_dup =
         [ "XDPIngressPipeline", "class_p4_1_1_e_b_p_f_1_1_x_d_p_ingress_pipeline.html", "class_p4_1_1_e_b_p_f_1_1_x_d_p_ingress_pipeline" ],
         [ "XdpTarget", "class_p4_1_1_e_b_p_f_1_1_xdp_target.html", null ]
       ] ],
+      [ "FormatDetail", null, [
+        [ "StreamArgument", "struct_p4_1_1_format_detail_1_1_stream_argument.html", null ]
+      ] ],
       [ "graphs", "namespace_p4_1_1graphs.html", [
         [ "ControlGraphs", "class_p4_1_1graphs_1_1_control_graphs.html", "class_p4_1_1graphs_1_1_control_graphs" ],
         [ "EdgeIf", "class_p4_1_1graphs_1_1_edge_if.html", null ],
@@ -930,6 +929,9 @@ var annotated_dup =
         [ "SkipControls", "class_p4_1_1_p4_test_1_1_skip_controls.html", "class_p4_1_1_p4_test_1_1_skip_controls" ]
       ] ],
       [ "P4Tools", "namespace_p4_1_1_p4_tools.html", [
+        [ "detail", null, [
+          [ "LogArgument", "struct_p4_1_1_p4_tools_1_1detail_1_1_log_argument.html", null ]
+        ] ],
         [ "P4Smith", null, [
           [ "BMv2", null, [
             [ "AbstractBMv2SmithTarget", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_abstract_b_mv2_smith_target.html", null ],
@@ -1134,7 +1136,8 @@ var annotated_dup =
             [ "Z3SolverSubSat02", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat02.html", null ],
             [ "Z3SolverSubSat03", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat03.html", null ],
             [ "Z3SolverSubSat04", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat04.html", null ],
-            [ "Z3SolverSubSat05", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat05.html", null ]
+            [ "Z3SolverSubSat05", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat05.html", null ],
+            [ "Z3SolverSubSat06", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat06.html", null ]
           ] ],
           [ "Z3Test", null, [
             [ "Z3SolverAdd", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_add.html", null ],
@@ -1358,7 +1361,7 @@ var annotated_dup =
         [ "EBPFHashPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_hash_p_n_a.html", null ],
         [ "EBPFInternetChecksumPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_internet_checksum_p_n_a.html", null ],
         [ "EBPFMeterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_meter_p_n_a.html", null ],
-        [ "EBPFPnaParser", "class_p4_1_1_t_c_1_1_e_b_p_f_pna_parser.html", null ],
+        [ "EBPFPnaParser", "class_p4_1_1_t_c_1_1_e_b_p_f_pna_parser.html", "class_p4_1_1_t_c_1_1_e_b_p_f_pna_parser" ],
         [ "EBPFRandomPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_random_p_n_a.html", null ],
         [ "EBPFRegisterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_register_p_n_a.html", null ],
         [ "EBPFTablePNA", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a.html", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a" ],
@@ -1523,7 +1526,7 @@ var annotated_dup =
         [ "BitRange", "struct_p4_1_1_util_1_1_bit_range.html", null ],
         [ "Comment", "class_p4_1_1_util_1_1_comment.html", "class_p4_1_1_util_1_1_comment" ],
         [ "CompilationError", "class_p4_1_1_util_1_1_compilation_error.html", null ],
-        [ "CompilerBug", "class_p4_1_1_util_1_1_compiler_bug.html", null ],
+        [ "CompilerBug", "class_p4_1_1_util_1_1_compiler_bug.html", "class_p4_1_1_util_1_1_compiler_bug" ],
         [ "CompilerUnimplemented", "class_p4_1_1_util_1_1_compiler_unimplemented.html", null ],
         [ "ConcatEnumerator", "class_p4_1_1_util_1_1_concat_enumerator.html", "class_p4_1_1_util_1_1_concat_enumerator" ],
         [ "ContainerType", "class_p4_1_1_util_1_1_container_type.html", null ],
@@ -1578,7 +1581,7 @@ var annotated_dup =
         [ "Namespace", "class_p4_1_1_util_1_1_namespace.html", null ],
         [ "Object", "class_p4_1_1_util_1_1_object.html", null ],
         [ "Options", "class_p4_1_1_util_1_1_options.html", "class_p4_1_1_util_1_1_options" ],
-        [ "P4CExceptionBase", "class_p4_1_1_util_1_1_p4_c_exception_base.html", null ],
+        [ "P4CExceptionBase", "class_p4_1_1_util_1_1_p4_c_exception_base.html", "class_p4_1_1_util_1_1_p4_c_exception_base" ],
         [ "ProgramStructure", "class_p4_1_1_util_1_1_program_structure.html", null ],
         [ "ScopedTimer", "class_p4_1_1_util_1_1_scoped_timer.html", null ],
         [ "ScopedTimerCtx", "struct_p4_1_1_util_1_1_scoped_timer_ctx.html", null ],
@@ -1589,9 +1592,6 @@ var annotated_dup =
         [ "SourceInfo", "class_p4_1_1_util_1_1_source_info.html", "class_p4_1_1_util_1_1_source_info" ],
         [ "SourcePosition", "class_p4_1_1_util_1_1_source_position.html", "class_p4_1_1_util_1_1_source_position" ],
         [ "TimerEntry", "struct_p4_1_1_util_1_1_timer_entry.html", "struct_p4_1_1_util_1_1_timer_entry" ]
-      ] ],
-      [ "V1", null, [
-        [ "V1ParserDriver", "class_p4_1_1_v1_1_1_v1_parser_driver.html", "class_p4_1_1_v1_1_1_v1_parser_driver" ]
       ] ],
       [ "AbstractInliner", "class_p4_1_1_abstract_inliner.html", null ],
       [ "AbstractParserDriver", "class_p4_1_1_abstract_parser_driver.html", "class_p4_1_1_abstract_parser_driver" ],
@@ -1611,7 +1611,7 @@ var annotated_dup =
       [ "ApplyOptionsPragmas", "class_p4_1_1_apply_options_pragmas.html", null ],
       [ "ApplyTypesToExpressions", "class_p4_1_1_apply_types_to_expressions.html", null ],
       [ "ArrayLocation", "class_p4_1_1_array_location.html", null ],
-      [ "AutoCompileContext", "struct_p4_1_1_auto_compile_context.html", null ],
+      [ "AutoCompileContext", "struct_p4_1_1_auto_compile_context.html", "struct_p4_1_1_auto_compile_context" ],
       [ "backtrace_exception", "class_p4_1_1backtrace__exception.html", null ],
       [ "Backtrack", "class_p4_1_1_backtrack.html", "class_p4_1_1_backtrack" ],
       [ "BaseCompileContext", "class_p4_1_1_base_compile_context.html", "class_p4_1_1_base_compile_context" ],
@@ -1662,6 +1662,7 @@ var annotated_dup =
       [ "ConvertErrors", "class_p4_1_1_convert_errors.html", null ],
       [ "CopySrcInfo", "class_p4_1_1_copy_src_info.html", "class_p4_1_1_copy_src_info" ],
       [ "CopyStructures", "class_p4_1_1_copy_structures.html", null ],
+      [ "CopyStructuresConfig", "namespace_p4.html#struct_p4_1_1_copy_structures_config", "namespace_p4_struct_p4_1_1_copy_structures_config_dup" ],
       [ "CreateBuiltins", "class_p4_1_1_create_builtins.html", null ],
       [ "CreateSpecializedTypes", "class_p4_1_1_create_specialized_types.html", null ],
       [ "CreateStructInitializers", "class_p4_1_1_create_struct_initializers.html", null ],
@@ -1695,6 +1696,7 @@ var annotated_dup =
       [ "DoEliminateSerEnums", "class_p4_1_1_do_eliminate_ser_enums.html", "class_p4_1_1_do_eliminate_ser_enums" ],
       [ "DoEliminateSwitch", "class_p4_1_1_do_eliminate_switch.html", null ],
       [ "DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
+      [ "DoExpandHeaderUnionStackPushPop", "class_p4_1_1_do_expand_header_union_stack_push_pop.html", null ],
       [ "DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
       [ "DoFlattenHeaderUnion", "class_p4_1_1_do_flatten_header_union.html", null ],
       [ "DoFlattenHeaderUnionStack", "class_p4_1_1_do_flatten_header_union_stack.html", null ],
@@ -1747,6 +1749,7 @@ var annotated_dup =
       [ "EliminateSwitch", "class_p4_1_1_eliminate_switch.html", null ],
       [ "EliminateTuples", "class_p4_1_1_eliminate_tuples.html", null ],
       [ "EliminateTypedef", "class_p4_1_1_eliminate_typedef.html", null ],
+      [ "ElimUnreachableStmts", "class_p4_1_1_elim_unreachable_stmts.html", null ],
       [ "EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
       [ "EnumInstance", "class_p4_1_1_enum_instance.html", null ],
       [ "EnumOn32Bits", "class_p4_1_1_enum_on32_bits.html", null ],
@@ -1772,6 +1775,7 @@ var annotated_dup =
       [ "ExternInstantiation", "class_p4_1_1_extern_instantiation.html", null ],
       [ "ExternMethod", "class_p4_1_1_extern_method.html", "class_p4_1_1_extern_method" ],
       [ "ExternMetrics", "namespace_p4.html#struct_p4_1_1_extern_metrics", null ],
+      [ "FdStream", "class_p4_1_1_fd_stream.html", null ],
       [ "FillEnumMap", "class_p4_1_1_fill_enum_map.html", null ],
       [ "FilterLikelyAnnot", "class_p4_1_1_filter_likely_annot.html", null ],
       [ "FindActionParameters", "class_p4_1_1_find_action_parameters.html", null ],
@@ -2062,7 +2066,7 @@ var annotated_dup =
       [ "StructInitializers", "class_p4_1_1_struct_initializers.html", null ],
       [ "StructLocation", "class_p4_1_1_struct_location.html", null ],
       [ "StructTypeReplacement", "struct_p4_1_1_struct_type_replacement.html", "struct_p4_1_1_struct_type_replacement" ],
-      [ "SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
+      [ "SubstituteParameters", "class_p4_1_1_substitute_parameters.html", "class_p4_1_1_substitute_parameters" ],
       [ "SubstituteStructures", "class_p4_1_1_substitute_structures.html", null ],
       [ "SwitchAddDefault", "class_p4_1_1_switch_add_default.html", null ],
       [ "SymBitMatrix", "class_p4_1_1_sym_bit_matrix.html", null ],
@@ -2599,7 +2603,6 @@ var annotated_dup =
     [ "ExpressionsToHash", "class_expressions_to_hash.html", null ],
     [ "ExtractBridgeInfo", "class_extract_bridge_info.html", "class_extract_bridge_info" ],
     [ "FakeTable", "class_fake_table.html", null ],
-    [ "fdstream", "classfdstream.html", null ],
     [ "FieldAlignment", "struct_field_alignment.html", "struct_field_alignment" ],
     [ "FieldDefUse", "group__parde.html#class_field_def_use", "group__parde_class_field_def_use" ],
     [ "FieldExtractInfo", "class_field_extract_info.html", "class_field_extract_info" ],

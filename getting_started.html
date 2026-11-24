@@ -166,6 +166,9 @@ $(function(){initNavTree('getting_started.html',''); initResizable(true); });
             <a href="#ubuntu-dependencies">Ubuntu dependencies</a>
             <ul>
               <li class="level4">
+                <a href="#p4runtime">P4Runtime</a>
+              </li>
+              <li class="level4">
                 <a href="#cmake">CMake</a>
               </li>
             </ul>
@@ -262,7 +265,9 @@ $(function(){initNavTree('getting_started.html',''); initResizable(true); });
   </li>
 </ul>
 </div>
-<div class="textblock"><p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg" alt="Bazel Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg" alt="Validation" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg" alt="Docker Container" style="pointer-events: none;" class="inline"/></a></p>
+<div class="textblock"><p><br  />
+</p>
+<p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg" alt="Bazel Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg" alt="Validation" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg" alt="Docker Container" style="pointer-events: none;" class="inline"/></a></p>
 <p>P4C is a reference compiler for the P4 programming language. It supports both P4-14 and P4-16; you can find more information about P4 <a href="http://p4.org">here</a> and the specifications for both versions of the language <a href="https://p4.org/specs">here</a>. One fact attesting to the level of quality and completeness of P4C's code is that its front-end code, mid-end code, and P4C-graphs back end are used as the basis for at least one commercially supported P4 compiler.</p>
 <p>P4C is modular; it provides a standard frontend and midend which can be combined with a target-specific backend to create a complete P4 compiler. The goal is to make adding new backends easy.</p>
 <h1><a class="anchor" id="overview"></a>
@@ -351,7 +356,7 @@ Debian</h4>
 Installing P4C from source</h3>
 <ol type="1">
 <li>Clone the repository. <code> git clone <a href="https://github.com/p4lang/p4c.git">https://github.com/p4lang/p4c.git</a> </code></li>
-<li>Install <a class="el" href="#dependencies">dependencies</a>. You can find specific instructions for Ubuntu 22.04 <a class="el" href="#ubuntu-dependencies">here</a> and for macOS 11 <a class="el" href="#macos-dependencies">here</a>. You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh">CI installation script</a>.</li>
+<li>Install <a class="el" href="#dependencies">dependencies</a>. You can find specific instructions for Ubuntu <a class="el" href="#ubuntu-dependencies">here</a> and for macOS <a class="el" href="#macos-dependencies">here</a>. You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh">CI installation script</a>.</li>
 <li><p class="startli">Build. Building should also take place in a subdirectory named <code>build</code>. <code> mkdir -p build cmake -B build &lt;optional arguments&gt; cmake --build build cmake --build build --target check </code> The cmake command takes the following optional arguments to further customize the build (see file <code>CMakeLists.txt</code> for the full list):</p><ul>
 <li><code>-DCMAKE_BUILD_TYPE=Release|Debug</code> &ndash; set CMAKE_BUILD_TYPE to Release or Debug to build with optimizations or with debug symbols to run in gdb. Default is Release.</li>
 <li><code>-DCMAKE_INSTALL_PREFIX=&lt;path&gt;</code> &ndash; set the directory where <code>cmake --build build --target install</code> installs the compiler. Defaults to /usr/local.</li>
@@ -368,7 +373,9 @@ Installing P4C from source</h3>
 <li><code>-DENABLE_GC=ON|OFF</code>. Enable the use of the garbage collection library. Default is ON.</li>
 <li><code>-DENABLE_GTESTS=ON|OFF</code>. Enable building and running GTest unit tests. Default is ON.</li>
 <li><code>-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF</code>. Try to find a system version of Abseil instead of a fetched one. Default is OFF.</li>
+<li><code>-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON|OFF</code>. Use installed Multiprecision headers and their matching Boost dependencies instead of fetching standalone Multiprecision. Default is OFF.</li>
 <li><code>-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF</code>. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.</li>
+<li><code>-DP4C_USE_PREINSTALLED_P4RUNTIME=ON|OFF</code>. Use an installed P4Runtime CMake package with C++ bindings instead of fetching it. Default is OFF.</li>
 <li><code>-DENABLE_ABSEIL_STATIC=ON|OFF</code>. Enable the use of static abseil libraries. Default is ON. Only has an effect when <code>P4C_USE_PREINSTALLED_ABSEIL</code> is enabled.</li>
 <li><code>-DENABLE_PROTOBUF_STATIC=ON|OFF</code>. Enable the use of static protobuf libraries. Default is ON. Only has an effect when <code>P4C_USE_PREINSTALLED_PROTOBUF</code> is enabled.</li>
 <li><code>-DENABLE_MULTITHREAD=ON|OFF</code>. Use multithreading. Default is OFF.</li>
@@ -386,15 +393,15 @@ Installing P4C from source</h3>
 <p>If you plan to contribute to P4C, you'll find more useful information <a class="el" href="#development-tools">here</a>.</p>
 <h2><a class="anchor" id="dependencies"></a>
 Dependencies</h2>
-<p>Ubuntu 22.04 is the officially supported platform for P4C. There's also unofficial support for macOS 11. Other platforms are untested; you can try to use them, but YMMV.</p>
+<p>Ubuntu 22.04 and Ubuntu 24.04 are the officially supported platforms for P4C. There's also unofficial support for macOS, including Apple Silicon. Other platforms are untested; you can try to use them, but YMMV.</p>
 <ul>
-<li>A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.</li>
+<li>A C++20 compiler. P4C is built with <code>CMAKE_CXX_STANDARD 20</code>.</li>
 <li><code>git</code> for version control</li>
 <li>CMake 3.16.3 or higher</li>
 <li>Boehm-Weiser garbage-collector C++ library</li>
 <li>GNU Bison and Flex for the parser and lexical analyzer generators.</li>
 <li>Google Protocol Buffers v3.25.3 or higher for control plane API generation</li>
-<li>C++ boost library</li>
+<li>Boost.Multiprecision library for arbitrary precision arithmetic</li>
 <li>Python 3 and uv for scripting and running tests</li>
 <li>Optional: Documentation generation requires Doxygen (1.13.2) and Graphviz (2.38.0 or higher).</li>
 </ul>
@@ -407,14 +414,14 @@ Dependencies</h2>
 Ubuntu dependencies</h3>
 <p>Most dependencies can be installed using <code>apt-get install</code>:</p>
 <div class="fragment"><div class="line">sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \</div>
-<div class="line">libfl-dev libboost-dev libboost-iostreams-dev \</div>
-<div class="line">libboost-graph-dev llvm pkg-config python3 python3-pip \</div>
+<div class="line">libfl-dev libboost-dev llvm pkg-config python3 python3-pip \</div>
 <div class="line">tcpdump</div>
 </div><!-- fragment --><p> Python dependencies can be installed using <code>uv</code>: </p><div class="fragment"><div class="line">curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh</div>
 <div class="line">uv sync</div>
-</div><!-- fragment --><p><b>For documentation building:</b></p>
+</div><!-- fragment --><p> The Python dependency versions are pinned in <code>pyproject.toml</code>.</p>
+<p><b>For documentation building:</b></p>
 <p><b>Tools</b></p><ul>
-<li>Download the Doxygen 1.13.2 binary <div class="fragment"><div class="line">wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.2.linux.bin.tar.gz</div>
+<li>Download the Doxygen 1.13.2 binary <div class="fragment"><div class="line">wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz</div>
 </div><!-- fragment --></li>
 <li>Extract and install Doxygen <div class="fragment"><div class="line">tar xzvf doxygen-1.13.2.linux.bin.tar.gz</div>
 <div class="line">cd doxygen-1.13.2</div>
@@ -428,20 +435,27 @@ Ubuntu dependencies</h3>
 <p><code>P4C</code> also depends on Google Protocol Buffers (Protobuf). <code>P4C</code> requires version 3.0 or higher, so the packaged version provided in Ubuntu 22.04 <b>should</b> work. However, P4C typically installs its own version of Protobuf using CMake's <code>FetchContent</code> module (at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions <a href="https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md">here</a>. After cloning Protobuf and before you build, check-out version 3.25.3:</p>
 <p><code>git checkout v3.25.3</code></p>
 <p>Please note that while all Protobuf versions newer than 3.0 should work for P4C itself, you may run into trouble with Abseil, some extensions and other p4lang projects unless you install version 3.25.3.</p>
-<p>P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's <code>FetchContent</code> module (Abseil LTS 20240116.1 at the moment).</p>
-<h4><a class="anchor" id="cmake"></a>
+<p>P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's <code>FetchContent</code> module (Abseil LTS 20240722.1 at the moment).</p>
+<h4><a class="anchor" id="p4runtime"></a>
+P4Runtime</h4>
+<p>P4C fetches P4Runtime and links its <code>p4runtime::cpp</code> target by default. The bindings are built with P4C's Protobuf library and <code>protoc</code>.</p>
+<p>To instead use an installed package (requires P4runtime 1.6 or newer) configure P4C with:</p>
+<div class="fragment"><div class="line">cmake -S . -B build \</div>
+<div class="line">  -DP4C_USE_PREINSTALLED_P4RUNTIME=ON \</div>
+<div class="line">  -DCMAKE_PREFIX_PATH=/path/to/p4runtime/install</div>
+</div><!-- fragment --><h4><a class="anchor" id="cmake"></a>
 CMake</h4>
-<p>P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using <code>pip3 install --user cmake==3.16.3</code>. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.</p>
+<p>P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using <code>pip3 install --user cmake==3.16.3</code>, but there is no guarantee that this will lead to a successful build.</p>
 <h3><a class="anchor" id="fedora-dependencies"></a>
 Fedora dependencies</h3>
 <div class="fragment"><div class="line">sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \</div>
-<div class="line">libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \</div>
+<div class="line">libfl-devel gmp-devel boost-devel llvm pkg-config \</div>
 <div class="line">python3 python3-pip tcpdump uv</div>
 <div class="line"> </div>
 <div class="line">uv sync</div>
 </div><!-- fragment --><p><b>For documentation building:</b></p>
 <p><b>Tools</b></p><ul>
-<li>Download the Doxygen 1.13.2 binary <div class="fragment"><div class="line">wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.2.linux.bin.tar.gz</div>
+<li>Download the Doxygen 1.13.2 binary <div class="fragment"><div class="line">wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz</div>
 </div><!-- fragment --></li>
 <li>Extract and install Doxygen <div class="fragment"><div class="line">tar xzvf doxygen-1.13.2.linux.bin.tar.gz</div>
 <div class="line">cd doxygen-1.13.2</div>
@@ -536,8 +550,22 @@ Source files</h4>
 <div class="line">add_clang_format_files (${CMAKE_CURRENT_SOURCE_DIR} &quot;${MY_SOURCES_AND_HEADERS}&quot;)</div>
 </div><!-- fragment --><p>Python files should be added to the black and isort target using the following rule: </p><div class="fragment"><div class="line">add_black_files (${CMAKE_CURRENT_SOURCE_DIR} &quot;${MY_SOURCES_AND_HEADERS}&quot;)</div>
 </div><!-- fragment --><p>The P4C CMakeLists.txt will use that name to figure the full path of the files to lint.</p>
-<p>clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command: </p><div class="fragment"><div class="line">uv pip install &quot;clang-format==18.1.8&quot; &quot;black==24.3.0&quot; &quot;isort==5.13.2&quot;</div>
-</div><!-- fragment --><p> clang-format can be checked using <code>cmake --build build --target clang-format</code>. Complaints can be fixed by running <code>cmake --build build --target clang-format-fix-errors</code>. black and isort can be checked using <code>cmake --build build --target black</code> or <code>cmake --build build --target isort</code> respectively. Complaints can be fixed by running <code>cmake --build build --target black-fix-errors</code> or <code>cmake --build build --target isort-fix-errors</code>.</p>
+<p>The precise version of the formatting tools is specified in <code>pyproject.toml</code>, use <code>uv run</code> to run the tools with the correct version:</p>
+<div class="fragment"><div class="line">uv run cmake -S . -B build</div>
+</div><!-- fragment --><p>Check C++ and Python formatting:</p>
+<div class="fragment"><div class="line">uv run cmake --build build --target clang-format black isort</div>
+</div><!-- fragment --><p>Apply formatting fixes:</p>
+<div class="fragment"><div class="line">uv run cmake --build build --target \</div>
+<div class="line">  clang-format-fix-errors black-fix-errors isort-fix-errors</div>
+</div><!-- fragment --><p>To run just one formatter, specify only its target.</p>
+<details >
+<summary >
+If an existing build still uses a system-installed formatter</summary>
+<p></p>
+<p>CMake caches the paths to formatter executables when you first configure a build. If you configured before installing the tools above, the build may still use a system-installed formatter with a different version. Use this command to clear the cached paths and reconfigure the build:</p>
+<div class="fragment"><div class="line">uv run cmake -S . -B build -U CLANG_FORMAT_CMD -U BLACK_CMD -U ISORT_CMD</div>
+</div><!-- fragment --><p></p>
+</details>
 <p>cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running </p><div class="fragment"><div class="line">./tools/install_git_hooks.sh</div>
 </div><!-- fragment --><p> clang-format, cpplint, and black/isort checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using <code>git commit --no-verify</code>.</p>
 <h4><a class="anchor" id="target"></a>
@@ -684,6 +712,10 @@ Contact</h2>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

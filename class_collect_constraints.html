@@ -137,7 +137,7 @@ $(function(){initNavTree('class_collect_constraints.html',''); initResizable(tru
 <div class="dynheader">
 Inheritance diagram for CollectConstraints:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_collect_constraints__inherit__graph.svg" width="152" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_collect_constraints__inherit__graph.svg" width="151" height="190"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -383,6 +383,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <dl class="section user"><dt>no_split and no_split_container_size constraints</dt><dd>The alignment constraint analysis may collect multiple alignment constraints on a single bridged field. In this case, the bridge packing algorithm must pick one of the alignment constraint as the final alignment for packing. If the selected alignment constraint is derived from a source field that span across byte boundary, then we generate additional no_split and no_split_container_size constraint on the bridged field. E.g., if the alignment requirement is bit 6 with a field size of 6, then the no_split constraint is 1 and no_split_container_size is round_up(6 + 6). </dd></dl>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

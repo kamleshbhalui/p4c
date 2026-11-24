@@ -175,7 +175,9 @@ $(function(){initNavTree('repository_structure.html',''); initResizable(true); }
   </li>
 </ul>
 </div>
-<div class="textblock"><p>This folder contains documentation for the P4_16 prototype compiler. The code and documentation are hosted in the <a href="https://github.com/p4lang/p4c">p4c repository</a>.</p>
+<div class="textblock"><p><br  />
+</p>
+<p>This folder contains documentation for the P4_16 prototype compiler. The code and documentation are hosted in the <a href="https://github.com/p4lang/p4c">p4c repository</a>.</p>
 <h1><a class="anchor" id="compiler-source-code-organization"></a>
 Compiler source code organization</h1>
 <div class="fragment"><div class="line">p4c</div>
@@ -400,7 +402,7 @@ Coding conventions</h2>
 <ul>
 <li>Coding style is guided by the following rules.</li>
 <li>We generally follow the <a href="https://google.github.io/styleguide/cppguide.html">Google C++ Style Guide</a>. This is partially enforced by <code>cpplint</code> and <code>clang-format</code> and their respective configuration files. We have customized Google's <code>cpplint.py</code> tool for our purposes. The tool can be invoked with <code>make cpplint</code>. To be able to run <code>clang-format</code> on Ubuntu 20.04, install it with <code>pip3 install --user clang-format</code>. Do not use the Debian package. Both tools run in a git hook and as part of CI.</li>
-<li>Commenting Style is guided by the following rules.</li>
+<li>Commenting Style is guided by the <a class="el" href="#cc-documentation-comments-style-guide">following rules</a>.</li>
 <li>Watch out for <code>const</code>; it is very important.</li>
 <li>Use <code>override</code> whenever possible (new GCC versions enforce this).</li>
 <li>Never use <code>const_cast</code> and <code>reinterpret_cast</code>.</li>
@@ -469,6 +471,10 @@ Compiler Driver</h2>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
